@@ -1,0 +1,32 @@
+---
+title: "Computer Assignment 1"
+author:
+  - "Ville Sebastian Olsson (19911231-1999)"
+  - "Arvind Guruprasad (19990212-6938)"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    fig_caption: true
+  pdf_document:
+    fig_caption: true
+---
+
+```{r, echo=FALSE, results='hide', fig.show='hide'}
+source("assignment1a.R")
+list2env(ass1a, envir = .GlobalEnv)
+knitr::opts_chunk$set(echo=FALSE, comment="")
+```
+
+# Exercise 1:1
+
+## 1.
+
+```{r}
+percentages
+```
+
+__
+
+# Exercise 1:2
+
+...
