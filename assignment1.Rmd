@@ -109,8 +109,84 @@ approximately \(0.0039\) which is between significance levels \(0.001\) and
 
 In conclusion, men and women differ in their opinions on legal abortion.
 
+## 3. Odds ratio
+
+### Odds
+We are interested in comparing the odds of a woman being in favor of legal
+abortion with the odds of a man being in favor of it.
+Hence, we want to find the probabilities of \(Y\) conditioned on \(X\).
+
+Odds for women:
+\[\omega_1 = \frac{P(Y=1|X=1)}{P(Y=2|X=1)} = \frac{P(X=1,Y=1)/P(X=1)}{P(X=1,Y=2)/P(X=1)}=\frac{P(X=1,Y=1)}{P(X=1,Y=2)}
+=\frac{\pi_{11}}{\pi_{12}}=\frac{N_{11}/n}{N_{12}/n}=\frac{N_{11}}{N_{12}}\]
+Odds for men:
+\[\omega_2 = \frac{P(Y=1|X=2)}{P(Y=2|X=2)} = \frac{P(X=2,Y=1)/P(X=2)}{P(X=2,Y=2)/P(X=2)}=\frac{P(X=2,Y=1)}{P(X=2,Y=2)}
+=\frac{\pi_{21}}{\pi_{22}}=\frac{N_{21}/n}{N_{22}/n}=\frac{N_{21}}{N_{22}}\]
+Odds ratio:
+\[
+\theta = \frac{\omega_1}{\omega_2}
+= \frac{\pi_{11}/\pi_{12}}{\pi_{21}/\pi_{22}}
+= \frac{\pi_{11}\pi_{22}}{\pi_{12}\pi_{21}}
+\]
+Estimated odds ratio:
+\[
+\hat\theta = \frac{\hat\omega_1}{\hat\omega_2}
+= \frac{\hat\pi_{11}\hat\pi_{22}}{\hat\pi_{12}\hat\pi_{21}}
+= \frac{(n_{11}/n)(n_{22}/n)}{(n_{12}/n)(n_{21}/n)}
+= \frac{n_{11}n_{22}}{n_{12}n_{21}}
+= \frac{309\cdot 281}{191 \cdot 319}
+= \frac{86829}{60929}
+\approx 1.43
+\]
+
+### Confidence interval
+
+We start by constructing a confidence interval for the log-transformed odds
+ratio:
+\[\operatorname{CI}_{\ln\theta} = \left[\ln \hat\theta - z_{0.95} \operatorname{se}(\ln \hat\theta ),\ln \hat\theta  + z_{0.95} \operatorname{se}(\ln \hat\theta )\right]\]
+with standard error:
+\[\operatorname{se}(\ln\hat\theta)
+= \sqrt{\widehat{\operatorname{Var}}(\ln\hat\theta)}
+= \sqrt{\frac{1}{N_{11}}+\frac{1}{N_{12}}+\frac{1}{N_{21}}+\frac{1}{N_{22}}}
+\]
+Realization:
+\[\sqrt{\frac{1}{n_{11}}+\frac{1}{n_{12}}+\frac{1}{n_{21}}+\frac{1}{n_{22}}}
+= \sqrt{\frac{1}{309}+\frac{1}{191}+\frac{1}{319}+\frac{1}{281}}
+\approx 0.1231
+\]
+Realized confidence interval for \(\ln \theta\):
+\[\operatorname{CI}_{\ln\theta} \approx \left[
+\ln\frac{86829}{60929} - 1.96 \cdot 0.1231,\ln\frac{86829}{60929} + 1.96\cdot 0.1231
+\right]
+= \left[0.1130,0.5955\right]
+\]
+We now exponentiate the limits to obtain the confidence interval for \(\theta\):
+\[\operatorname{CI}_\theta \approx \left[e^{0.1130},e^{0.5955}\right] \approx [1.12,1.81]\]
+
+### Interpretation
+The odds ratio between women and men is approximately 1.43, so
+the odds are 43 \% higher for women to be in favor of legal abortion compared
+to men.
+
+The 95 % confidence interval for the odds ratio is approximately
+\([1.12,1.81]\).
+Since the interval does not contain 1, we conclude with 95 % confidence
+that the odds of women being in favor of legal abortion are higher than for men.
+
+
+
+## 4. Risk ratio
+
+## 5. Numerical result
+
 __
 
 # Exercise 1:2
+
+## 1. Analysis of admission data
+
+## 2. Comparison with scaled data
+
+## 3. Custom two-way table
 
 ...
