@@ -147,10 +147,7 @@ ratio:
 with standard error:
 \[\operatorname{se}(\ln\hat\theta)
 = \sqrt{\widehat{\operatorname{Var}}(\ln\hat\theta)}
-= \sqrt{\frac{1}{N_{11}}+\frac{1}{N_{12}}+\frac{1}{N_{21}}+\frac{1}{N_{22}}}
-\]
-Realization:
-\[\sqrt{\frac{1}{n_{11}}+\frac{1}{n_{12}}+\frac{1}{n_{21}}+\frac{1}{n_{22}}}
+= \sqrt{\frac{1}{n_{11}}+\frac{1}{n_{12}}+\frac{1}{n_{21}}+\frac{1}{n_{22}}}
 = \sqrt{\frac{1}{309}+\frac{1}{191}+\frac{1}{319}+\frac{1}{281}}
 \approx 0.1231
 \]
@@ -173,9 +170,38 @@ The 95 % confidence interval for the odds ratio is approximately
 Since the interval does not contain 1, we conclude with 95 % confidence
 that the odds of women being in favor of legal abortion are higher than for men.
 
-
-
 ## 4. Risk ratio
+
+### Relative risk
+
+The "risk" of women and men, respectively, being in favor of legal abortion:
+\[r_1 = P(Y=1|X=1) = \frac{P(X=1,Y=1)}{P(X=1)} = \frac{\pi_{11}}{\pi_{1+}}\]
+\[r_2 = P(Y=1|X=2) = \frac{P(X=2,Y=1)}{P(X=2)} = \frac{\pi_{21}}{\pi_{2+}}\]
+
+Risk ratio:
+\[r = \frac{r_1}{r_2} = \frac{\pi_{11}\pi_{2+}}{\pi_{21}\pi_{1+}}\]
+
+Estimated relative risk:
+\[\hat{r} = \frac{n_{11}/n_{1+}}{n_{21}/n_{2+}} = \frac{309/500}{319/600}
+=\frac{1854}{1595} \approx 1.16\]
+
+### Confidence interval
+We start by constructing a confidence interval for the log-transformed odds
+ratio:
+\[\operatorname{CI}_{\ln r} = \left[
+\ln \hat r - z_{0.95} \operatorname{se}(\ln \hat r ),
+\ln \hat r + z_{0.95} \operatorname{se}(\ln \hat r )
+\right]\]
+with standard error:
+\[\operatorname{se}(\ln\hat r)
+= \sqrt{\widehat{\operatorname{Var}}(\ln\hat r)}
+= \sqrt{\frac{1-n_{11}/n_{1+}}{n_{11}}+\frac{1-n_{21}/n_{2+}}{n_{21}}}
+= \sqrt{\frac{1-309/500}{309}+\frac{1-319/600}{319}}
+\approx 0.05200
+\]
+
+
+### Interpretation
 
 ## 5. Numerical result
 
