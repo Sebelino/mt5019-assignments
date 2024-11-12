@@ -14,16 +14,100 @@ output:
 ```{r, echo=FALSE, results='hide', fig.show='hide'}
 source("assignment1a.R")
 list2env(ass1a, envir = .GlobalEnv)
-knitr::opts_chunk$set(echo=FALSE, comment="")
+knitr::opts_chunk$set(echo = FALSE, comment = "")
 ```
 
 # Exercise 1:1
 
-## 1.
+## 1. Percentages in favor and against legal abortion
 
+We have a two-way contingency table with two categorical variables.
+Let \(X\) denote the subject's gender, where \(X=1\) indicates a woman
+and \(X=2\) indicates a man. Let \(Y\) denote the subject's opinion on
+legal abortion, where \(Y=1\) indicates being in favor and \(Y=2\) indicates
+being against.
+Let \(n_{ij}\) denote the observed cell count in category \(X=i\), \(Y=j\).
+
+The percentage is calculated as the number of subjects in a category
+divided by the total number of subjects in the same row.
+So for example:
+\[\pi_{1|1} = \frac{n_{11}}{n_{1+}} = \frac{309}{500}=0.618\]
+Numerically computed percentages:
 ```{r}
 percentages
 ```
+
+## 2. Different opinions on legal abortion?
+Let:
+\[\pi_{ij} = P(X=i,Y=j)\]
+\[\pi_{i+}=P(X=i)\]
+\[\pi_{+j}=P(Y=j)\]
+
+### Hypotheses
+We wish to investigate whether men and women have different opinions on legal
+abortion.
+This means investigating whether the events \(X=i\) and \(Y=j\) are independent
+for all \(i,j\). As null hypothesis, we assume that they are independent:
+\[H_0: \forall i,j\in\{1,2\}: \pi_{ij}=\pi_{i+}\pi_{+j}\]
+Alternative hypothesis:
+\[H_1: \exists i,j\in\{1,2\}: \pi_{ij} \neq \pi_{i+}\pi_{+j}\]
+
+### Pearson's statistic
+Let \(N_{ij}\) denote the random variable which \(n_{ij}\) is a realization of.
+
+Pearson's \(\chi^2\) statistic is given by:
+\[T_{\chi^2} = \sum_{i,j\in\{1,2\}} \frac{(N_{ij}-\hat\mu_{ij})^2}{\hat\mu_{ij}}\]
+where \(\hat\mu_j\) is an estimate of the expected frequency for category \(j\), given by:
+\[\hat\mu_{ij} = n\hat\pi_{ij} = n \hat\pi_{i+}\hat\pi_{+j} = n\frac{n_{i+}}{n}\frac{n_{+j}}{n}=\frac{n_{i+}n_{+j}}{n}\]
+Estimates:
+\[\hat\mu_{11} = \frac{500\cdot 628}{1100}=\frac{3140}{11}\]
+\[\hat\mu_{12} = \frac{500\cdot 472}{1100}=\frac{2360}{11}\]
+\[\hat\mu_{12} = \frac{600\cdot 628}{1100}=\frac{3768}{11}\]
+\[\hat\mu_{12} = \frac{600\cdot 472}{1100}=\frac{2832}{11}\]
+The statistic is, under \(H_0\), asymptotically \(\chi^2\) distributed with \(p-q = 3-2 = 1\)
+degree of freedom, where \(p\) is the number of parameters in the unrestricted model
+and \(q\) is the number of free parameters under \(H_0\).
+
+Realization of Pearson's statistic:
+\[t_{\chi^2} =
+\frac{(309-\frac{3140}{11})^2}{3140/11}+
+\frac{(191-\frac{2360}{11})^2}{2360/11}+
+\frac{(319-\frac{3768}{11})^2}{3768/11}+
+\frac{(281-\frac{2832}{11})^2}{2832/11}
+\]
+
+### LR statistic
+The likelihood ratio (LR) statistic is given by:
+\[T_{LR} = 2\sum_{i,j\in\{1,2\}} N_{ij}\ln\frac{N_{ij}}{\hat\mu_{ij}}\]
+Like Person's statistic, the LR statistic is asymptotically \(\chi^2(1)\)
+distributed under \(H_0\).
+
+Realization of the LR statistic:
+\[t_{LR} = 2\left(
+309\cdot\ln\frac{309}{3140/11}+
+191\cdot\ln\frac{191}{2360/11}+
+319\cdot\ln\frac{319}{3768/11}+
+281\cdot\ln\frac{281}{2832/11}
+\right)\]
+
+### Result
+
+Numerically computed realizations of the \(\chi^2\) statistic and LR statistic:
+```{r}
+square_statistics
+```
+
+### Conclusion
+
+The P-value for Pearson's \(\chi^2\) statistic is
+approximately \(0.0040\) which is between significance levels \(0.001\) and
+\(0.01\). Hence, we reject \(H_0\) in favor of \(H_1\) with high significance.
+
+The P-value for the LR statistic is
+approximately \(0.0039\) which is between significance levels \(0.001\) and
+\(0.01\). Hence, we reject \(H_0\) in favor of \(H_1\) with high significance.
+
+In conclusion, men and women differ in their opinions on legal abortion.
 
 __
 
