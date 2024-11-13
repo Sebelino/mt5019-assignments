@@ -152,16 +152,15 @@ with standard error:
 \approx 0.1231
 \]
 Realized confidence interval for \(\ln \theta\):
-\[\operatorname{CI}_{\ln\theta} \approx \left[
-\ln\frac{86829}{60929} - 1.96 \cdot 0.1231,\ln\frac{86829}{60929} + 1.96\cdot 0.1231
-\right]
-= \left[0.1130,0.5955\right]
+\[\operatorname{CI}_{\ln\theta}
+\approx\left[\ln\frac{86829}{60929} - 1.96 \cdot 0.1231,\ln\frac{86829}{60929} + 1.96\cdot 0.1231\right]
+\approx \left[0.1130,0.5955\right]
 \]
 We now exponentiate the limits to obtain the confidence interval for \(\theta\):
 \[\operatorname{CI}_\theta \approx \left[e^{0.1130},e^{0.5955}\right] \approx [1.12,1.81]\]
 
 ### Interpretation
-The odds ratio between women and men is approximately 1.43, so
+The estimated odds ratio between women and men is approximately 1.43, so
 the odds are 43 \% higher for women to be in favor of legal abortion compared
 to men.
 
@@ -199,9 +198,25 @@ with standard error:
 = \sqrt{\frac{1-309/500}{309}+\frac{1-319/600}{319}}
 \approx 0.05200
 \]
-
+Realized confidence interval for \(\ln r\):
+\[\operatorname{CI}_{\ln r}
+\approx [\ln\frac{1854}{1596}-1.96\cdot 0.05200,\frac{1854}{1596}+1.96\cdot 0.05200]
+\approx [0.04793,0.2518]
+\]
+We now exponentiate the limits to obtain the confidence interval for \(r\):
+\[\operatorname{CI}_r \approx [e^{0.04793},e^{0.2518}] \approx [1.05,1.29]\]
 
 ### Interpretation
+
+The estimated risk ratio between women and men is approximately 1.16,
+indicating that women are 16 % more likely than men to be in favor of legal
+abortion.
+
+The 95 % confidence interval for the risk ratio is approximately
+\([1.05,1.29]\).
+Since this interval does not contain 1, we conclude with 95 %
+confidence that women are more likely to be in favor of legal abortion compared
+to men.
 
 ## 5. Numerical result
 
