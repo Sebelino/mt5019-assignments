@@ -30,12 +30,23 @@ Let \(n_{ij}\) denote the observed cell count in category \(X=i\), \(Y=j\).
 
 The percentage is calculated as the number of subjects in a category
 divided by the total number of subjects in the same row.
-So for example:
-\[\pi_{1|1} = \frac{n_{11}}{n_{1+}} = \frac{309}{500}=0.618\]
-Numerically computed percentages:
-```{r}
-percentages
-```
+
+Percentage of women in favor:
+\[\hat\pi_{1|1} = \frac{\hat\pi_{11}}{\hat\pi_{1+}}
+= \frac{n_{11}/n}{n_{1+}/n}
+= \frac{n_{11}}{n_{1+}} = \frac{309}{500}=0.618
+\]
+Percentage of women against:
+\[\hat\pi_{2|1} = 1-\hat\pi_{1|1} = \frac{191}{500} = 0.382
+\]
+Percentage of men in favor:
+\[\hat\pi_{1|2} = \frac{\hat\pi_{21}}{\hat\pi_{2+}}
+= \frac{n_{12}/n}{n_{2+}/n}
+= \frac{n_{12}}{n_{2+}} = \frac{319}{600}=0.532
+\]
+Percentage of men against:
+\[\hat\pi_{2|2} = 1-\hat\pi_{1|2} = \frac{281}{600} = 0.468
+\]
 
 ## 2. Different opinions on legal abortion?
 Let:
@@ -74,6 +85,7 @@ Realization of Pearson's statistic:
 \frac{(191-\frac{2360}{11})^2}{2360/11}+
 \frac{(319-\frac{3768}{11})^2}{3768/11}+
 \frac{(281-\frac{2832}{11})^2}{2832/11}
+\approx 8.30
 \]
 
 ### LR statistic
@@ -88,14 +100,8 @@ Realization of the LR statistic:
 191\cdot\ln\frac{191}{2360/11}+
 319\cdot\ln\frac{319}{3768/11}+
 281\cdot\ln\frac{281}{2832/11}
-\right)\]
-
-### Result
-
-Numerically computed realizations of the \(\chi^2\) statistic and LR statistic:
-```{r}
-square_statistics
-```
+\right)
+\approx 8.32\]
 
 ### Conclusion
 
@@ -196,7 +202,6 @@ with standard error:
 = \sqrt{\widehat{\operatorname{Var}}(\ln\hat r)}
 = \sqrt{\frac{1-n_{11}/n_{1+}}{n_{11}}+\frac{1-n_{21}/n_{2+}}{n_{21}}}
 = \sqrt{\frac{1-309/500}{309}+\frac{1-319/600}{319}}
-\approx 0.05200
 \]
 Realized confidence interval for \(\ln r\):
 \[\operatorname{CI}_{\ln r}
@@ -219,6 +224,29 @@ confidence that women are more likely to be in favor of legal abortion compared
 to men.
 
 ## 5. Numerical result
+
+Numerically computed percentages:
+```{r}
+percentages
+```
+
+Numerically computed realizations of the \(\chi^2\) statistic and LR statistic:
+```{r}
+square_statistics
+```
+
+Numerically computed odds ratio estimate and confidence interval:
+```{r}
+odds_ratio
+```
+
+Numerically computed risk ratio estimate and confidence interval:
+```{r}
+risk_ratio
+```
+
+These results are close approximations of the analytically calculated
+values from earlier sections.
 
 __
 

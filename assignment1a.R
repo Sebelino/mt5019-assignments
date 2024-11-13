@@ -14,19 +14,34 @@ percentages <- function(tab1) {
 
 main <- function() {
   tab1 <- make_table()
-  # Exercise 1.1.1
+  # Exercise 1:1.1
   percentages <- percentages(tab1)
   cat("Percentage in favor and against legal abortion:\n")
   print(percentages)
 
-  # Exercise 1.1.2
+  # Exercise 1:1.2
   chi2 <- chisq.test(tab1, correct = FALSE)
   library(MASS)
-  square_statistics <- loglm(~gender+opinion,tab1)
+  square_statistics <- loglm(~ gender + opinion, tab1)
+  cat("Chi2 and LR statistics:\n")
+  print(chi2)
+
+  # Exercise 1:1.3
+  library(epitools)
+  odds_ratio <- oddsratio(tab1, method = "wald", rev = "both")$measure
+  cat("Odds ratio:\n")
+  print(odds_ratio)
+
+  # Exercise 1:1.4
+  risk_ratio <- riskratio(tab1, rev = "both")$measure
+  cat("Risk ratio:\n")
+  print(risk_ratio)
 
   return(list(
     percentages = percentages,
-    square_statistics = square_statistics
+    square_statistics = square_statistics,
+    odds_ratio = odds_ratio,
+    risk_ratio = risk_ratio
   ))
 }
 
