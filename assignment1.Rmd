@@ -279,6 +279,65 @@ The confidence interval
 
 ## 2. Comparison with scaled data
 
+### Dividing the study population by 10
+
+Table:
+```{r}
+tab2b
+```
+Pearson's \(\chi^2\) statistic and LR statistic:
+```{r}
+square_statistics2b
+```
+Odds ratio:
+```{r}
+odds_ratio2b
+```
+Risk ratio:
+```{r}
+risk_ratio2b
+```
+
+INTERPRETATION HERE
+
+### Dividing the study population by 100
+
+Table:
+```{r}
+tab2c
+```
+Pearson's \(\chi^2\) statistic and LR statistic:
+```{r}
+square_statistics2c
+```
+Odds ratio:
+```{r}
+odds_ratio2c
+```
+Risk ratio:
+```{r}
+risk_ratio2c
+```
+
+INTERPRETATION HERE
+
 ## 3. Custom two-way table
+
+\[\hat\theta = \frac{a\cdot d}{b \cdot c}\]
+
+Table:
+```{r}
+tab2d
+```
+Pearson's \(\chi^2\) statistic and LR statistic:
+Odds ratio:
+```{r}
+odds_ratio2d
+```
+The estimated odds ratio is approximately 99.4 \% which is within the bounds of \((0.99,1.01)\).
+```{r}
+square_statistics2d
+```
+The P-value is approximately 3.3 \% which is less than 5 \%. Hence, the result is statistically signifiant.
 
 ...
