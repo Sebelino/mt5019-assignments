@@ -36,12 +36,28 @@ main <- function() {
   risk_ratio <- riskratio(tab1, rev = "both")$measure
   cat("Risk ratio:\n")
   print(risk_ratio)
-
+  
+  # Exercise 1:2.1
+  tab2 <- as.table(rbind(c(1198, 1493), c(557, 1278)))
+  dimnames(tab2) <- list(gender = c("men", "women"), admission = c("admitted", "not_admitted"))
+  square_statistics2 <- loglm(~ gender + admission, data = tab2)
+  cat("Chi2 and LR statistics:\n")
+  print(summary(square_statistics2))
+  odds_ratio2 <- oddsratio(tab2, method = "wald", rev = "both")$measure
+  cat("Odds ratio:\n")
+  print(odds_ratio2)
+  risk_ratio2 <- riskratio(tab2, rev = "both")$measure
+  cat("Risk ratio:\n")
+  print(risk_ratio2)
+  
   return(list(
     percentages = percentages,
     square_statistics = square_statistics,
     odds_ratio = odds_ratio,
-    risk_ratio = risk_ratio
+    risk_ratio = risk_ratio,
+    square_statistics2 = square_statistics2,
+    odds_ratio2 = odds_ratio2,
+    risk_ratio2 = risk_ratio2
   ))
 }
 

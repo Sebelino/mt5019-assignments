@@ -254,6 +254,29 @@ __
 
 ## 1. Analysis of admission data
 
+Pearson's \(\chi^2\) statistic and LR statistic:
+```{r}
+square_statistics2
+```
+Odds ratio:
+```{r}
+odds_ratio2
+```
+Risk ratio:
+```{r}
+risk_ratio2
+```
+
+The odds ratio is approximately 1.84, respectively, hinting that
+the odds of men being admitted are 84 \% higher
+than that of women.
+The relative risk is 46 \% higher for men.
+Since the 95 \% confidence interval does not include 1,
+this result is statistically significant.
+The P-value is effectively zero for both the \(\chi^2\) and LR statistics, meaning that the result is very statistically significant.
+
+The confidence interval 
+
 ## 2. Comparison with scaled data
 
 ## 3. Custom two-way table
