@@ -155,4 +155,107 @@ Thus, we have shown that \( \beta_1 \) and \( \gamma_1 \) are indeed equal. This
 
 # Exercise 2:2
 
+## 1.
+
+For each dose, the probability of developing a tumor is given by:
+
+\[
+\text{Risk} = \frac{\text{Tumor}}{\text{Total}}
+\]
+where \textit{Total} is the sum of "Tumor" and "No Tumor" counts for each dose level.
+
+\subsection*{Odds of Tumor for Each Dose}
+The odds for each dose level can be calculated as:
+\[
+\text{Log-Odds} = \log \left( \frac{\text{Tumor} / \text{Total}}{1 - (\text{Tumor} / \text{Total})} \right)
+\]
+
+We now plot the risk against the log-dose and log-odds against the log-dose:
+
+```{r, align='center'}
+plot_risk(log_dose, risk)
+```
+
+This plot shows the probability (or risk) of developing a tumor at different log(dose) levels.
+As the log(dose) increases, the risk of developing a tumor also increases. This suggests a positive association between dose and tumor risk; higher doses are associated with a greater likelihood of developing a tumor.
+The increase in risk appears to follow a smooth trend, becoming especially steep for higher log(dose) values.
+
+```{r, align='center'}
+plot_odds(log_dose, log_odds)
+```
+
+This plot shows the relationship between log(dose) and the log-odds of developing a tumor.
+The log-odds appear to increase in an approximately linear fashion as log(dose) increases. The points follow a roughly straight line, which is a key indicator of a linear relationship.
+This linear trend in the log-odds plot suggests that a logistic regression model may be appropriate for modeling the relationship between log(dose) and the probability of developing a tumor. In logistic regression, we assume that the log-odds of the outcome is linearly related to the explanatory variable, and this plot supports that assumption.
+
+Since the log-odds plot shows a roughly linear trend with log(dose), a logistic regression model seems appropriate for these data. The linearity in the log-odds plot indicates that the assumption of logistic regression (a linear relationship between log-odds and the predictor) is likely met. This model would allow us to quantify the effect of dose on the probability of developing a tumor.
+
+## 2.
+
+We now fit a logistic regression model to the data
+to estimate the relationship between does and
+the log-odds of developing a tumor.
+
+\(\hat\beta_0\): This represents the log-odds of developing a tumor when the log(dose) is zero. Although it has a mathematical interpretation, it may not have a direct practical meaning in this context, especially if log(dose) = 0 is outside the range of observed values.
+
+\(\hat\beta_1\): The slope tells us how the log-odds of developing a tumor change with each unit increase in log(dose). If \(\hat\beta_1\) is positive, this implies that as log(dose) increases, the log-odds of developing a tumor also increase, indicating a higher probability of tumor development at higher doses.
+
+```{r}
+coef(model22)
+```
+
+By exponentiating, we obtain the odds:
+```{r}
+exp(coef(model22)["(Intercept)"])
+```
+This means that, at a log_dose of zero, the odds of developing a tumor are approximately 1.99.
+
+```{r}
+exp(coef(model22)["log_dose"])
+```
+The positive slope of 0.5204 indicates a strong association between increasing dose levels and a higher likelihood of tumor development.
+The odds value of \(1.682\) means that for each one-unit increase in log_dose, the odds of developing a tumor increase by approximately 68.2%. In other words, higher doses are associated with a significantly higher risk of developing a tumor.
+
+## 3.
+
+Covariance matrix:
+```{r}
+cov_matrix
+```
+The diagonal of the covariance matrix
+represents the variance of the intercept and the log dose,
+respectively.
+The off-diagonal elements represent the covariance.
+This value indicates the degree to which the intercept and slope vary together.
+The off-diagonal values are not zero, meaning that
+they are not independent.
+
+The correlation coefficient is given by:
+\[\text{Correlation} = \frac{\text{Covariance}}{\text{Standard Error of Intercept} \times \text{Standard Error of Slope}}\]
+
+```{r}
+correlation
+```
+A correlation of approximately 
+0.649 indicates a moderate positive correlation between the intercept and slope estimates.
+This suggests that the intercept and slope estimates are not completely independent; as one estimate increases, the other tends to increase as well. In practical terms, this moderate correlation is not unusual in logistic regression and does not typically indicate an issue with the model. However, it is useful to be aware of this correlation, especially if we are interpreting the parameters separately.
+
+Confidence interval for the intercept and slope parameter:
+```{r}
+conf_intervals
+```
+
+This interval tells us that we are 95% confident that the true value of the intercept parameter \(\beta_0\) lies between 0.1822 and 1.1918.
+In terms of log-odds, the intercept represents the log-odds of developing a tumor when log(dose) = 0.
+
+This interval tells us that we are 95% confident that the true value of the slope parameter \(\beta_1\) lies between 0.3537 and 0.6870.
+The slope represents the change in log-odds of developing a tumor for each one-unit increase in log(dose).
+
+Confidence interval for the tumor risk at dose 0.25:
+```{r}
+probability_ci
+```
+This interval tells us that we are 95% confident that the true probability of developing a tumor at log(dose) = -1.39 lies between 0.394 (39.4%) and 0.588 (58.8%).
+Since this interval is relatively wide, it reflects some uncertainty in the exact probability estimate but still suggests a moderate to high likelihood of tumor development at this dose level.
+
 ...
