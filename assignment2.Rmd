@@ -21,33 +21,50 @@ knitr::opts_chunk$set(echo = FALSE, comment = "")
 
 ## 1.
 
-We are computing estimates of the intercept parameter and the effect parameter: \(\hat\beta_0\) and \(\hat\beta_1\), respectively.
+The following parameters in the model can be estimated:
 
-The estimates are given by fitting a logistic regression
-model and fetching the coefficients of the model.
+* The intercept \(\beta_0\), which represents the log-odds of having periodontitis when
+\(x=0\) (i.e. no floss use).
+This parameter can be directly estimated from the data because the proportions of periodontitis cases for \(x=0\) are provided by the table.
 
+* The effect parameter \(\beta_1\), which represents the change in log-odds
+of having periodontitis between those who use floss (\(x=1\)) and those who
+do not (\(x=0\)). This parameter can also be directly estimated because we have the counts for both groups.
+
+Estimates \(\hat\beta_0\) and \(\hat\beta_1\) for these are given by fitting
+a logistic regression model and fetching the coefficients of the model.
+
+Coefficients of the model:
 ```{r}
 coef(model21)
 ```
 
-\(\hat\beta_0\): This is the estimated log-odds of periodontitis for those who do not use floss.
-
-We can exponentiate the log-odds to get the odds:
+### Intercept parameter
+The estimate for \(\beta_0\) is \(\hat\beta_0\approx -0.58\).
+The negative value suggests that
+it is more likely for a non-floss user to not have periodontitis than
+to have it.
+To interpret \(\hat\beta_0\) further,
+we can first exponentiate the log-odds to obtain the odds:
 
 \[\text{odds} = e^{\hat\beta_0}\]
-Numerically computed odds:
+which yields the following value:
 ```{r}
 exp(coef(model21)["(Intercept)"])
 ```
 
-This suggests that for non-floss users, the odds of having periodontitis are about 0.558.
+Meaning, for non-floss users, the odds of having periodontitis are about 0.558.
+In other words, for every 100 non-floss users who do not have periodontitis, around 56 are expected to have it.
 
-\(\hat\beta_1\): This indicates that floss usage is associated with lower odds of periodontitis. The negative value suggests that floss users are less likely to have periodontitis compared to non-users.
+### Effect parameter
+The estimate for \(\beta_1\) is \(\hat\beta_1\approx -0.64\).
+The negative value suggests that floss users are less likely to have
+have periodontitis.
 
 Exponentiating this coefficient gives the odds ratio for floss users compared to non-users:
 
-\[\text{odds} = e^{\hat\beta_1}\]
-Numerically computed odds:
+\[\theta = e^{\hat\beta_1}\]
+which yields:
 ```{r}
 exp(coef(model21)["useYes"])
 ```
