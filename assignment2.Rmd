@@ -1,5 +1,5 @@
 ---
-title: "Computer Assignment 1"
+title: "Computer Assignment 2"
 author:
   - "Ville Sebastian Olsson (19911231-1999)"
   - "Arvind Guruprasad (19990212-6938)"
