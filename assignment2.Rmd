@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = FALSE, comment = "")
 
 # Exercise 2:1
 
-## 1.
+## 1. \(\beta\) model
 
 The following parameters in the model can be estimated:
 
@@ -61,7 +61,7 @@ The estimate for \(\beta_1\) is \(\hat\beta_1\approx -0.64\).
 The negative value suggests that floss users are less likely to have
 have periodontitis.
 
-Exponentiating this coefficient gives the odds ratio for floss users compared to non-users:
+Exponentiating this coefficient gives the odds ratio for floss users relative to non-users:
 
 \[\theta = e^{\hat\beta_1}\]
 which yields:
@@ -71,104 +71,117 @@ exp(coef(model21)["useYes"])
 
 This means that floss users have approximately 52.5% of the odds of having periodontitis compared to non-users, suggesting a protective effect of flossing against periodontitis.
 
-## 2.
+## 2. \(\gamma\) model
 
-The estimates are given by fitting a logistic regression model and fetching the coefficients of the model:
+The following parameters in the model can be estimated:
+
+* The intercept \(\gamma_0\), which represents the log-odds of using dental floss when
+\(y=0\) (i.e. no periodontitis).
+This parameter can be directly estimated from the data because the proportions of floss uses for \(y=0\) are provided by the table.
+
+* The effect parameter \(\gamma_1\), which represents the change in log-odds
+of being a floss user between those with periodontitis (\(y=1\)) and those without it (\(y=0\)). This parameter can also be directly estimated because we have the counts for both groups.
+
+Estimates \(\hat\gamma_0\) and \(\hat\gamma_1\) for these are given by fitting
+a logistic regression model and fetching the coefficients of the model.
+
+Coefficients of the model:
 ```{r}
 coef(model21b)
 ```
 
-\(\gamma_0\): This coefficient represents the log-odds of using dental floss for individuals without periodontitis.
+### Intercept parameter
 
-Exponentiating gives the baseline odds of floss usage among those without periodontitis:
+The estimate for \(\gamma_0\) is \(\hat\gamma_0\approx -1.3\).
+The negative value suggests that
+it is more likely for a healthy individual to not use dental floss than
+to do it.
+To interpret \(\hat\gamma_0\) further,
+we can first exponentiate the log-odds to obtain the odds:
 
-\[\text{odds} = e^{\hat\beta_0}\]
-Numerically computed odds:
+\[\text{odds} = e^{\hat\gamma_0}\]
+which yields the following value:
 ```{r}
 exp(coef(model21b)["(Intercept)"])
 ```
 
-This suggests that for individuals without periodontitis, the odds of using dental floss are approximately 0.283.
+Meaning, for healthy individuals, the odds of using floss are about 0.28.
+In other words, for every 100 healthy individuals who do not floss, around 28 are expected to floss.
 
-\(\gamma_1\): This coefficient represents the change in log-odds of floss usage when periodontitis is present compared to when it is absent.
-Since \(\gamma_1\) is negative, it indicates that individuals with periodontitis are less likely to use dental floss compared to those without periodontitis.
+### Effect parameter
 
-\[\text{odds} = e^{\hat\beta_1}\]
-Numerically computed odds:
+The estimate for \(\gamma_1\) is \(\hat\gamma_1\approx -0.64\).
+The negative value indicates that individuals with periodontitis (\(y=1\)) are less likely to use dental floss compared to healthy individuals (\(y=0\)).
+
+Exponentiating this coefficient gives the odds ratio for flossing behavior among individuals with periodontitis compared to healthy individuals.
+
+\[\theta = e^{\hat\beta_1}\]
+which yields:
 ```{r}
-exp(coef(model21b)["perYes"])
+exp(coef(model21)["useYes"])
 ```
 
-This odds ratio of 0.525 means that individuals with periodontitis have 52.5% of the odds of using dental floss compared to individuals without periodontitis. In other words, individuals with periodontitis are less likely to use dental floss than those without it.
+This means that the odds of using dental floss for individuals with periodontitis are approximately 53 % of the odds for healthy individuals.
+This result suggests a behavioral pattern where individuals with periodontitis are less likely to have used dental floss, possibly because abstaining from flossing increases the risk of periodontitis.
 
-## 3.
+## 3. Model comparison
 
-The estimate for \( \beta_1 \) is the difference in log-odds of periodontitis between floss users and non-floss users:
-
-For \(\beta\):
-
-\[
-\beta_1 = \log \left( \frac{\text{odds of floss for peridontitis users}}{\text{odds of floss for non-periodontitis users}} \right)
-\]
+The estimate for \(\beta_0\) is the log-odds of periodontitis for non-floss users, calculated as follows:
 
 \[
-\text{odds}_{\text{floss}} = \frac{22}{75} \approx 0.2933
+\beta_0 = \operatorname{logit}(P(\text{periodontitis} | x=0))
+= \ln \left( \frac{P(\text{periodontitis} | x=0)}{1-P(\text{periodontitis} | x=0)}\right)
+= \ln \left(\frac{\frac{148}{413}}{1-\frac{148}{413}}\right)
+\approx -0.58
 \]
 
-For individuals without floss:
+The estimate for \( \beta_1 \) is the difference in log-odds of periodontitis between floss users and non-floss users, calculated as follows:
+
 \[
-\text{odds}_{\text{no floss}} = \frac{148}{265} \approx 0.5585
+\beta_1 = \ln \left( \frac{\text{odds}_{x=1}(\text{periodontitis})}{\text{odds}_{x=0}(\text{periodontitis})} \right)
+= \ln \left( \frac{22/75}{148/265} \right)
+\approx -0.64
 \]
 
-The coefficient \( \beta_1 \) is given by:
-\[
-\beta_1 = \log \left( \frac{0.2933}{0.5585} \right) = \log(0.525) \approx -0.6439
-\]
-
-Numerical result:
-```{r}
+Numerically:
+```{r,echo=TRUE,results='show'}
 odds_floss <- 22 / 75
 odds_no_floss <- 148 / 265
-logratio <- log(odds_floss / odds_no_floss)
-logratio
+log_odds_ratio <- log(odds_floss / odds_no_floss)
+log_odds_ratio
 ```
 
-For \(\gamma\):
+The estimate for \(\gamma_0\) is the log-odds of flossing for healthy individuals,
+calculated as follows:
 
 \[
-\gamma_1 = \log \left( \frac{\text{odds of periodontitis for floss users}}{\text{odds of periodontitis for non-floss users}} \right)
+\gamma_0 = \operatorname{logit}(P(\text{floss} | y=0))
+= \ln \left( \frac{P(\text{floss} | y=0)}{1-P(\text{floss} | y=0)}\right)
+= \ln \left(\frac{\frac{75}{340}}{1-\frac{75}{340}}\right)
+\approx -1.3
 \]
 
-\[
-\text{odds}_{\text{periodontitis}} = \frac{22}{148} \approx 0.1486
-\]
+The estimate for \( \gamma_1 \) is the difference in log-odds of flossing between periodontitis cases and healthy individuals, calculated as follows:
 
-For individuals without periodontitis:
 \[
-\text{odds}_{\text{no periodontitis}} = \frac{75}{265} \approx 0.2830
-\]
-
-The coefficient \( \gamma_1 \) is given by:
-\[
-\gamma_1 = \log \left( \frac{0.1486}{0.2830} \right) = \log(0.525) \approx -0.6439
+\gamma_1 = \ln \left( \frac{\text{odds}_{y=1}(\text{floss})}{\text{odds}_{y=0}(\text{floss})} \right)
+= \ln \left( \frac{22/148}{75/265} \right)
+\approx -0.64
 \]
 
 Numerical result:
 ```{r}
 odds_periodontitis <- 22 / 148
 odds_no_periodontitis <- 75 / 265
-logratio <- log(odds_periodontitis / odds_no_periodontitis)
-logratio
+log_odds_ratio <- log(odds_periodontitis / odds_no_periodontitis)
+log_odds_ratio
 ```
 
-Both \( \beta_1 \) and \( \gamma_1 \) are calculated as the log of the same odds ratio, \( \log(0.525) \), resulting in:
-
-\[
-\beta_1 = \gamma_1 \approx -0.6439
-\]
-
-Thus, we have shown that \( \beta_1 \) and \( \gamma_1 \) are indeed equal. This equality holds because both logistic models are derived from the same underlying contingency table, just with the roles of the variables swapped.
-
+We observe that \(\gamma_1=\beta_1\approx -0.64\).
+This equality holds because both parameters represent
+the same log-odds-ratio, but computed differently:
+\[e^{\beta_1} = \frac{\text{odds}_{x=1}(\text{periodontitis})}{\text{odds}_{x=0}(\text{periodontitis})} = \frac{22/75}{148/265} = \frac{22/148}{75/265} = \frac{\text{odds}_{y=1}(\text{floss})}{\text{odds}_{y=0}(\text{floss})} = e^{\gamma_1}\]
+This simplification relies on the inherent symmetry of odds ratios in a 2×2 table, where the same odds ratio is obtained regardless of whether the roles of the predictor and outcome are reversed.
 
 # Exercise 2:2
 
