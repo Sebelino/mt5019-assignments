@@ -79,7 +79,7 @@ main <- function() {
   cat("Risk ratio:\n")
   print(risk_ratio2c)
   
-  # Exerices 1:2.3
+  # Exercise 1:2.3
   cat("Custom study:\n")
   tab2d <- matrix(c(500000, 501500, 500500, 499000), nrow = 2, byrow = TRUE)
   cat("Table:")
