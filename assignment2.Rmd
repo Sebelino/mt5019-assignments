@@ -288,4 +288,89 @@ probability_ci
 This interval tells us that we are 95% confident that the true probability of developing a tumor at log(dose) = -1.39 lies between 0.394 (39.4%) and 0.588 (58.8%).
 Since this interval is relatively wide, it reflects some uncertainty in the exact probability estimate but still suggests a moderate to high likelihood of tumor development at this dose level.
 
-...
+## 4.
+
+We aim to test the null hypothesis:
+$$
+H_0: \beta_1 = 0
+$$
+against the alternative hypothesis:
+$$
+H_1: \beta_1 \neq 0
+$$
+Numerically computed estimate for \(\beta_1\):
+```{r}
+beta1
+```
+Numerically computed standard error for \(\beta_1\):
+```{r}
+se_beta1
+```
+
+The Wald test statistic (squared variant) is given by:
+\[t_{W^2} = \frac{(\hat\beta_1-0)^2}{\operatorname{se}(\hat\beta_1)^2}
+=\frac{\hat\beta_1^2}{\operatorname{se}(\hat\beta_1)^2}
+\]
+with realization:
+\[t_{W^2} =\frac{0.5204^2}{0.08502^2}\]
+
+where \( \hat{\beta}_1 \) is the estimated coefficient and \( \operatorname{se}(\hat{\beta}_1) \) is its standard error. The test statistic follows a \(\chi^2(1)\) distribution under the null hypothesis.
+
+Numerically computed value for the Wald statistic:
+```{r}
+wald_statistic
+```
+
+\[
+p\text{-value} = P(T_{W^2} \geq 37.457)
+\]
+
+Numerically computed p-value:
+```{r}
+p_value24
+```
+
+The p-value is much lower than 0.05,
+indicating strong evidence against the null hypothesis.
+In other words, the slope \(\beta_1\) is significantly different from zero,
+meaning that the dose has significant effect on the odds of developing
+a tumor.
+
+## 5.
+
+We aim to investigate the relationship between the sample size and the variances of parameter estimates in logistic regression. Specifically, we scale the sample size by factors of 10, 100, and 1000,
+train a new model on each sample size,
+compare the square of the standard errors (i.e. variances)
+of the intercept and slope parameters.
+
+Numerically computed results:
+```{r}
+variance_results
+```
+
+**Intercept Variance**
+
+- At a scale factor of 10: \( 6.63336 \times 10^{-3} \),
+- At a scale factor of 100: \( 6.63336 \times 10^{-4} \),
+- At a scale factor of 1000: \( 6.33359 \times 10^{-5} \).
+
+The variance reduces approximately by a factor of 10 for each scale increase.
+
+**Slope Variance**
+
+- At a scale factor of 10: \( 7.22009 \times 10^{-4} \),
+- At a scale factor of 100: \( 7.22009 \times 10^{-5} \),
+- At a scale factor of 1000: \( 7.22909 \times 10^{-6} \).
+
+Similarly, the slope variance decreases by a factor of 10 with each scale increase, maintaining consistency with the intercept variance.
+
+The table demonstrates that as the sample size increases (by scaling the counts), the variances of both the intercept and slope parameters decrease significantly.
+Multiplying by 10 causes the variance to be divided by 10.
+
+**Conclusion**
+
+The results demonstrate that both intercept and slope variances decrease proportionally to the increase in the sample size (scale factor). This observation aligns with the theoretical relationship:
+\[
+\text{Var}(\hat{\beta}) \propto \frac{1}{n}
+\]
+where \( n \) is the sample size. Such a reduction in variance highlights the importance of larger datasets in improving the precision of parameter estimates in logistic regression models.

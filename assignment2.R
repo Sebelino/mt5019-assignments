@@ -16,6 +16,24 @@ plot_odds <- function(log_dose, log_odds) {
   )
 }
 
+# Function to fit logistic regression and extract variances for scaled data
+scale_and_fit <- function(scale_factor, log_dose, tumor, no_tumor) {
+  # Scale the counts
+  tumor_scaled <- tumor * scale_factor
+  no_tumor_scaled <- no_tumor * scale_factor
+  total_scaled <- tumor_scaled + no_tumor_scaled
+
+  # Create a new dataset with scaled values
+  data_scaled <- data.frame(log_dose, tumor = tumor_scaled, no_tumor = no_tumor_scaled, total = total_scaled)
+
+  # Fit logistic regression model
+  model <- glm(cbind(tumor, no_tumor) ~ log_dose, family = binomial(link = "logit"), data = data_scaled)
+
+  # Extract variance (square of standard error) for parameters
+  variances <- summary(model)$coefficients[, "Std. Error"]^2
+  return(variances)
+}
+
 main <- function() {
   # Exercise 2:1.1
   # Define the variables for floss usage and periodontitis status
@@ -55,16 +73,16 @@ main <- function() {
   log_odds <- log(risk / (1 - risk))
 
   # Plot risk against log(dose)
-  plot_risk(log_dose, risk)
+  # plot_risk(log_dose, risk)
 
   # Plot log-odds against log(dose)
-  plot_odds(log_dose, log_odds)
+  # plot_odds(log_dose, log_odds)
 
   # Exercise 2:2.2
   # Create data frame
-  data <- data.frame(log_dose, tumor, no_tumor, total)
+  data22 <- data.frame(log_dose, tumor, no_tumor, total)
   # Fit logistic regression model
-  model22 <- glm(cbind(tumor, no_tumor) ~ log_dose, family = binomial(link = "logit"), data = data)
+  model22 <- glm(cbind(tumor, no_tumor) ~ log_dose, family = binomial(link = "logit"), data = data22)
   # Summary of the model
   summary(model22)
 
@@ -92,6 +110,33 @@ main <- function() {
   # Convert log-odds interval to probability interval
   probability_ci <- exp(logit_ci) / (1 + exp(logit_ci))
 
+  # Exercise 2:2.4
+  # Extract the slope coefficient and its standard error
+  beta1 <- coef(summary(model22))["log_dose", "Estimate"]
+  se_beta1 <- coef(summary(model22))["log_dose", "Std. Error"]
+
+  # Calculate the Wald statistic
+  wald_statistic <- (beta1 / se_beta1)^2
+  wald_statistic
+
+  # Step 4: Calculate p-value
+  p_value24 <- 1 - pchisq(wald_statistic, df = 1)
+
+  # Exercise 2:2.5
+  # Calculate variances for different scaling factors
+  variance_10 <- scale_and_fit(10, log_dose, tumor, no_tumor)
+  variance_100 <- scale_and_fit(100, log_dose, tumor, no_tumor)
+  variance_1000 <- scale_and_fit(1000, log_dose, tumor, no_tumor)
+
+  # Combine results into a data frame for comparison
+  variance_results <- data.frame(
+    Scale_Factor = c(10, 100, 1000),
+    Intercept_Variance = c(variance_10[1], variance_100[1], variance_1000[1]),
+    Slope_Variance = c(variance_10[2], variance_100[2], variance_1000[2])
+  )
+
+  print(variance_results)
+
   return(list(
     model21 = model21,
     model21b = model21b,
@@ -102,7 +147,12 @@ main <- function() {
     cov_matrix = cov_matrix,
     correlation = correlation,
     conf_intervals = conf_intervals,
-    probability_ci = probability_ci
+    probability_ci = probability_ci,
+    beta1 = beta1,
+    se_beta1 = se_beta1,
+    wald_statistic = wald_statistic,
+    p_value24 = p_value24,
+    variance_results = variance_results
   ))
 }
 
