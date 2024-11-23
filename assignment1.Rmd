@@ -415,4 +415,5 @@ the difference is so small that it is not a noteworthy result.
 In situations with very large sample sizes, even trivial differences can achieve statistical significance due to the high power of the tests.
 
 The results in such instances would involve providing the entire context, discussing both statistical and practical significance. To report this result, one could utilize visualizations to indicate its lack of practical significance. This result could be expressed using for example a forest plot, a bar plot of the relative frequencies, or a confidence interval for the odds ratio.
-Hence, statistical significance alone does not imply real-world importance.
+Which exact visualization or information to include would depend on the context and the audience.
+In summary, statistical significance alone does not imply real-world importance.
