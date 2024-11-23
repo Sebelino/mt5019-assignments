@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = FALSE, comment = "")
 
 # Exercise 1:1
 
-## 1. Percentages in favor and against legal abortion
+## 1. Percentages in Favor and Against Legal Abortion
 
 We have a two-way contingency table with two categorical variables.
 Let \(X\) denote the subject's gender, where \(X=1\) indicates a woman
@@ -48,7 +48,7 @@ Percentage of men against:
 \[\hat\pi_{2|2} = 1-\hat\pi_{1|2} = \frac{281}{600} = 0.468
 \]
 
-## 2. Different opinions on legal abortion?
+## 2. Different Opinions on Legal Abortion
 Let:
 \[\pi_{ij} = P(X=i,Y=j)\]
 \[\pi_{i+}=P(X=i)\]
@@ -115,7 +115,7 @@ approximately \(0.0039\) which is between significance levels \(0.001\) and
 
 In conclusion, men and women differ in their opinions on legal abortion.
 
-## 3. Odds ratio
+## 3. Odds Ratio
 
 ### Odds
 We are interested in comparing the odds of a woman being in favor of legal
@@ -145,7 +145,7 @@ Estimated odds ratio:
 \approx 1.43
 \]
 
-### Confidence interval
+### Confidence Interval
 
 We start by constructing a confidence interval for the log-transformed odds
 ratio:
@@ -175,7 +175,7 @@ The 95 % confidence interval for the odds ratio is approximately
 Since the interval does not contain 1, we conclude with 95 % confidence
 that the odds of women being in favor of legal abortion are higher than for men.
 
-## 4. Risk ratio
+## 4. Risk Ratio
 
 ### Relative risk
 
@@ -223,7 +223,7 @@ Since this interval does not contain 1, we conclude with 95 %
 confidence that women are more likely to be in favor of legal abortion compared
 to men.
 
-## 5. Numerical result
+## 5. Numerical Result
 
 Numerically computed percentages:
 ```{r}
@@ -252,7 +252,7 @@ __
 
 # Exercise 1:2
 
-## 1. Analysis of admission data
+## 1. Analysis of Admission Data
 
 We are given the admission data for the University of California, Berkeley grouped by gender. We are asked to create a table in R from the data provided and run the functions created earlier.
 
@@ -301,7 +301,7 @@ Since the 95 \% confidence interval does not include 1,
 this result is statistically significant.
 The P-value is effectively zero for both the \(\chi^2\) and LR statistics, meaning that the result is very statistically significant. Men have both higher odds (1.84 times) and higher risk (1.47 times) of admission compared to women. This suggests a possible gender disparity in admission rates, favoring men. However, further investigation into other factors influencing admission (e.g., qualifications, department preferences, etc.) would be necessary to understand the full context.
 
-## 2. Comparison with scaled data
+## 2. Comparison with Scaled Data
 
 Here, we would like to understand the effects of reducing the sample size of the data by dividing all the entries by a constant value. In this case, we are analyzing the statistics when we divide the input data by 10 and 100 respectively.
 
@@ -363,7 +363,7 @@ Like the odds ratio, the risk ratio is consistent but with a much wider confiden
 Dividing the sample size by 100 further demonstrates the limitations of small data sets in hypothesis testing and estimation. While odds and risk ratios remain unchanged in magnitude, the increased uncertainty renders these measures less informative.
 This highlights the importance of sufficient sample sizes for reliable statistical inference. With small data sets, significant effects might go undetected, and confidence in parameter estimates is greatly diminished.
 
-## 3. Custom two-way table
+## 3. Custom Two-way Table
 
 Our objective is to find a two-way contingency table of the form:
 

@@ -185,7 +185,7 @@ This simplification relies on the inherent symmetry of odds ratios in a 2×2 tab
 
 # Exercise 2:2
 
-## 1.
+## 1. Estimate risk and log-odds
 
 For each dose, the probability of developing a tumor is given by:
 
@@ -220,7 +220,7 @@ This linear trend in the log-odds plot suggests that a logistic regression model
 
 Since the log-odds plot shows a roughly linear trend with log(dose), a logistic regression model seems appropriate for these data. The linearity in the log-odds plot indicates that the assumption of logistic regression (a linear relationship between log-odds and the predictor) is likely met. This model would allow us to quantify the effect of dose on the probability of developing a tumor.
 
-## 2.
+## 2. Fit a Logistic Regression Model
 
 We now fit a logistic regression model to the data
 to estimate the relationship between does and
@@ -246,7 +246,7 @@ exp(coef(model22)["log_dose"])
 The positive slope of 0.5204 indicates a strong association between increasing dose levels and a higher likelihood of tumor development.
 The odds value of \(1.682\) means that for each one-unit increase in log_dose, the odds of developing a tumor increase by approximately 68.2%. In other words, higher doses are associated with a significantly higher risk of developing a tumor.
 
-## 3.
+## 3. Covariance Matrix and Confidence Interval
 
 Covariance matrix:
 ```{r}
@@ -288,7 +288,7 @@ probability_ci
 This interval tells us that we are 95% confident that the true probability of developing a tumor at log(dose) = -1.39 lies between 0.394 (39.4%) and 0.588 (58.8%).
 Since this interval is relatively wide, it reflects some uncertainty in the exact probability estimate but still suggests a moderate to high likelihood of tumor development at this dose level.
 
-## 4.
+## 4. Wald Test
 
 We aim to test the null hypothesis:
 $$
@@ -336,7 +336,7 @@ In other words, the slope \(\beta_1\) is significantly different from zero,
 meaning that the dose has significant effect on the odds of developing
 a tumor.
 
-## 5.
+## 5. Variance and Sample Size Relationship
 
 We aim to investigate the relationship between the sample size and the variances of parameter estimates in logistic regression. Specifically, we scale the sample size by factors of 10, 100, and 1000,
 train a new model on each sample size,
