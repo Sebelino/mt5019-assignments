@@ -97,6 +97,7 @@ main <- function() {
     square_statistics = square_statistics,
     odds_ratio = odds_ratio,
     risk_ratio = risk_ratio,
+    tab2 = tab2,
     square_statistics2 = square_statistics2,
     odds_ratio2 = odds_ratio2,
     risk_ratio2 = risk_ratio2,

@@ -254,7 +254,12 @@ __
 
 ## 1. Analysis of admission data
 
-We are given the admission data for the University of California, Berkeley grouped by gender. We are asked to create a table in R from the data provided and run the functions created earlier. 
+We are given the admission data for the University of California, Berkeley grouped by gender. We are asked to create a table in R from the data provided and run the functions created earlier.
+
+**Contingency table:**
+```{r}
+tab2
+```
 
 **Pearson's \(\chi^2\) statistic and LR statistic:**
 ```{r}
