@@ -407,10 +407,13 @@ square_statistics2d
 ```
 The P-value for both statistics is approximately 3.3 \%. The p-value is less than 0.05, so the result meets the conventional threshold for statistical significance.
 
-Given that the odds ratio is so close to 1, it may not be practically significant even though it is statistically significant the magnitude of the effect is so small that it is unlikely to have any real-world or practical impact. In situations with very large sample sizes, even trivial differences can achieve statistical significance due to the high power of the tests.
+Given that the estimated odds ratio is so close to 1, the result may not have
+any practical significance in most real-world contexts even though the result is
+statistically significant.
+For example, if the odds ratio represents the admission rate for men and women,
+the difference is so small that it is not a noteworthy result.
+In situations with very large sample sizes, even trivial differences can achieve statistical significance due to the high power of the tests.
 
-The results in such instances would involve providing the entire context, discussing both statistical and practical significance. One would also utilize visualizations to indicate its lack of practical significance. This result could be expressed using for example a forest plot, a bar plot of the relative frequencies, or a confidence interval for the odds ratio. It's important to emphasize that statistical significance alone does not imply real-world importance. 
-
-In this case, the result lacks practical importance despite being statistically significant, underscoring the need to interpret results beyond p-values, especially in large-sample studies. Decisions should factor both the statistical results and the practical relevance of the observed effect. 
-
+The results in such instances would involve providing the entire context, discussing both statistical and practical significance. One would also utilize visualizations to indicate its lack of practical significance. This result could be expressed using for example a forest plot, a bar plot of the relative frequencies, or a confidence interval for the odds ratio.
+Hence, statistical significance alone does not imply real-world importance.
 ...
