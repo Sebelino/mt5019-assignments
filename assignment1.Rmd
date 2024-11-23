@@ -266,7 +266,11 @@ tab2
 square_statistics2
 ```
 Both tests indicate a very strong association between gender and admission.
-Since the p-values are 0 (extremely small, less than 0.05), we reject the null hypothesis that gender and admission are independent. Thus, the data suggest that gender is significantly associated with admission.
+The R function reports the p-values as 0.
+In reality, the p-values are positive numbers very close to zero,
+and R is unable to display them due to numerical precision limitations.
+Since the p-values are lower than even the lowest common significance level of 0.001,
+we reject the null hypothesis that gender and admission are independent. Thus, the data suggest that gender is significantly associated with admission.
 
 **Odds Ratio:**
 ```{r}
