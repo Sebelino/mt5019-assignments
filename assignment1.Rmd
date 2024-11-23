@@ -416,4 +416,3 @@ In situations with very large sample sizes, even trivial differences can achieve
 
 The results in such instances would involve providing the entire context, discussing both statistical and practical significance. One would also utilize visualizations to indicate its lack of practical significance. This result could be expressed using for example a forest plot, a bar plot of the relative frequencies, or a confidence interval for the odds ratio.
 Hence, statistical significance alone does not imply real-world importance.
-...
