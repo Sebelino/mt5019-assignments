@@ -273,6 +273,10 @@ Since the p-values are lower than even the lowest common significance level of 0
 we reject the null hypothesis that gender and admission are independent. Thus, the data suggest that gender is significantly associated with admission.
 
 **Odds Ratio:**
+
+We seek the estimated odds of admission for men and the estimated odds of admission for women.
+Dividing the former with the latter yields the estimated odds ratio for men compared to women:
+\[\hat\theta = \frac{\hat\omega_1}{\hat\omega_2} = \frac{n_{11}/n_{12}}{n_{21}/n_{22}}\]
 ```{r}
 odds_ratio2
 ```
@@ -280,6 +284,11 @@ The odds of admission for men are approximately **1.84** times higher than the o
 The confidence interval (1.62 to 2.08) does not include 1, indicating that this result is statistically significant.
 
 **Risk Ratio:**
+
+We seek the estimated probability of admission for men and the estimated probability of admission for women.
+Dividing the former with the latter yields the estimated risk ratio for men compared to women:
+\[\hat{r} = \frac{\hat{r}_2}{\hat{r}_1} = \frac{n_{11}/(n_{11}+n_{12})}{n_{21}/(n_{21}+n_{22})}\]
+
 ```{r}
 risk_ratio2
 ```
