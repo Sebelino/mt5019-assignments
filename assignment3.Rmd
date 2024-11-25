@@ -1,0 +1,126 @@
+---
+title: "Computer Assignment 3"
+author:
+  - "Ville Sebastian Olsson (19911231-1999)"
+  - "Arvind Guruprasad (19990212-6938)"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    fig_caption: true
+  pdf_document:
+    fig_caption: true
+---
+
+```{r, echo=FALSE, results='hide', fig.show='hide'}
+source("assignment3.R")
+list2env(ass, envir = .GlobalEnv)
+knitr::opts_chunk$set(echo = FALSE, comment = "")
+```
+
+# Exercise 3:1
+
+## 1. Model selection
+
+The data comes from a study reported by Wermuth (1976), which was collected in a birth clinic. The dataset includes the following variables:
+
+- **Mother's age (X):** `<30` and `30+`.
+- **Smoking habits (Y):** `<5 cigarettes/day` and `5+ cigarettes/day`.
+- **Gestational age (Z):** `<260 days` and `≥260 days`.
+- **Child survival (V):** Binary outcome indicating survival (Yes/No).
+
+The goal is to build log-linear models to understand the associations between these categorical variables.
+
+To generate a table, we follow this process:
+
+1. Read the CSV data
+2. Fit the saturated model
+3. For each combination of interaction terms, fit a model
+4. For each sub-model, calculate deviance, AIC and p-value with respect to the saturated model
+
+Result:
+```{r}
+model_table
+```
+
+
+## 2.
+
+The table contains the following information which helps us
+select the best model:
+
+**1. Deviance**
+
+- Measures the difference in goodness-of-fit between the submodel and the saturated model.
+- A low deviance indicates a good fit.
+
+**2. Degrees of Freedom**
+
+- Reflects the number of parameters removed from the saturated model.
+- Higher df means a simpler model.
+
+**3. p-value**
+
+- Tests whether the submodel is significantly worse than the saturated model.
+- If \( p > 0.05 \), the simpler model is adequate.
+
+**4. AIC**
+
+- Evaluates the trade-off between model complexity and fit.
+- Select the model with the lowest AIC.
+
+```{r}
+model_table[order(model_table$AIC),]
+```
+
+The table above has been sorted by AIC in ascending order,
+to gauge which of the simpler model would be effective with
+respect to the saturated model.
+
+We should select the model that satisfies two criteria:
+
+* Minimal AIC value
+* The p-value is greater than 0.05
+
+Based on the table above, we want to select model 6,
+which includes the interaction terms `XZ, XV, ZV, Y`.
+
+# 3.
+
+The model we selected looks like this:
+
+```{r}
+best_model
+```
+
+Given the lack of three-way interactions, this model
+is much simpler relative to the relative model and the
+other three-way interaction model while retaining
+its ability to fit the data reasonably well.
+
+```{r}
+associations
+```
+
+
+1. **Main Effects**:
+   - \(x\), \(z\), and \(y\) have significant **negative associations** with the outcome.
+   - \(v\) has a significant **positive association** with the outcome.
+
+2. **Interaction Effects**:
+   - \(x : z\) and \(x : y\): Significant **negative interactions**, indicating their combined effects reduce the odds of the outcome beyond individual effects.
+   - \(z : v\): A significant **positive interaction**, with their combined effects dramatically increasing the odds of the outcome.
+
+Detailed Interpretation:
+
+1. **Main Effects**:
+   - \(x\): A significant negative association (\(OR = 0.51\), \(CI: 0.43 \, - \, 0.60\)), meaning a 1-unit increase in \(x\) reduces the odds by 49%.
+   - \(z\): Similarly, \(z\) has a significant negative association (\(OR = 0.47\), \(CI: 0.33 \, - \, 0.66\)), reducing the odds by 53%.
+   - \(y\): A strong negative association (\(OR = 0.12\), \(CI: 0.11 \, - \, 0.13\)), where a 1-unit increase reduces the odds by 88%.
+   - \(v\): A significant positive association (\(OR = 4.93\), \(CI: 4.00 \, - \, 6.09\)), meaning \(v\) increases the odds nearly fivefold.
+
+2. **Interaction Effects**:
+   - \(x : z\): A significant negative interaction (\(OR = 0.79\), \(CI: 0.66 \, - \, 0.94\)), indicating the combined effect of \(x\) and \(z\) decreases odds by 21% beyond their individual effects.
+   - \(x : y\): Another significant negative interaction (\(OR = 0.67\), \(CI: 0.55 \, - \, 0.81\)), reducing odds by 33% for combined increases in \(x\) and \(y\).
+   - \(z : v\): A highly significant positive interaction (\(OR = 27.88\), \(CI: 19.43 \, - \, 40.01\)), suggesting that the joint presence of \(z\) and \(v\) increases the odds by nearly 28 times.
+
+# 4.
