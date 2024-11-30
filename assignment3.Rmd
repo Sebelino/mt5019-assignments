@@ -54,7 +54,7 @@ Result:
 ```{r}
 model_table
 ```
-
+TODO: Ask about whether to list all combinations of interaction terms vs. total ordering of models, where set n is a subset of set n-1
 
 ## 2.
 
@@ -95,7 +95,7 @@ We should select the model that satisfies two criteria:
 * The p-value is greater than 0.05
 
 Based on the table above, we want to select model 6,
-which includes the interaction terms `XZ, XV, ZV, Y`.
+which includes the interaction terms `XV, YV, ZV, XZ, XY, YZ`.
 
 # 3.
 
@@ -114,26 +114,63 @@ its ability to fit the data reasonably well.
 associations
 ```
 
+\[OR_Y = \frac{odds(Y=1)}{odds(Y=0)}\]
 
-1. **Main Effects**:
-   - \(x\), \(z\), and \(y\) have significant **negative associations** with the outcome.
-   - \(v\) has a significant **positive association** with the outcome.
+Critical Factors:
 
-2. **Interaction Effects**:
-   - \(x : z\) and \(x : y\): Significant **negative interactions**, indicating their combined effects reduce the odds of the outcome beyond individual effects.
-   - \(z : v\): A significant **positive interaction**, with their combined effects dramatically increasing the odds of the outcome.
+- **The main effects of \( Y \) (smoking) and \( Z \) (gestational age)** are significant predictors of child survival.
+- **The interaction \( V : Z \) (child survival and gestational age)** has the strongest effect, highlighting the importance of adequate gestational periods for child survival.
 
-Detailed Interpretation:
+Non-significant Effects:
 
-1. **Main Effects**:
-   - \(x\): A significant negative association (\(OR = 0.51\), \(CI: 0.43 \, - \, 0.60\)), meaning a 1-unit increase in \(x\) reduces the odds by 49%.
-   - \(z\): Similarly, \(z\) has a significant negative association (\(OR = 0.47\), \(CI: 0.33 \, - \, 0.66\)), reducing the odds by 53%.
-   - \(y\): A strong negative association (\(OR = 0.12\), \(CI: 0.11 \, - \, 0.13\)), where a 1-unit increase reduces the odds by 88%.
-   - \(v\): A significant positive association (\(OR = 4.93\), \(CI: 4.00 \, - \, 6.09\)), meaning \(v\) increases the odds nearly fivefold.
+- The interactions \( V : Y \), \( X : Z \), and \( Y : Z \) are not statistically significant, suggesting these effects are not strong enough to influence survival outcomes in this dataset.
 
-2. **Interaction Effects**:
-   - \(x : z\): A significant negative interaction (\(OR = 0.79\), \(CI: 0.66 \, - \, 0.94\)), indicating the combined effect of \(x\) and \(z\) decreases odds by 21% beyond their individual effects.
-   - \(x : y\): Another significant negative interaction (\(OR = 0.67\), \(CI: 0.55 \, - \, 0.81\)), reducing odds by 33% for combined increases in \(x\) and \(y\).
-   - \(z : v\): A highly significant positive interaction (\(OR = 27.88\), \(CI: 19.43 \, - \, 40.01\)), suggesting that the joint presence of \(z\) and \(v\) increases the odds by nearly 28 times.
+Implications:
+
+- Reducing smoking among mothers and improving gestational age outcomes are likely to have the most significant positive impact on child survival rates.
+
 
 # 4.
+
+```{r}
+model_table4
+```
+
+Based on the table, AIC is minimized for the model `X, Y, Z`
+(AIC: `1092.757`),
+so we consider it the model that strikes the best balance
+between goodness-of-fit and model complexity.
+
+Next, we calculate the odds ratio and associated confidence intervals
+and p-values of this model's coefficients:
+
+```{r}
+results4
+```
+
+The odds ratio for the smoking risk factor (`y5+`) indicates that mothers
+who smoke 5+ cigarettes per day
+have 65.5% of the odds of child survival compared to mothers who smoke less
+than 5 cigarettes per day, holding all other variables constant.
+Since the odds ratio is less than 1, it suggests a negative association between smoking heavily and child survival.
+
+# 5.
+
+```{r}
+coefficients <- summary(model4)$coefficients
+beta <- coefficients[, "Estimate"]
+se <- coefficients[, "Std. Error"]
+print(beta)
+#print(se)
+```
+
+
+```{r}
+coefficients <- summary(model4_loglinear)$coefficients
+beta <- coefficients[, "Estimate"]
+se <- coefficients[, "Std. Error"]
+print(beta)
+#print(se)
+```
+
+

@@ -43,6 +43,7 @@ main <- function() {
   data21 <- data.frame(use, per, n)
 
   # Convert categorical variables to factors
+  # TODO: is this useless??
   data21$use <- factor(data21$use, levels = c("No", "Yes"))
   data21$per <- factor(data21$per, levels = c("No", "Yes"))
 

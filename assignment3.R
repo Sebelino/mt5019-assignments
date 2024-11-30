@@ -5,21 +5,23 @@ main <- function() {
 
   saturated_model <- glm(n ~ x * y * z * v, family = poisson, data = data)
 
+  # xyzv, xyv, xzv, yzv, xyz, xv, yv, zv, xy, xz, yz, x, y, z, v
   models <- list(
     "xyzv (Saturated)" = saturated_model,
-    "xyz, xyv, xzv, yzv" = glm(n ~ x * y * z + x * y * v + x * z * v + y * z * v, family = poisson, data = data),
-    "xyv, xzv, yzv" = glm(n ~ x * y * v + x * z * v + y * z * v, family = poisson, data = data),
-    "xyz, xv, yv, zv" = glm(n ~ x * y * z + x * y + y * v + z * v, family = poisson, data = data),
-    "yz, yv, zv, x" = glm(n ~ y * z + y * v + z * v + x, family = poisson, data = data),
-    "xz, xv, zv, y" = glm(n ~ x * z + x * y + z * v + y, family = poisson, data = data),
-    "xy, xv, yv, z" = glm(n ~ x * y + x * y + y * v + z, family = poisson, data = data),
-    "xy, xz, yz, v" = glm(n ~ x * y + x * y + y * z + v, family = poisson, data = data),
-    "zv, x, y" = glm(n ~ z * v + x + y, family = poisson, data = data),
-    "yv, x, z" = glm(n ~ y * v + x + y, family = poisson, data = data),
-    "yz, x, v" = glm(n ~ y * z + x + y, family = poisson, data = data),
-    "xv, y, z" = glm(n ~ x * v + y + z, family = poisson, data = data),
-    "xz, y, v" = glm(n ~ x * z + y + v, family = poisson, data = data),
-    "xy, z, v" = glm(n ~ x * y + z + v, family = poisson, data = data),
+    "xyv, xzv, yzv, xyz" = glm(n ~ x * y * v + x * z * v + y * z * v + x * y * z, family = poisson, data = data),
+    "xzv, yzv, xyz" = glm(n ~ x * z * v + y * z * v + x * y * z, family = poisson, data = data),
+    "yzv, xyz, xv" = glm(n ~ y * z * v + x * y * z + x * v, family = poisson, data = data),
+    "xyz, xv, yv, zv" = glm(n ~ x * y * z + x * v + y * v + z * v, family = poisson, data = data),
+    "xv, yv, zv, xz, xy, yz" = glm(n ~ x * v + y * v + z * v + x * z + x * y + y * z, family = poisson, data = data),
+
+    # "xv, zv, xy" = glm(n ~ x*v+z*v+x*y, family = poisson, data = data),
+
+
+    "yv, zv, xz, xy, yz" = glm(n ~ y * v + z * v + x * z + x * y + y * z, family = poisson, data = data),
+    "zv, xz, xy, yz" = glm(n ~ z * v + x * z + x * y + y * z, family = poisson, data = data),
+    "xz, xy, yz, v" = glm(n ~ x * z + x * y + y * z + v, family = poisson, data = data),
+    "xy, yz, v" = glm(n ~ x * y + y * z + v, family = poisson, data = data),
+    "yz, v, x" = glm(n ~ y * z + v + x, family = poisson, data = data),
     "x, y, z, v" = glm(n ~ x + y + z + v, family = poisson, data = data)
   )
 
@@ -45,7 +47,7 @@ main <- function() {
   print(model_table)
 
   # Exercise 3:1.3
-  best_model <- models$"xz, xv, zv, y"
+  best_model <- models$"xv, yv, zv, xz, xy, yz"
 
   summary_model_6 <- summary(best_model)
 
@@ -72,15 +74,25 @@ main <- function() {
 
   # Exercise 3:1.4
   # Fit the model with main effects and interactions
-  saturated_model4 <- glm(v ~ x * y * z, weights = n, data = data, family = binomial)
+  
+  data4 <- data
+  data4$x <- factor(data4$x, labels = c("<30", "30+"))
+  data4$y <- factor(data4$y, labels = c("<5", "5+"))
+  data4$z <- factor(data4$z, labels = c("<260", ">=260"))
+  data4$v <- factor(data4$v, labels = c("No", "Yes"))
+  
+  saturated_model4 <- glm(v ~ x * y * z, weights = n, data = data4, family = binomial)
 
   models4 <- list(
     "xyz (Saturated)" = saturated_model4,
-    "xy, xz, yz" = glm(v ~ x * y + x * z + y * z, family = binomial, weights = n, data = data),
-    "yz, x" = glm(v ~ y * z + x, family = binomial, weights = n, data = data),
-    "xz, y" = glm(v ~ x * z + y, family = binomial, weights = n, data = data),
-    "xy, z" = glm(v ~ x * y + z, family = binomial, weights = n, data = data),
-    "x, y, z" = glm(v ~ x + y + z, family = binomial, weights = n, data = data)
+    "xy, xz, yz" = glm(v ~ x * y + x * z + y * z, family = binomial, weights = n, data = data4),
+    "xy, xz" = glm(v ~ x * y + x * z, family = binomial, weights = n, data = data4),
+    "xy, yz" = glm(v ~ x * y + y * z, family = binomial, weights = n, data = data4),
+    "yz, xz" = glm(v ~ y * z + x * z, family = binomial, weights = n, data = data4),
+    "yz, x" = glm(v ~ y * z + x, family = binomial, weights = n, data = data4),
+    "xz, y" = glm(v ~ x * z + y, family = binomial, weights = n, data = data4),
+    "xy, z" = glm(v ~ x * y + z, family = binomial, weights = n, data = data4),
+    "x, y, z" = glm(v ~ x + y + z, family = binomial, weights = n, data = data4)
   )
 
   # Compare models
@@ -94,17 +106,19 @@ main <- function() {
     anova_res <- anova(model, saturated_model4, test = "LRT")
     model_table4 <- rbind(model_table4, data.frame(
       Model = model_name,
-      Deviance = ifelse(model_name == "xyz (Saturated)", NA, anova_res$Deviance[2]),
-      df = ifelse(model_name == "xyz (Saturated)", NA, anova_res$Df[2]),
-      p_value = ifelse(model_name == "DUMMYxyz (Saturated)", NA, anova_res$`Pr(>Chi)`[2]),
+      Deviance = anova_res$Deviance[2],
+      df = anova_res$Df[2],
+      p_value = ifelse(model_name == "xyz (Saturated)", NA, anova_res$`Pr(>Chi)`[2]),
       AIC = AIC(model)
     ))
   }
 
   print(summary(saturated_model4))
+  
+  model4 <- models4$"x, y, z"
 
   # Extract coefficients
-  coefficients <- summary(model)$coefficients
+  coefficients <- summary(model4)$coefficients
   beta <- coefficients[, "Estimate"]
   se <- coefficients[, "Std. Error"]
 
@@ -114,7 +128,7 @@ main <- function() {
   upper_ci <- exp(beta + 1.96 * se)
 
   # Combine results into a data frame
-  results <- data.frame(
+  results4 <- data.frame(
     Odds_Ratio = odds_ratios,
     Lower_CI = lower_ci,
     Upper_CI = upper_ci,
@@ -122,16 +136,21 @@ main <- function() {
   )
 
   # Print results
-  print(results)
-
-  # Compare models with and without interactions
-  model_main <- glm(v ~ x + y + z, data = data, family = binomial(link = "logit"))
-  AIC(model_main, model)
+  print(results4)
+  
+  # Exercise 3:1.5
+  
+  print(data)
+  model4_loglinear <- glm(n ~ x + y + z + v, family = poisson, data = data)
 
   return(list(
     model_table = model_table,
     best_model = best_model,
-    associations = associations
+    associations = associations,
+    model_table4 = model_table4,
+    results4 = results4,
+    model4 = model4,
+    model4_loglinear = model4_loglinear
   ))
 }
 
