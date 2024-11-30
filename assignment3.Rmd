@@ -32,10 +32,23 @@ The goal is to build log-linear models to understand the associations between th
 
 To generate a table, we follow this process:
 
-1. Read the CSV data
-2. Fit the saturated model
-3. For each combination of interaction terms, fit a model
-4. For each sub-model, calculate deviance, AIC and p-value with respect to the saturated model
+1. Read the CSV data.
+2. Fit the saturated model, \(XYZV\).
+3. For each combination of interaction terms, fit a model. Each combination must include the main effects, i.e. \(X\), \(Y\), \(Z\) and \(V\).
+4. For each sub-model, calculate deviance, Akaike's information criterion (AIC) and p-value with respect to the saturated model.
+
+The deviance is used to calculate the p-value as follows:
+\[\text{p-value} = P(\chi^2_{\text{df}} \geq T_{\chi^2})\]
+where \(T_{\chi^2} = 2(\ell(XYZ) - \ell(M))\) denotes the deviance and \(\text{df}\)
+is the degrees of freedom. \(\ell(M)\) denotes the log-likelihood under model \(M\).
+
+The degrees of freedom is calculated as:
+\[\text{df} = IJKL - \text{number of parameters of }M\]
+where \(IJKL = 2\cdot2\cdot2\cdot2 = 16\) is the number of cells in the contingency table.
+
+The AIC is calculated as:
+\[\text{AIC} = -2\ell(\hat\theta) + 2p\]
+TODO: Explain \(p\)
 
 Result:
 ```{r}

@@ -34,8 +34,8 @@ main <- function() {
     anova_res <- anova(model, saturated_model, test = "LRT")
     model_table <- rbind(model_table, data.frame(
       Model = model_name,
-      Deviance = ifelse(model_name == "xyzv (Saturated)", NA, anova_res$Deviance[2]),
-      df = ifelse(model_name == "xyzv (Saturated)", NA, anova_res$Df[2]),
+      Deviance = anova_res$Deviance[2],
+      df = anova_res$Df[2],
       p_value = ifelse(model_name == "xyzv (Saturated)", NA, anova_res$`Pr(>Chi)`[2]),
       AIC = AIC(model)
     ))
