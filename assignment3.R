@@ -7,8 +7,8 @@ main <- function() {
 
   models <- list(
     "xyzv (Saturated)" = saturated_model,
-    "xyz, xyv, xzv, yzv" = glm(n ~ x * y * z + x * y * v + x * y * v + y * z * v, family = poisson, data = data),
-    "xyv, xzv, yzv" = glm(n ~ x * y * v + x * y * v + y * z * v, family = poisson, data = data),
+    "xyz, xyv, xzv, yzv" = glm(n ~ x * y * z + x * y * v + x * z * v + y * z * v, family = poisson, data = data),
+    "xyv, xzv, yzv" = glm(n ~ x * y * v + x * z * v + y * z * v, family = poisson, data = data),
     "xyz, xv, yv, zv" = glm(n ~ x * y * z + x * y + y * v + z * v, family = poisson, data = data),
     "yz, yv, zv, x" = glm(n ~ y * z + y * v + z * v + x, family = poisson, data = data),
     "xz, xv, zv, y" = glm(n ~ x * z + x * y + z * v + y, family = poisson, data = data),
