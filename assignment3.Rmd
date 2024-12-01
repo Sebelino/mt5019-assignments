@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = FALSE, comment = "")
 
 # Exercise 3:1
 
-## 1. Model selection
+## 1. Model finding
 
 The data comes from a study reported by Wermuth (1976), which was collected in a birth clinic. The dataset includes the following variables:
 
@@ -84,7 +84,7 @@ model_table
 ```
 TODO: Ask about whether to list all combinations of interaction terms vs. total ordering of models, where set n is a subset of set n-1
 
-## 2.
+## 2. Model selection
 
 The table contains the following information which helps us
 select the best model:
@@ -125,7 +125,7 @@ We should select the model that satisfies two criteria:
 Based on the table above, we want to select model 6,
 which includes the interaction terms `XV, YV, ZV, XZ, XY, YZ`.
 
-# 3.
+# 3. Model interpretation
 
 The model we selected looks like this:
 
@@ -158,7 +158,7 @@ Implications:
 - Reducing smoking among mothers and improving gestational age outcomes are likely to have the most significant positive impact on child survival rates.
 
 
-# 4.
+# 4. Logistic model
 
 ```{r}
 model_table4
@@ -189,7 +189,7 @@ msat <- glm(v ~ x * y * z, weights=n, family = binomial, data = data)
 mstep_AIC<-step(msat, direction="backward", trace=TRUE, scope = list(upper = v~x*y*z, lower = v~x+y+z))
 ```
 
-# 5.
+# 5. Logistic-loglinear model relationship
 
 In problem 4, we selected the logistic regression model with the lowest AIC
 value, namely:
@@ -314,6 +314,7 @@ comparison_se <- data.frame(
 )
 print(comparison_se)
 ```
+The biggest difference is smaller than \(10^{-6}\) which is negligible.
 This confirms that the loglinear model matches the logistic model we chose.
 
 Let \(V=1\) mean child survival, \(V=2\) mean child death.
