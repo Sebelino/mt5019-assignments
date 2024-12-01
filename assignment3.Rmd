@@ -202,7 +202,7 @@ data <- data.frame(
   v = c(1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1),
   n = c(40, 315, 9, 50, 6, 24, 459, 4012, 11, 4, 41, 147, 1594, 1, 14, 124)
 )
-model4 <- glm(v ~ x + z + x*y, weights=n, family = binomial(link=logit), data = data)
+model4 <- glm(v ~ x + y + z + x:y, weights=n, family = binomial(link=logit), data = data)
 coefficients <- summary(model4)$coefficients
 beta <- coefficients[, "Estimate"]
 print(beta)
