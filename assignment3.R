@@ -74,13 +74,9 @@ main <- function() {
 
   # Exercise 3:1.4
   # Fit the model with main effects and interactions
-  
+
   data4 <- data
-  data4$x <- factor(data4$x, labels = c("<30", "30+"))
-  data4$y <- factor(data4$y, labels = c("<5", "5+"))
-  data4$z <- factor(data4$z, labels = c("<260", ">=260"))
-  data4$v <- factor(data4$v, labels = c("No", "Yes"))
-  
+
   saturated_model4 <- glm(v ~ x * y * z, weights = n, data = data4, family = binomial)
 
   models4 <- list(
