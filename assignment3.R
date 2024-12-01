@@ -15,8 +15,8 @@ main <- function() {
     "xv, yv, zv, xz, xy, yz" = glm(n ~ x * v + y * v + z * v + x * z + x * y + y * z, family = poisson, data = data),
 
     # "xv, zv, xy" = glm(n ~ x*v+z*v+x*y, family = poisson, data = data),
-
-
+    "xy, xz, xv, yv, zv" = glm(n ~ x * y + x * z + x * v + y * v + z * v, family = poisson, data = data),
+    #
     "yv, zv, xz, xy, yz" = glm(n ~ y * v + z * v + x * z + x * y + y * z, family = poisson, data = data),
     "zv, xz, xy, yz" = glm(n ~ z * v + x * z + x * y + y * z, family = poisson, data = data),
     "xz, xy, yz, v" = glm(n ~ x * z + x * y + y * z + v, family = poisson, data = data),
@@ -110,7 +110,7 @@ main <- function() {
   }
 
   print(summary(saturated_model4))
-  
+
   model4 <- models4$"x, y, z"
 
   # Extract coefficients
@@ -133,9 +133,9 @@ main <- function() {
 
   # Print results
   print(results4)
-  
+
   # Exercise 3:1.5
-  
+
   print(data)
   model4_loglinear <- glm(n ~ x + y + z + v, family = poisson, data = data)
 

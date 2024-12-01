@@ -164,6 +164,166 @@ Implications:
 
 # 4. Logistic model
 
+We now want to fit a logistic model
+where \(V\) (child survival) is a response variable.
+This model would then help us determine
+how the mother's age, smoking habits and gestational
+age affect the chances of the child surviving.
+
+As before, we start by considering the saturated model.
+\(V\) is now a response variable, so the saturated model has the formula:
+\[V \sim X+Y+Z+X:Y+X:Z+Y:Z+X:Y:Z\]
+We then use the `step` function with
+`direction="backward"` to explore
+the model space by removing one interaction
+term at a time.
+This may continue until the main effects model,
+\(V\sim X+Y+Z\), is found.
+
+**TODO: Are we finding the best model incorrectly here as well?**
+
+Output:
+
+```{r}
+data <- read.csv("data_ca3.csv")
+msat <- glm(v ~ x * y * z, weights=n, family = binomial, data = data)
+mstep_AIC<-step(msat, direction="backward", trace=TRUE, scope = list(upper = v~x*y*z, lower = v~x+y+z))
+```
+We see that the model with the lowest AIC (`1092.76`)
+is the main effects model, \(V \sim X+Y+Z\).
+We can compare it to the model
+with the second-lowest AIC value (`1094.22`), i.e. \(V \sim X+Y+Z+X:Z\):
+
+```{r}
+second_simplest_model <- glm(v ~ x + y + z + x:z, weights=n, family = binomial, data = data)
+anova(mstep_AIC, second_simplest_model, test = "LRT")
+```
+
+The more complex model has a slightly lower residual deviance
+(`1084.2` vs. `1084.8`), indicating a marginally better fit
+at the cost of higher model complexity.
+
+\[\text{p-value} = P(T_{\chi^2,1} \geq 0.53951) = 0.4626\]
+where \(T_{\chi^2,1}\) denotes the chi-squared likelihood ratio test statistic
+with 1 degree of freedom.
+The p-value is greater than 0.05, so
+there is no evidence to suggest that the added \(X:Z\) term
+improves the model's fit significantly.
+Hence, we choose the simpler main effects model.
+
+The main effects model has the following coefficients:
+```{r}
+summary(mstep_AIC)
+```
+
+Based on these, we calculate the odds ratio and associated confidence intervals:
+
+```{r}
+# Extract coefficients
+coefficients4 <- summary(mstep_AIC)$coefficients
+beta4 <- coefficients4[, "Estimate"]
+se4 <- coefficients4[, "Std. Error"]
+
+# Compute odds ratios and confidence intervals
+odds_ratios4 <- exp(beta4)
+lower_ci4 <- exp(beta4 - 1.96 * se4)
+upper_ci4 <- exp(beta4 + 1.96 * se4)
+
+# Combine results into a data frame
+results4 <- data.frame(
+  Odds_Ratio = odds_ratios4,
+  Lower_CI = lower_ci4,
+  Upper_CI = upper_ci4,
+  P_Value = coefficients4[, "Pr(>|z|)"]
+)
+print(results4)
+```
+
+## Mother's age
+
+The estimated odds ratio of \(0.627\) for \(X\) is less than 1,
+suggesting that older mothers have lower odds of child survival.
+
+The p-value is \(0.00954\) which is less than \(0.05\).
+Hence, we reject the null hypothesis that the odds ratio is 1.
+We are 95 \% confident that the true odds ratio lies in the
+interval \([0.440, 0.892]\).
+
+This result may make sense intuitively, as
+older mothers may have more health issues that could
+affect the child's survival chances.
+However, 30 is arguably not a high enough threshold
+for classifying mothers based on age-related risks.
+If there were more age categories, or if \(X\)
+were an interval variable, we might have been able to
+make a more nuanced conclusion.
+
+## Gestational age
+
+The estimated odds ratio of \(27.4\) for \(Z\) is greater than 1,
+suggesting that children born after 260 days of gestation have higher odds of survival compared to those born before 260 days.
+The odds are \(27.4\) times higher for children born after 260 days compared to those born before 260 days.
+
+The p-value is much less than 0.05, meaning that we
+reject the null hypothesis that the odds is 1 with strong
+statistical significance.
+We are 95 \% confident that the true odds ratio lies
+in the interval \([19.1,39.3]\).
+
+This result is hardly surprising, as children born prematurely
+may be miscarriages or premature births
+where the vital organs of the infant may be underdeveloped.
+
+## Smoking habits
+
+The estimated odds ratio for the smoking risk factor (\(Y\)) indicates that mothers
+who smoke 5+ cigarettes per day
+have 65.5% of the odds of child survival compared to mothers who smoke less
+than 5 cigarettes per day, holding all other variables constant.
+Since the odds ratio is less than 1, it suggests a negative association between smoking heavily and child survival.
+
+However, the p-value exceeds 0.05, so we cannot conclude that the effect of smoking is statistically significant.
+We are 95 \% confident that the true odds ratio lies in the interval \([0.391, 1.10]\). This interval includes 1, which is consistent with our conclusion regarding statistical significance.
+
+Intuitively, it makes sense that smoking would negatively affect child survival, as smoking is commonly regarded to be associated with
+negative health outcomes in general.
+Hence, the fact that our estimate for the odds ratio is lower
+than 1 makes sense.
+The fact that our result is not statistically significant
+could be due to the small sample size
+or the fact that the effect of smoking on survival
+is mediated or overshadowed by other factors, such as gestational age (\(Z\)) which has a very strong effect.
+
+## Intercept
+
+The estimated odds ratio of \(6.13\) for the intercept means
+that the odds of child survival are \(6.13\) times higher
+than the odds of the child not surviving
+when all explanatory variables are at their baseline levels,
+i.e. when \(X=0\), \(Y=0\), and \(Z=0\).
+This means that a mother who is below 30 years old, smokes less than 5 cigarettes per day, and has a gestational age of less than 260 days has
+\(6.13\) better odds of her child surviving compared to it not surviving.
+
+The associated p-value is much less than 0.05, meaning that we
+reject the null hypothesis that the odds is 1 with strong
+statistical significance.
+We are 95 \% confident that the true odds ratio lies
+in the interval \([4.71, 7.99]\).
+
+It may be challenging to tell whether this
+estimated odds ratio makes sense intuitively.
+While a shorter gestational age (\(Z=0\))
+may be a risk factor, the lack of smoking (\(X=0\))
+and being below 30 years old (\(Y=0\)) might
+be protective factors that offset this risk.
+Most children in this study survived
+(`r sum(data[data$v==1,])` vs. `r sum(data[data$v==0,])`).
+Hence, it does not seem unreasonable
+that one child of this kind dies for each six children
+of the same kind who survive.
+
+**TODO we can prolly remove the below**
+
 ```{r}
 model_table4
 ```
@@ -174,23 +334,8 @@ main effects model \((X, Y, Z)\)
 so we consider it the model that strikes the best balance
 between goodness-of-fit and model complexity.
 
-Next, we calculate the odds ratio and associated confidence intervals
-and p-values of this model's coefficients:
-
 ```{r}
 results4
-```
-
-The odds ratio for the smoking risk factor (`y5+`) indicates that mothers
-who smoke 5+ cigarettes per day
-have 65.5% of the odds of child survival compared to mothers who smoke less
-than 5 cigarettes per day, holding all other variables constant.
-Since the odds ratio is less than 1, it suggests a negative association between smoking heavily and child survival.
-
-```{r}
-data <- read.csv("data_ca3.csv")
-msat <- glm(v ~ x * y * z, weights=n, family = binomial, data = data)
-mstep_AIC<-step(msat, direction="backward", trace=TRUE, scope = list(upper = v~x*y*z, lower = v~x+y+z))
 ```
 
 # 5. Logistic-loglinear model relationship
