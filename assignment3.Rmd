@@ -29,15 +29,23 @@ The data comes from a study reported by Wermuth (1976), which was collected in a
 - **Child survival (\(V\)):** Binary outcome indicating survival (`Yes`/`No`).
 
 Our objective is to find a suitable loglinear model
-which
+which strikes the best balance between goodness-of-fit
+and model complexity.
 
-**TODO: Is this approach correct?**
+```{r}
+#trace <- capture.output(step(mstep3_AIC, direction="backward", trace=TRUE, scope = list(upper = mstep3_AIC, lower = m1)))
+# trace_table <- data.frame(
+#    Formula = grep("n ~ ", trace, value = TRUE)
+# )
+```
 
-To generate a table, we follow this process:
+To find a suitable model, we will generate a set of model by following this process:
 
 1. Read the CSV data.
-2. Fit the saturated model, \((XYZV)\).
-3. For each combination of interaction terms, fit a model. Each combination must include the main effects, i.e. \(X\), \(Y\), \(Z\) and \(V\).
+2. Use the data to fit the saturated model, \((XYZV)\).
+3. Remove interaction terms one by one, starting with the highest-order interactions.
+   For each set of interaction terms, use it to fit a model.
+   Each combination must include the main effects, i.e. \(X\), \(Y\), \(Z\) and \(V\).
 4. For each sub-model, calculate deviance, Akaike's information criterion (AIC) and p-value with respect to the saturated model.
 
 The deviance is used to calculate the p-value as follows:
@@ -49,7 +57,8 @@ The degrees of freedom is calculated as:
 \[\text{df} = IJKL - \text{number of parameters of }M\]
 where \(IJKL = 2\cdot2\cdot2\cdot2 = 16\) is the number of cells in the contingency table.
 
-The AIC of a model \(M\) is given by:
+The AIC of a model \(M\) is a measure of the model's balance between goodness-of-fit
+and model complexity, where a lower AIC value implies a better model. The AIC is given by:
 \[\text{AIC}(M) = -2\ell(M) + 2p\]
 where \(p\) is the number of parameters in \(M\),
 including intercept terms.
@@ -64,7 +73,9 @@ Result:
 ```{r}
 data <- read.csv("data_ca3.csv")
 msat <- glm(n ~ x * y * z * v, family = poisson, data = data)
-mstep_AIC<-step(msat, direction="backward", trace=TRUE, scope = list(upper = n~x*y*z*v, lower = n~x+y+z+v))
+m3 <- step(msat, direction="backward", trace=TRUE, scope = list(upper = n~(x+y+z+v)^4, lower = n~(x+y+z+v)^3))
+m2 <- step(m3, direction="backward", trace=TRUE, scope = list(upper = n~(x+y+z+v)^3, lower = n~(x+y+z+v)^2))
+m1 <- step(m2, direction="backward", trace=TRUE, scope = list(upper = n~(x+y+z+v)^2, lower = n~x+y+z+v))
 ```
 
 TODO: but higher interaction terms should be
@@ -435,6 +446,8 @@ print(comparison)
 The biggest difference is smaller than \(10^{-10}\).
 This difference is negligible and likely due to loss of numerical precision
 when the values were computed.
+
+TODO: check significance p-value of models selected by step
 
 ## Standard errors
 Calculating the standard errors yields similar results.
