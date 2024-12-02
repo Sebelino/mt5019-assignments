@@ -305,7 +305,15 @@ In other words, higher doses are associated with a significantly higher risk of 
 
 ## 3. Covariance Matrix and Confidence Interval
 
-### Covariance matrix:
+### Covariance matrix
+
+The covariance matrix expresses
+the variances of the model coefficients
+\(\beta_0\) and \(\beta_1\)
+and their covariances.
+We can extract these directly from the
+model using `vcov`, which yields:
+
 ```{r}
 cov_matrix
 ```
@@ -314,20 +322,30 @@ represents the variance of the intercept and the log dose,
 respectively.
 The off-diagonal elements represent the covariance.
 This value indicates the degree to which the intercept and slope vary together.
-The off-diagonal values are not zero, meaning that
-they are not independent.
+The off-diagonal values are not zero, implying that
+the parameters are not independent.
 
-The correlation coefficient is given by:
-\[\text{Correlation} = \frac{\text{Covariance}}{\text{Standard Error of Intercept} \times \text{Standard Error of Slope}}\]
+We can study this relationship more thoroughly
+using the correlation coefficient.
+It is given by:
+\[
+\rho = \frac{\text{Cov}(\beta_0,\beta_1)}{\sqrt{\text{Var}(\beta_0)\cdot \text{Var}(\beta_1) }}
+\]
+
+Plugging in the values above, we obtain the
+following value for \(\rho\):
 
 ```{r}
 correlation
 ```
 A correlation of approximately 
-0.649 indicates a moderate positive correlation between the intercept and slope estimates.
-This suggests that the intercept and slope estimates are not completely independent; as one estimate increases, the other tends to increase as well. In practical terms, this moderate correlation is not unusual in logistic regression and does not typically indicate an issue with the model. However, it is useful to be aware of this correlation, especially if we are interpreting the parameters separately.
+\(`r round(correlation,2)`\)
+indicates a moderate positive correlation between
+the intercept and slope estimates.
+This suggests that the intercept and slope estimates are not completely independent; as one estimate increases, the other tends to increase as well.
+This is consistent with our conclusion earlier.
 
-### Confidence interval for the intercept and slope parameter:
+### Confidence interval for the parameters
 ```{r}
 conf_intervals
 ```
