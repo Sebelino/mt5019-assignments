@@ -427,34 +427,39 @@ against the alternative hypothesis:
 $$
 H_1: \beta_1 \neq 0
 $$
-Numerically computed estimate for \(\beta_1\):
+
+Recall that the estimate for \(\beta_1\) we
+found earlier was:
 ```{r}
 beta1
 ```
-Numerically computed standard error for \(\beta_1\):
+The associated estimated standard error for \(\beta_1\) is:
 ```{r}
 se_beta1
 ```
 
 The Wald test statistic (squared variant) is given by:
-\[t_{W^2} = \frac{(\hat\beta_1-0)^2}{\operatorname{se}(\hat\beta_1)^2}
+\[T_{W^2} = \frac{(\hat\beta_1-0)^2}{\operatorname{se}(\hat\beta_1)^2}
 =\frac{\hat\beta_1^2}{\operatorname{se}(\hat\beta_1)^2}
 \]
 with realization:
 \[t_{W^2} =\frac{0.5204^2}{0.08502^2}\]
 
-where \( \hat{\beta}_1 \) is the estimated coefficient and \( \operatorname{se}(\hat{\beta}_1) \) is its standard error. The test statistic follows a \(\chi^2(1)\) distribution under the null hypothesis.
+where \( \hat{\beta}_1 \) is the estimated coefficient and \( \operatorname{se}(\hat{\beta}_1) \) is its standard error. The test statistic follows a \(\chi^2(q)\) distribution under the null hypothesis, where \(q=1\) is the degrees of freedom,
+which is equal to the number of parameter constraints under \(H_0\).
 
 Numerically computed value for the Wald statistic:
 ```{r}
 wald_statistic
 ```
 
+We can calculate the p-value from the value of the statistic by the relationship:
+
 \[
 p\text{-value} = P(T_{W^2} \geq 37.457)
 \]
 
-Numerically computed p-value:
+which yields the following numerically computed p-value:
 ```{r}
 p_value24
 ```
