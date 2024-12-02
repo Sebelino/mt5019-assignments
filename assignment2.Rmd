@@ -38,6 +38,7 @@ Coefficients of the model:
 ```{r}
 coef(model21)
 ```
+We will discuss these estimates below.
 
 ### Intercept parameter
 The estimate for \(\beta_0\) is \(\hat\beta_0\approx -0.58\).
@@ -170,7 +171,7 @@ The estimate for \( \gamma_1 \) is the difference in log-odds of flossing betwee
 \]
 
 Numerical result:
-```{r}
+```{r,echo=TRUE,results='show'}
 odds_periodontitis <- 22 / 148
 odds_no_periodontitis <- 75 / 265
 log_odds_ratio <- log(odds_periodontitis / odds_no_periodontitis)
@@ -207,38 +208,51 @@ cat("
 
 ## 1. Estimate risk and log-odds
 
-For each dose, the probability of developing a tumor is given by:
+Let \(n_{1d}\) denote the observed number of mice with tumors at log-dose \(d\).
+Let \(n_{2d}\) denote the observed number of mice with no tumor at log-dose \(d\).
+
+For each log-dose \(d\), the estimated risk of developing a tumor is given by the proportion of mice with tumors at that log-dose level, i.e.:
 
 \[
-\text{Risk} = \frac{\text{Tumor}}{\text{Total}}
+\hat\pi_d = \frac{n_{1d}}{n_{+d}}
 \]
-where \textit{Total} is the sum of "Tumor" and "No Tumor" counts for each dose level.
+where \(n_{+d} = n_{1d}+n_{2d}\).
 
-\subsection*{Odds of Tumor for Each Dose}
-The odds for each dose level can be calculated as:
+The estimated log-odds for each log-dose level can be calculated as:
 \[
-\text{Log-Odds} = \log \left( \frac{\text{Tumor} / \text{Total}}{1 - (\text{Tumor} / \text{Total})} \right)
+\text{Log-Odds} = \ln \left( \frac{\pi_{1d}}{1 - \pi_{1d}} \right)
 \]
 
-We now plot the risk against the log-dose and log-odds against the log-dose:
+We exponentiate the log-dose to obtain the actual quantity
+of the dose.
+We end up with the following estimated risks
+and log-odds:
+
+```{r}
+data22
+```
+
+Plot of the risk against the log-dose:
 
 ```{r, align='center'}
 plot_risk(log_dose, risk)
 ```
 
-This plot shows the probability (or risk) of developing a tumor at different log(dose) levels.
-As the log(dose) increases, the risk of developing a tumor also increases. This suggests a positive association between dose and tumor risk; higher doses are associated with a greater likelihood of developing a tumor.
-The increase in risk appears to follow a smooth trend, becoming especially steep for higher log(dose) values.
+This plot shows the risk of developing a tumor at different log-dose levels.
+As the log-dose increases, the risk of developing a tumor also increases. This suggests a positive association between dose and tumor risk: higher doses are associated with a greater likelihood of developing a tumor.
+The increase in risk appears to follow a smooth trend, becoming especially steep for higher log-dose values.
+
+Next, we plot the log-odds against the log-dose:
 
 ```{r, align='center'}
 plot_odds(log_dose, log_odds)
 ```
 
-This plot shows the relationship between log(dose) and the log-odds of developing a tumor.
-The log-odds appear to increase in an approximately linear fashion as log(dose) increases. The points follow a roughly straight line, which is a key indicator of a linear relationship.
-This linear trend in the log-odds plot suggests that a logistic regression model may be appropriate for modeling the relationship between log(dose) and the probability of developing a tumor. In logistic regression, we assume that the log-odds of the outcome is linearly related to the explanatory variable, and this plot supports that assumption.
+This plot shows the relationship between the log-dose and the log-odds of developing a tumor.
+The log-odds appear to increase in an approximately linear fashion as log-dose increases. The points follow a roughly straight line, which is a key indicator of a linear relationship.
+This linear trend in the log-odds plot suggests that a logistic regression model may be appropriate for modeling the relationship between log-dose and the probability of developing a tumor. In logistic regression, we assume that the log-odds of the outcome is linearly related to the explanatory variable, and this plot supports that assumption.
 
-Since the log-odds plot shows a roughly linear trend with log(dose), a logistic regression model seems appropriate for these data. The linearity in the log-odds plot indicates that the assumption of logistic regression (a linear relationship between log-odds and the predictor) is likely met. This model would allow us to quantify the effect of dose on the probability of developing a tumor.
+Since the log-odds plot shows a roughly linear trend with log-dose, a logistic regression model seems appropriate for these data. This model would allow us to quantify the effect of dose on the probability of developing a tumor.
 
 ## 2. Fit a Logistic Regression Model
 

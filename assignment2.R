@@ -66,6 +66,7 @@ main <- function() {
   tumor <- c(1, 2, 4, 9, 12, 32)
   no_tumor <- c(17, 17, 24, 23, 16, 8)
   total <- tumor + no_tumor
+  dose <- exp(log_dose)
 
   # Calculate risk (probability) for each dose
   risk <- tumor / total
@@ -81,7 +82,7 @@ main <- function() {
 
   # Exercise 2:2.2
   # Create data frame
-  data22 <- data.frame(log_dose, tumor, no_tumor, total)
+  data22 <- data.frame(dose, log_dose, tumor, no_tumor, total, risk, log_odds)
   # Fit logistic regression model
   model22 <- glm(cbind(tumor, no_tumor) ~ log_dose, family = binomial(link = "logit"), data = data22)
   # Summary of the model
@@ -144,6 +145,7 @@ main <- function() {
     log_dose = log_dose,
     log_odds = log_odds,
     risk = risk,
+    data22 = data22,
     model22 = model22,
     cov_matrix = cov_matrix,
     correlation = correlation,
