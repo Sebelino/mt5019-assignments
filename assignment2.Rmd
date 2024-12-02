@@ -352,23 +352,70 @@ the intercept and slope estimates.
 This suggests that the intercept and slope estimates are not completely independent; as one estimate increases, the other tends to increase as well.
 This is consistent with our conclusion earlier.
 
-### Confidence interval for the parameters
+### Confidence interval for the intercept
+Next, we want to find a likely range for our
+estimates of the parameter values.
+A 95 \% confidence interval for \(\beta_0\) is given by:
 ```{r}
-conf_intervals
+conf_intervals["(Intercept)",]
 ```
 
-This interval tells us that we are 95% confident that the true value of the intercept parameter \(\beta_0\) lies between 0.1822 and 1.1918.
-In terms of log-odds, the intercept represents the log-odds of developing a tumor when \(\log(\text{dose}) = 0\).
+The results show that we are 95% confident that the true value of the intercept parameter \(\beta_0\) lies between 
+approximately
+`r round(conf_intervals["(Intercept)",]["2.5 %"],2)`
+and
+`r round(conf_intervals["(Intercept)",]["97.5 %"],2)`.
+The intercept \(\beta_0\)
+represents log-odds, so we can find a
+confidence interval for the corresponding odds by
+exponentiating both limits of the interval, yielding:
+```{r}
+exp(conf_intervals["(Intercept)",])
+```
+This tells us that at a log-dose of zero (i.e. a dose of 1),
+the true value of the odds of developing a tumor is
+between approximately
+`r round(exp(conf_intervals["(Intercept)",]["2.5 %"]),2)`
+and
+`r round(exp(conf_intervals["(Intercept)",]["97.5 %"]),2)`
+with 95 \% confidence.
 
-This interval tells us that we are 95% confident that the true value of the slope parameter \(\beta_1\) lies between 0.3537 and 0.6870.
-The slope represents the change in log-odds of developing a tumor for each one-unit increase in \(\log(\text{dose})\).
+### Confidence interval for the slope
+A 95 \% confidence interval for \(\beta_1\) is given by:
+```{r}
+conf_intervals["log_dose",]
+```
 
-### Confidence interval for the tumor risk at dose 0.25:
+The results show that we are 95% confident that the true value of the slope parameter \(\beta_1\) lies between 0.35 and 0.69.
+The slope represents the change in log-odds of developing a tumor for each one-unit increase in log-dose.
+We can find
+a confidence interval for the corresponding odds ratio by exponentiating
+both limits of the interval, yielding:
+```{r}
+exp(conf_intervals["log_dose",])
+```
+This tells that for each one-unit increase in log-dose, the odds of developing a tumor are between approximately 1.42 and 1.99 times higher with 95% confidence.
+This is consistent with our earlier findings:
+an increase in dosage is associated with higher chance of developing a tumor.
+
+### Confidence interval at dose 0.25
+
+We will now use the model to predict the risk of developing a tumor at a log-dose of -1.39.
+Using on our formula for the tumor risk earlier,
+this probability can be expressed as:
+
+\[
+\hat{p} = \widehat{P}(Y = 1 | X=-1.39) = \frac{1}{1 + e^{-\left(\hat\beta_0 + \hat\beta_1 \cdot (-1.39)\right)}}
+\]
+
+Since we also know the standard error, we can obtain
+the limits of the confidence interval for the tumor risk:
+
 ```{r}
 probability_ci
 ```
-This interval tells us that we are 95% confident that the true probability of developing a tumor at \(\log(\text{dose}) = -1.39\) lies between **0.394** (39.4%) and **0.588** (58.8%). 
-Since this interval is relatively wide, it reflects some uncertainty in the exact probability estimate but still suggests a moderate to high likelihood of tumor development at this dose level.
+This interval tells us that we are 95% confident that the true probability of developing a tumor at \(\log(\text{dose}) = -1.39\) lies between approximately 0.39 (39%) and 0.59 (59%).
+Since this interval is fairly wide, it reflects some uncertainty in the exact probability estimate but still suggests a moderate to high likelihood of tumor development at this dose level.
 
 ## 4. Wald Test
 
