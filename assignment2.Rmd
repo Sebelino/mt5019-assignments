@@ -185,6 +185,26 @@ This simplification relies on the inherent symmetry of odds ratios in a 2×2 tab
 
 # Exercise 2:2
 
+We are given data of 165 mice where various doses of a particular drug (bensopyren) is administered over a 10 month period. The objective is to examine the count of mice that has developed lung tumor during this timeframe.
+
+```{r, results='asis'}
+cat("
+\\[
+\\begin{array}{|c|c|c|c|c|c|c|c|c|}
+\\hline
+\\text{log(dose)} & -7.60 & -6.22 & -4.60 & -3.00 & -1.39 & 0.92 & \\Sigma \\\\
+\\hline
+\\text{Tumor} & 1 & 2 & 4 & 9 & 12 & 32 & 60 \\\\
+\\hline
+\\text{No tumor} & 17 & 17 & 24 & 23 & 16 & 8 & 105 \\\\
+\\hline
+\\Sigma & 18 & 19 & 28 & 32 & 28 & 40 & 165 \\\\
+\\hline
+\\end{array}
+\\]
+")
+```
+
 ## 1. Estimate risk and log-odds
 
 For each dose, the probability of developing a tumor is given by:
@@ -223,12 +243,29 @@ Since the log-odds plot shows a roughly linear trend with log(dose), a logistic 
 ## 2. Fit a Logistic Regression Model
 
 We now fit a logistic regression model to the data
-to estimate the relationship between does and
+to estimate the relationship between the dose and
 the log-odds of developing a tumor.
+
+```{r, results='asis'}
+cat("
+\\[
+P(Y = 1 | X) = \\frac{1}{1 + e^{-\\left(\\beta_0 + \\beta_1X\\right)}}
+\\]
+\\begin{align*}
+\\text{Where:} & \\\\
+P(Y = 1 | X) & \\text{ is the probability of the dependent variable } Y \\text{ being 1, given the predictor } X. \\\\
+\\beta_0 & \\text{ is the intercept term.} \\\\
+\\beta_1 & \\text{ is the coefficient of the predictor variable.} \\\\
+X & \\text{ is the predictor variable, log(dose).}
+\\end{align*}
+")
+```
 
 \(\hat\beta_0\): This represents the log-odds of developing a tumor when the log(dose) is zero. Although it has a mathematical interpretation, it may not have a direct practical meaning in this context, especially if log(dose) = 0 is outside the range of observed values.
 
 \(\hat\beta_1\): The slope tells us how the log-odds of developing a tumor change with each unit increase in log(dose). If \(\hat\beta_1\) is positive, this implies that as log(dose) increases, the log-odds of developing a tumor also increase, indicating a higher probability of tumor development at higher doses.
+
+We obtain the estimates of the intercept and slope parameter as follows:
 
 ```{r}
 coef(model22)
@@ -238,17 +275,18 @@ By exponentiating, we obtain the odds:
 ```{r}
 exp(coef(model22)["(Intercept)"])
 ```
-This means that, at a log_dose of zero, the odds of developing a tumor are approximately 1.99.
+This means that, at a \(log(dose)\) of zero, the odds of developing a tumor are approximately 1.99.
 
 ```{r}
 exp(coef(model22)["log_dose"])
 ```
-The positive slope of 0.5204 indicates a strong association between increasing dose levels and a higher likelihood of tumor development.
-The odds value of \(1.682\) means that for each one-unit increase in log_dose, the odds of developing a tumor increase by approximately 68.2%. In other words, higher doses are associated with a significantly higher risk of developing a tumor.
+The positive slope of \(0.5204\) indicates a strong association between increasing dose levels and a higher likelihood of tumor development.
+The odds value of \(1.682\) means that for each one-unit increase in log(dose), the odds of developing a tumor increase by approximately 68.2%. 
+In other words, higher doses are associated with a significantly higher risk of developing a tumor.
 
 ## 3. Covariance Matrix and Confidence Interval
 
-Covariance matrix:
+### Covariance matrix:
 ```{r}
 cov_matrix
 ```
@@ -270,22 +308,22 @@ A correlation of approximately
 0.649 indicates a moderate positive correlation between the intercept and slope estimates.
 This suggests that the intercept and slope estimates are not completely independent; as one estimate increases, the other tends to increase as well. In practical terms, this moderate correlation is not unusual in logistic regression and does not typically indicate an issue with the model. However, it is useful to be aware of this correlation, especially if we are interpreting the parameters separately.
 
-Confidence interval for the intercept and slope parameter:
+### Confidence interval for the intercept and slope parameter:
 ```{r}
 conf_intervals
 ```
 
 This interval tells us that we are 95% confident that the true value of the intercept parameter \(\beta_0\) lies between 0.1822 and 1.1918.
-In terms of log-odds, the intercept represents the log-odds of developing a tumor when log(dose) = 0.
+In terms of log-odds, the intercept represents the log-odds of developing a tumor when \(\log(\text{dose}) = 0\).
 
 This interval tells us that we are 95% confident that the true value of the slope parameter \(\beta_1\) lies between 0.3537 and 0.6870.
-The slope represents the change in log-odds of developing a tumor for each one-unit increase in log(dose).
+The slope represents the change in log-odds of developing a tumor for each one-unit increase in \(\log(\text{dose})\).
 
-Confidence interval for the tumor risk at dose 0.25:
+### Confidence interval for the tumor risk at dose 0.25:
 ```{r}
 probability_ci
 ```
-This interval tells us that we are 95% confident that the true probability of developing a tumor at log(dose) = -1.39 lies between 0.394 (39.4%) and 0.588 (58.8%).
+This interval tells us that we are 95% confident that the true probability of developing a tumor at \(\log(\text{dose}) = -1.39\) lies between **0.394** (39.4%) and **0.588** (58.8%). 
 Since this interval is relatively wide, it reflects some uncertainty in the exact probability estimate but still suggests a moderate to high likelihood of tumor development at this dose level.
 
 ## 4. Wald Test
