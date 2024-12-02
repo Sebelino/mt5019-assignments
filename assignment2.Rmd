@@ -258,10 +258,10 @@ Since the log-odds plot shows a roughly linear trend with log-dose, a logistic r
 
 We now fit a logistic regression model to the data
 to estimate the relationship between the log-dose (\(X\)) and the log-odds of developing a tumor (\(Y=1\)).
+We can represent this relationship as:
 
-\[
-P(Y = 1 | X=x) = \frac{1}{1 + e^{-\left(\beta_0 + \beta_1 x\right)}}
-\]
+\[\text{logit} P(Y = 1 | X=x) = \beta_0+\beta_1 x\]
+
 where
 
 * \(Y\) is a binary response variable where \(Y=0\) means no tumor,
@@ -271,6 +271,13 @@ where
 given a log-dose of \(x\),
 * \(\beta_0\) is the intercept parameter,
 * \(\beta_1\) is the slope parameter.
+
+Equivalently, we can express the corresponding risk by
+transforming the equality into:
+
+\[
+P(Y = 1 | X=x) = \frac{1}{1 + e^{-\left(\beta_0 + \beta_1 x\right)}}
+\]
 
 \(\hat\beta_0\) denotes our estimate of the intercept parameter. It represents the log-odds of developing a tumor when the log-dose is zero \(X=0\). Although it has a mathematical interpretation, it is possible that it does not have a direct practical meaning in this context, especially if \(\log(\text{dose}) = 0\) (i.e. \(\text{dose}=1\)) is outside the range of observed values.
 
