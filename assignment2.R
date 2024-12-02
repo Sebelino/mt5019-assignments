@@ -125,15 +125,16 @@ main <- function() {
 
   # Exercise 2:2.5
   # Calculate variances for different scaling factors
+  variance_1 <- scale_and_fit(1, log_dose, tumor, no_tumor)
   variance_10 <- scale_and_fit(10, log_dose, tumor, no_tumor)
   variance_100 <- scale_and_fit(100, log_dose, tumor, no_tumor)
   variance_1000 <- scale_and_fit(1000, log_dose, tumor, no_tumor)
 
   # Combine results into a data frame for comparison
   variance_results <- data.frame(
-    Scale_Factor = c(10, 100, 1000),
-    Intercept_Variance = c(variance_10[1], variance_100[1], variance_1000[1]),
-    Slope_Variance = c(variance_10[2], variance_100[2], variance_1000[2])
+    Scale_Factor = c(1, 10, 100, 1000),
+    Intercept_Variance = c(variance_1[1], variance_10[1], variance_100[1], variance_1000[1]),
+    Slope_Variance = c(variance_1[2], variance_10[2], variance_100[2], variance_1000[2])
   )
 
   print(variance_results)

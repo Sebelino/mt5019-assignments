@@ -474,35 +474,35 @@ a tumor.
 
 We aim to investigate the relationship between the sample size and the variances of parameter estimates in logistic regression. Specifically, we scale the sample size by factors of 10, 100, and 1000,
 train a new model on each sample size,
-compare the square of the standard errors (i.e. variances)
-of the intercept and slope parameters.
+extract the standard errors of both parameters,
+and finally
+compare the square of the standard errors (i.e. variances).
 
 Numerically computed results:
 ```{r}
 variance_results
 ```
 
-**Intercept Variance**
+The intercept variance is approximately:
 
-- At a scale factor of 10: \( 6.63336 \times 10^{-3} \),
-- At a scale factor of 100: \( 6.63336 \times 10^{-4} \),
-- At a scale factor of 1000: \( 6.33359 \times 10^{-5} \).
+- Unscaled: \( 6.63 \times 10^{-2} \),
+- At a scale factor of 10: \( 6.63 \times 10^{-3} \),
+- At a scale factor of 100: \( 6.63 \times 10^{-4} \),
+- At a scale factor of 1000: \( 6.63 \times 10^{-5} \).
 
-The variance reduces approximately by a factor of 10 for each scale increase.
+We see that the variance for the intercept decreases by a factor of 10 for each scale increase.
 
-**Slope Variance**
+The slope variance is approximately:
 
-- At a scale factor of 10: \( 7.22009 \times 10^{-4} \),
-- At a scale factor of 100: \( 7.22009 \times 10^{-5} \),
-- At a scale factor of 1000: \( 7.22909 \times 10^{-6} \).
+- Unscaled: \( 7.22 \times 10^{-3} \),
+- At a scale factor of 10: \( 7.22 \times 10^{-4} \),
+- At a scale factor of 100: \( 7.22 \times 10^{-5} \),
+- At a scale factor of 1000: \( 7.22 \times 10^{-6} \).
 
 Similarly, the slope variance decreases by a factor of 10 with each scale increase, maintaining consistency with the intercept variance.
 
 The table demonstrates that as the sample size increases (by scaling the counts), the variances of both the intercept and slope parameters decrease significantly.
 Multiplying by 10 causes the variance to be divided by 10.
-
-**Conclusion**
-
 The results demonstrate that both intercept and slope variances decrease proportionally to the increase in the sample size (scale factor). This observation aligns with the theoretical relationship:
 \[
 \text{Var}(\hat{\beta}) \propto \frac{1}{n}
