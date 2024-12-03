@@ -1,65 +1,104 @@
+model_stats <- function(formula) {
+  model <- glm(formula, family = poisson, data = data)
+  return(list(
+    Deviance = summary(model)$deviance,
+    df = summary(model)$df,
+    AIC = AIC(model)
+  ))
+}
+
 main <- function() {
   # Exercise 3:1.1, 3:1.2
-  # Load the data
   data <- read.csv("data_ca3.csv")
 
-  saturated_model <- glm(n ~ x * y * z * v, family = poisson, data = data)
+  msat <- glm(n ~ x * y * z * v, family = poisson, data = data)
+  cat("Running step from (x+y+z+v)^4 -> (x+y+z+v)^3\n")
+  m3 <- step(msat, scope = list(upper = n ~ (x + y + z + v)^4, lower = n ~ (x + y + z + v)^3), direction = "backward", trace = TRUE,)
+  cat("Running step from (x+y+z+v)^3 -> (x+y+z+v)^2\n")
+  m2 <- step(m3, scope = list(upper = n ~ (x + y + z + v)^3, lower = n ~ (x + y + z + v)^2), direction = "backward", trace = TRUE)
+  cat("Running step from (x+y+z+v)^2 -> x+y+z+v\n")
+  m1 <- step(m2, scope = list(upper = n ~ (x + y + z + v)^2, lower = n ~ x + y + z + v), direction = "backward", trace = TRUE)
 
-  # xyzv, xyv, xzv, yzv, xyz, xv, yv, zv, xy, xz, yz, x, y, z, v
-  models <- list(
-    "xyzv (Saturated)" = saturated_model,
-    "xyv, xzv, yzv, xyz" = glm(n ~ x * y * v + x * z * v + y * z * v + x * y * z, family = poisson, data = data),
-    "xzv, yzv, xyz" = glm(n ~ x * z * v + y * z * v + x * y * z, family = poisson, data = data),
-    "yzv, xyz, xv" = glm(n ~ y * z * v + x * y * z + x * v, family = poisson, data = data),
-    "xyz, xv, yv, zv" = glm(n ~ x * y * z + x * v + y * v + z * v, family = poisson, data = data),
-    "xv, yv, zv, xz, xy, yz" = glm(n ~ x * v + y * v + z * v + x * z + x * y + y * z, family = poisson, data = data),
-
-    # "xv, zv, xy" = glm(n ~ x*v+z*v+x*y, family = poisson, data = data),
-    "xy, xz, xv, yv, zv" = glm(n ~ x * y + x * z + x * v + y * v + z * v, family = poisson, data = data),
-    #
-    "yv, zv, xz, xy, yz" = glm(n ~ y * v + z * v + x * z + x * y + y * z, family = poisson, data = data),
-    "zv, xz, xy, yz" = glm(n ~ z * v + x * z + x * y + y * z, family = poisson, data = data),
-    "xz, xy, yz, v" = glm(n ~ x * z + x * y + y * z + v, family = poisson, data = data),
-    "xy, yz, v" = glm(n ~ x * y + y * z + v, family = poisson, data = data),
-    "yz, v, x" = glm(n ~ y * z + v + x, family = poisson, data = data),
-    "x, y, z, v" = glm(n ~ x + y + z + v, family = poisson, data = data)
+  # Manually entered from the output of running `step` repeatedly
+  loglinear_formulas <- list(
+    # Four-way formulas
+    "n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v + x:y:z + x:y:v + x:z:v + y:z:v + x:y:z:v",
+    # Three-way formulas
+    "n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v + x:y:z + x:y:v + x:z:v + y:z:v",
+    # 13-dimensional candidate set
+    "n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v + x:y:v + x:z:v + y:z:v", # - x:y:z, lowest AIC
+    "n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v + x:y:z + x:y:v + x:z:v",
+    "n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v + x:y:z + x:z:v + y:z:v",
+    "n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v + x:y:z + x:y:v + y:z:v",
+    # 12-dimensional candidate set
+    "n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v + x:y:v + x:z:v", # - y:z:v, lowest AIC
+    "n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v + x:y:v + y:z:v",
+    "n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v + x:z:v + y:z:v",
+    # 11-dimensional candidate set
+    "n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v + x:y:v", # - x:z:v, lowest AIC
+    "n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v + x:z:v",
+    # Two-way formulas
+    "n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v",
+    # 9-dimensional candidate set
+    "n ~ x + y + z + v + x:y + x:z + x:v + y:v + z:v", # - y:z, lowest AIC (best model)
+    "n ~ x + y + z + v + x:y + x:z + y:z + x:v + z:v",
+    "n ~ x + y + z + v + x:y + y:z + x:v + y:v + z:v",
+    "n ~ x + y + z + v + x:y + x:z + y:z + y:v + z:v",
+    "n ~ x + y + z + v + x:z + y:z + x:v + y:v + z:v",
+    "n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v",
+    # 8-dimensional candidate set (all these suck)
+    "n ~ x + y + z + v + x:y + x:v + y:v + z:v",
+    "n ~ x + y + z + v + x:y + x:z + x:v + z:v",
+    "n ~ x + y + z + v + x:y + x:z + y:v + z:v",
+    "n ~ x + y + z + v + x:z + x:v + y:v + z:v",
+    "n ~ x + y + z + v + x:y + x:z + x:v + y:v"
   )
+  loglinear_models <- list()
+  for (formula in loglinear_formulas) {
+    loglinear_models[[formula]] <- glm(formula, family = poisson, data = data)
+  }
 
-  # Compare models
   model_table <- data.frame(
     Model = character(), Deviance = numeric(), df = numeric(),
     p_value = numeric(), AIC = numeric()
   )
 
-  for (model_name in names(models)) {
-    model <- models[[model_name]]
-    anova_res <- anova(model, saturated_model, test = "LRT")
+  for (model in loglinear_models) {
+    is_saturated_model = length(coef(model)) == length(coef(msat)) && all(coef(model) == coef(msat))
+    anova_res <- anova(model, msat, test = "LRT")
+    p_value <- anova_res$`Pr(>Chi)`[2]
     model_table <- rbind(model_table, data.frame(
-      Model = model_name,
+      Model = model$formula,
+      AIC = AIC(model),
       Deviance = anova_res$Deviance[2],
       df = anova_res$Df[2],
-      p_value = ifelse(model_name == "xyzv (Saturated)", NA, anova_res$`Pr(>Chi)`[2]),
-      AIC = AIC(model)
+      p_value = ifelse(is_saturated_model, NA, p_value)
     ))
   }
+  model_table$Model <- format(model_table$Model, justify="left")
+  model_table$p_value <- ifelse(
+    model_table$p_value < 0.001,
+    format(model_table$p_value, scientific=TRUE, digits=3),
+    format(round(model_table$p_value,3), scientific=FALSE)
+  )
 
   # Print results
   print(model_table)
 
   # Exercise 3:1.3
-  best_model <- models$"xv, yv, zv, xz, xy, yz"
-
-  summary_model_6 <- summary(best_model)
+  best_model_row <- model_table[which.min(model_table$AIC),]
+  best_model_formula <- trimws(best_model_row$Model)
+  best_model <- loglinear_models[[best_model_formula]]
 
   # Extract coefficients and standard errors
-  coefficients <- summary_model_6$coefficients
-  beta <- coefficients[, "Estimate"]
-  se <- coefficients[, "Std. Error"]
+  coefficients <- summary(best_model)$coefficients
+  best_model_estimates <- coefficients[, "Estimate"]
+  best_model_se <- coefficients[, "Std. Error"]
 
   # Compute odds ratios and confidence intervals
-  odds_ratios <- exp(beta)
-  lower_ci <- exp(beta - 1.96 * se)
-  upper_ci <- exp(beta + 1.96 * se)
+  odds_ratios <- exp(best_model_estimates)
+  lower_ci <- exp(best_model_estimates - 1.96 * best_model_se)
+  upper_ci <- exp(best_model_estimates + 1.96 * best_model_se)
 
   # Combine results into a data frame for interpretation
   associations <- data.frame(

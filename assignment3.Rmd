@@ -32,13 +32,6 @@ Our objective is to find a suitable loglinear model
 which strikes the best balance between goodness-of-fit
 and model complexity.
 
-```{r}
-#trace <- capture.output(step(mstep3_AIC, direction="backward", trace=TRUE, scope = list(upper = mstep3_AIC, lower = m1)))
-# trace_table <- data.frame(
-#    Formula = grep("n ~ ", trace, value = TRUE)
-# )
-```
-
 To find a suitable model, we will generate a set of model by following this process:
 
 1. Read the CSV data.
@@ -60,14 +53,21 @@ where \(IJKL = 2\cdot2\cdot2\cdot2 = 16\) is the number of cells in the continge
 The AIC of a model \(M\) is a measure of the model's balance between goodness-of-fit
 and model complexity, where a lower AIC value implies a better model. The AIC is given by:
 \[\text{AIC}(M) = -2\ell(M) + 2p\]
-where \(p\) is the number of parameters in \(M\),
+where \(-2\ell(M)\) is the deviance and \(p\) is the number of parameters in \(M\),
 including intercept terms.
 
-We can use the function `step` to find the model with the lowest AIC.
+We can use the function `step` to find a model with a low AIC.
+We do this by starting with the saturated model and then removing 
 Since we are supposed to find this model by
 starting with the saturated model (`x*y*z`) and then
 removing (but not adding)
 interaction terms, we must run `step` with `direction="backward"`.
+
+greedy algorithm:
+
+1. Starting with the saturated model, remove the four-way interaction term and use the remaining terms to construct a new model, `m3`.
+2. 
+Verify that the selected model has a low enough deviance.
 
 Result:
 ```{r}
