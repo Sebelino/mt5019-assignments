@@ -14,10 +14,13 @@ main <- function() {
   msat <- glm(n ~ x * y * z * v, family = poisson, data = data)
   cat("Running step from (x+y+z+v)^4 -> (x+y+z+v)^3\n")
   m3 <- step(msat, scope = list(upper = n ~ (x + y + z + v)^4, lower = n ~ (x + y + z + v)^3), direction = "backward", trace = TRUE,)
+  # TODO here, assert that p-value of the selected model > 0.05
   cat("Running step from (x+y+z+v)^3 -> (x+y+z+v)^2\n")
   m2 <- step(m3, scope = list(upper = n ~ (x + y + z + v)^3, lower = n ~ (x + y + z + v)^2), direction = "backward", trace = TRUE)
+  # TODO here, assert that p-value of the selected model > 0.05
   cat("Running step from (x+y+z+v)^2 -> x+y+z+v\n")
   m1 <- step(m2, scope = list(upper = n ~ (x + y + z + v)^2, lower = n ~ x + y + z + v), direction = "backward", trace = TRUE)
+  # TODO here, assert that p-value of the selected model > 0.05
 
   # Manually entered from the output of running `step` repeatedly
   loglinear_formulas <- list(

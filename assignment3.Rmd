@@ -63,11 +63,22 @@ starting with the saturated model (`x*y*z`) and then
 removing (but not adding)
 interaction terms, we must run `step` with `direction="backward"`.
 
-greedy algorithm:
+The process of selecting the best model
+is based on the following greedy algorithm,
+where we seek to minimize AIC in each step
+under the additional constraint that the p-value
+must exceed 0.05:
 
-1. Starting with the saturated model, remove the four-way interaction term and use the remaining terms to construct a new model, `m3`.
-2. 
-Verify that the selected model has a low enough deviance.
+1. Starting with the saturated model, remove the four-way interaction term and use the remaining terms to construct a new model, \(M_3\).
+2. Let \(M \leftarrow M_3\).
+3. For each three-way term in \(M\), remove it and use the remaining terms to construct a new model (candidate model). Calculate its AIC, deviance and p-value against the saturated model. This yields a set of 4 candidate models, as there are 4 three-way terms.
+4. From the set of candidate models, select the model with the lowest AIC and with a p-value above 0.05, unless \(M\) has a lower AIC. If a model was selected, let \(M\) be this new selected model. If not, go to step 10.
+5. Repeat phase (3)-(4) until all three-way terms have been removed, or until the act of removing a three-way term does not yield a better model. If all three-way terms were removed, let \(M_2\) denote this model. If not, go to step 10.
+6. Let \(M \leftarrow M_2\).
+7. For each two-way term in \(M\), remove it and use the remaining terms to construct a new model (candidate model). Calculate its AIC, deviance and p-value against the saturated model. This yields a set of 6 candidate models, as there are 6 two-way terms.
+8. From the set of candidate models, select the model with the lowest AIC and with a p-value above 0.05, unless \(M\) has a lower AIC. If a model was selected, let \(M\) be this new selected model. If not, go to step 10.
+9. Repeat phase (7)-(8) until all two-way terms have been removed, or until the act of removing a two-way term does not yield a better model. Let \(M\) be the selected model.
+10. \(M\) is now considered the best model.
 
 Result:
 ```{r}
