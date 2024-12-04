@@ -3,11 +3,11 @@ title: "Computer Assignment 2"
 author:
   - "Ville Sebastian Olsson (19911231-1999)"
   - "Arvind Guruprasad (19990212-6938)"
-date: "`r Sys.Date()`"
+date: "2024-12-02"
 output:
-  html_document:
-    fig_caption: true
   pdf_document:
+    fig_caption: true
+  html_document:
     fig_caption: true
 ---
 
