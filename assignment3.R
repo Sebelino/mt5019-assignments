@@ -176,6 +176,8 @@ main <- function() {
   model4_loglinear <- glm(n ~ x + y + z + v, family = poisson, data = data)
 
   return(list(
+    data = data,
+    msat = msat,
     model_table = model_table,
     model_table_short = model_table_short,
     best_model = best_model,

@@ -56,13 +56,6 @@ and model complexity, where a lower AIC value implies a better model. The AIC is
 where \(-2\ell(M)\) is the deviance and \(p\) is the number of parameters in \(M\),
 including intercept terms.
 
-We can use the function `step` to find a model with a low AIC.
-We do this by starting with the saturated model and then removing 
-Since we are supposed to find this model by
-starting with the saturated model (`x*y*z`) and then
-removing (but not adding)
-interaction terms, we must run `step` with `direction="backward"`.
-
 The process of selecting the best model
 is based on the following greedy backward elimination algorithm,
 where we seek to minimize AIC in each step
@@ -80,33 +73,69 @@ must exceed 0.05:
 9. Repeat phase (7)-(8) until all two-way terms have been removed, or until the act of removing a two-way term does not yield a better model. Let \(M\) be the selected model.
 10. \(M\) is now considered the best model.
 
-Result:
+We can accomplish this using the `step` function in R, which allows us to perform stepwise model selection based on the AIC value.
+Starting from the saturated model, we run `step`
+repeatedly with `direction="backward"`, removing first
+the four-order term, then the third-order terms,
+and finally the second-order terms.
+However, we terminate the process prematurely if we fail to find
+a better model in each step.
+
+Removing the fourth-order term:
 ```{r}
-data <- read.csv("data_ca3.csv")
-msat <- glm(n ~ x * y * z * v, family = poisson, data = data)
-m3 <- step(msat, direction="backward", trace=TRUE, scope = list(upper = n~(x+y+z+v)^4, lower = n~(x+y+z+v)^3))
-m2 <- step(m3, direction="backward", trace=TRUE, scope = list(upper = n~(x+y+z+v)^3, lower = n~(x+y+z+v)^2))
-m1 <- step(m2, direction="backward", trace=TRUE, scope = list(upper = n~(x+y+z+v)^2, lower = n~x+y+z+v))
+m3 <- step(msat, scope = list(upper = n ~ (x + y + z + v)^4, lower = n ~ (x + y + z + v)^3), direction = "backward", trace = TRUE)
+```
+Removing the third-order terms:
+```{r}
+m2 <- step(m3, scope = list(upper = n ~ (x + y + z + v)^3, lower = n ~ (x + y + z + v)^2), direction = "backward", trace = TRUE)
+```
+Removing the second-order terms:
+```{r}
+m1 <- step(m2, scope = list(upper = n ~ (x + y + z + v)^2, lower = n ~ x + y + z + v), direction = "backward", trace = TRUE)
 ```
 
-TODO: but higher interaction terms should be
-removed before lower-interaction terms, and that's
-not happening here.
-The 2-way `y:v` term is removed before any of the remaining 3-way terms:
-<pre><code>
-n ~ x + y + z + v + x:y + x:z + y:z + x:v + z:v + y:v + x:y:v + x:z:v + y:z:v + x:y:z + x:y:z:v
-n ~ x + y + z + v + x:y + x:z + y:z + x:v + z:v + y:v + x:y:v + x:z:v + y:z:v + x:y:z
-n ~ x + y + z + v + x:y + x:z + y:z + x:v + z:v + y:v + x:y:v + x:z:v + y:z:v
-n ~ x + y + z + v + x:y + x:z + y:z + x:v + z:v + <span style="background-color: yellow">y:v</span> + x:y:v + x:z:v
-n ~ x + y + z + v + x:y + x:z + x:v + y:v + z:v + x:y:v + x:z:v
-n ~ x + y + z + v + x:y + x:z + x:v + y:v + z:v + x:y:v
+We see that interaction terms are removed
+in the following order, starting from the
+saturated model at the top and ending
+with the model that is ultimately selected:
+
+```
+n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v + x:y:z + x:y:v + x:z:v + y:z:v + x:y:z:v
+n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v + x:y:z + x:y:v + x:z:v + y:z:v
+n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v + x:y:v + x:z:v + y:z:v
+n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v + x:y:v + x:z:v
+n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v + x:y:v
+n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v
 n ~ x + y + z + v + x:y + x:z + x:v + y:v + z:v
-</code></pre>
+```
 
+The process halts while there are still
+second-order terms remaining.
+This is because the final model
+\((XY,XZ,XV,YV,ZV)\) has an AIC value (\(113.8\))
+that is lower than any of the models that obtained
+by removing yet another second-order term.
 
-Result:
+We summarize the models considered in the following table,
+along with the AIC, deviance, degrees of freedom (df),
+and p-value:
+
 ```{r}
 model_table_short
+```
+
+A few of the models above have a p-value less than 0.05, but none of these were selected during the model selection process.
+We can see this more clearly by only looking at the rows in the table
+corresponding to the models that were selected in each step:
+```
+               Model      AIC    Deviance df  p_value
+1               XYZV 123.9732   0.0000000  0     <NA>
+2    XYZ,XYV,XZV,YZV 122.3326   0.3593495  1    0.549
+3        XYV,XZV,YZV 120.3846   0.4113326  2    0.814
+7         XYV,XZV,YZ 118.6116   0.6383817  3    0.888
+10      XYV,XZ,YZ,ZV 117.1359   1.1627121  4    0.884
+12 XY,XZ,YZ,XV,YV,ZV 115.6958   1.7225357  5    0.886
+13    XY,XZ,XV,YV,ZV 113.7953   1.8221265  6    0.935
 ```
 
 ## 2. Model selection
@@ -135,7 +164,7 @@ select the best model:
 - Select the model with the lowest AIC.
 
 ```{r}
-model_table[order(model_table$AIC),]
+model_table[order(model_table$AIC), ]
 ```
 
 The table above has been sorted by AIC in ascending order,
@@ -207,8 +236,8 @@ Output:
 
 ```{r}
 data <- read.csv("data_ca3.csv")
-msat <- glm(v ~ x * y * z, weights=n, family = binomial, data = data)
-mstep_AIC<-step(msat, direction="backward", trace=TRUE, scope = list(upper = v~x*y*z, lower = v~x+y+z))
+msat <- glm(v ~ x * y * z, weights = n, family = binomial, data = data)
+mstep_AIC <- step(msat, direction = "backward", trace = TRUE, scope = list(upper = v ~ x * y * z, lower = v ~ x + y + z))
 ```
 We see that the model with the lowest AIC (`1092.76`)
 is the main effects model, \(V \sim X+Y+Z\).
@@ -216,7 +245,7 @@ We can compare it to the model
 with the second-lowest AIC value (`1094.22`), i.e. \(V \sim X+Y+Z+X:Z\):
 
 ```{r}
-second_simplest_model <- glm(v ~ x + y + z + x:z, weights=n, family = binomial, data = data)
+second_simplest_model <- glm(v ~ x + y + z + x:z, weights = n, family = binomial, data = data)
 anova(mstep_AIC, second_simplest_model, test = "LRT")
 ```
 
@@ -412,7 +441,7 @@ data <- data.frame(
   v = c(1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1),
   n = c(40, 315, 9, 50, 6, 24, 459, 4012, 11, 4, 41, 147, 1594, 1, 14, 124)
 )
-model4 <- glm(v ~ x + y + z, weights=n, family = binomial(link=logit), data = data)
+model4 <- glm(v ~ x + y + z, weights = n, family = binomial(link = logit), data = data)
 coefficients <- summary(model4)$coefficients
 beta <- coefficients[, "Estimate"]
 print(beta)
@@ -421,16 +450,17 @@ Fitting the equivalent loglinear model yields the following estimates:
 ```{r}
 # https://stats.stackexchange.com/questions/476742/cant-find-loglinear-models-corresponding-logistic-regression-model
 # https://teaching.sociology.ul.ie/SSS/lugano/node58.html
-model4_loglinear <- glm(n ~ x + y + z + v
-                        + x:y
-                        + x:z
-                        + x:v
-                        + y:z
-                        + y:v
-                        + z:v
-                        + x:y:z
-                        ,
-                        family = poisson(link=log), data = data)
+model4_loglinear <- glm(
+  n ~ x + y + z + v
+    + x:y
+    + x:z
+    + x:v
+    + y:z
+    + y:v
+    + z:v
+    + x:y:z,
+  family = poisson(link = log), data = data
+)
 coefficients_ll <- summary(model4_loglinear)$coefficients
 beta_ll <- coefficients_ll[, "Estimate"]
 print(beta_ll)
@@ -439,17 +469,17 @@ When comparing each pair of terms according to Table 1,
 we see that each pair of coefficient values are virtually identical:
 ```{r}
 comparison <- data.frame(
-  LogisticParam = c("(Intercept)","x","y","z"),
-  LoglinearParam=c("v","x:v","y:v","z:v"),
+  LogisticParam = c("(Intercept)", "x", "y", "z"),
+  LoglinearParam = c("v", "x:v", "y:v", "z:v"),
   Logistic = beta[c("(Intercept)", "x", "y", "z")],
   Loglinear = beta_ll[c("v", "x:v", "y:v", "z:v")],
   Difference = c(
-    beta_ll["v"]-beta["(Intercept)"],
-    beta_ll["x:v"]-beta["x"],
-    beta_ll["y:v"]-beta["y"],
-    beta_ll["z:v"]-beta["z"]
+    beta_ll["v"] - beta["(Intercept)"],
+    beta_ll["x:v"] - beta["x"],
+    beta_ll["y:v"] - beta["y"],
+    beta_ll["z:v"] - beta["z"]
   ),
-  row.names=NULL
+  row.names = NULL
 )
 print(comparison)
 ```
@@ -475,13 +505,13 @@ print(se_ll)
 Again, we see that the standard errors are virtually identical:
 ```{r}
 comparison_se <- data.frame(
-  LogisticParam = c("(Intercept)","x","y","z"),
-  LoglinearParam=c("v","x:v","y:v","z:v"),
+  LogisticParam = c("(Intercept)", "x", "y", "z"),
+  LoglinearParam = c("v", "x:v", "y:v", "z:v"),
   Logistic = se[c("(Intercept)", "x", "y", "z")],
   Loglinear = se_ll[c("v", "x:v", "y:v", "z:v")],
   Difference = c(
-    se_ll["v"]-se["(Intercept)"],
-    se_ll["x:v"]-se["x"]
+    se_ll["v"] - se["(Intercept)"],
+    se_ll["x:v"] - se["x"]
   )
 )
 print(comparison_se)
@@ -558,14 +588,14 @@ data <- data.frame(
   v = c(1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1),
   n = c(40, 315, 9, 50, 6, 24, 459, 4012, 11, 4, 41, 147, 1594, 1, 14, 124)
 )
-#model4 <- glm(v/n ~ x+y+z, weights=n, family = binomial, data = data)
-model4 <- glm(v ~ x + y + z, weights=n, family = binomial(link=logit), data = data)
+# model4 <- glm(v/n ~ x+y+z, weights=n, family = binomial, data = data)
+model4 <- glm(v ~ x + y + z, weights = n, family = binomial(link = logit), data = data)
 coefficients <- summary(model4)$coefficients
 beta <- coefficients[, "Estimate"]
 print(beta)
 print("---")
 
-model4_loglinear <- glm(n ~ v + x + y + z + x:z + x:y + y:z + x:y:z + v:z + v:x + v:y + v:x:y, family = poisson(link=log), data = data)
+model4_loglinear <- glm(n ~ v + x + y + z + x:z + x:y + y:z + x:y:z + v:z + v:x + v:y + v:x:y, family = poisson(link = log), data = data)
 coefficients <- summary(model4_loglinear)$coefficients
 beta <- coefficients[, "Estimate"]
 print(beta)
@@ -574,29 +604,29 @@ print("---")
 
 ```{r}
 formulas <- c(
-"n ~ x * y * v + x * z * v + y * z * v + x * y * z + x * y * z * v",
-"n ~ x * y * v + x * z * v + y * z * v + x * y * z",
-"n ~ x * z * v + y * z * v + x * y * z",
-"n ~ y * z * v + x * y * z + x * v",
-"n ~ x * y * z + x * v + y * v + z * v",
-"n ~ x * v + y * v + z * v + x * z + x * y + y * z",
-"n ~ x * v + z * v + x * y",
-"n ~ y * v + z * v + x * z + x * y + y * z",
-"n ~ z * v + x * z + x * y + y * z",
-"n ~ x * z + x * y + y * z + v",
-"n ~ x * y + y * z + v",
-"n ~ y * z + v + x",
-"n ~ x + y + z + v"
-  )
-for(f in formulas) {
-#model4_loglinear <- glm(n ~ x+y+z+v + v*x + v*y + v*z, family = poisson(link=log), data = data)
-model4_loglinear <- glm(f, family = poisson(link=log), data = data)
-coefficients <- summary(model4_loglinear)$coefficients
-beta <- coefficients[, "Estimate"]
-se <- coefficients[, "Std. Error"]
-#print(beta)
-#print(coef(model4_loglinear)[grep("v", names(coef(model4_loglinear)))])
-print(sum(coef(model4_loglinear)[grep("z", names(coef(model4_loglinear)))]))
+  "n ~ x * y * v + x * z * v + y * z * v + x * y * z + x * y * z * v",
+  "n ~ x * y * v + x * z * v + y * z * v + x * y * z",
+  "n ~ x * z * v + y * z * v + x * y * z",
+  "n ~ y * z * v + x * y * z + x * v",
+  "n ~ x * y * z + x * v + y * v + z * v",
+  "n ~ x * v + y * v + z * v + x * z + x * y + y * z",
+  "n ~ x * v + z * v + x * y",
+  "n ~ y * v + z * v + x * z + x * y + y * z",
+  "n ~ z * v + x * z + x * y + y * z",
+  "n ~ x * z + x * y + y * z + v",
+  "n ~ x * y + y * z + v",
+  "n ~ y * z + v + x",
+  "n ~ x + y + z + v"
+)
+for (f in formulas) {
+  # model4_loglinear <- glm(n ~ x+y+z+v + v*x + v*y + v*z, family = poisson(link=log), data = data)
+  model4_loglinear <- glm(f, family = poisson(link = log), data = data)
+  coefficients <- summary(model4_loglinear)$coefficients
+  beta <- coefficients[, "Estimate"]
+  se <- coefficients[, "Std. Error"]
+  # print(beta)
+  # print(coef(model4_loglinear)[grep("v", names(coef(model4_loglinear)))])
+  print(sum(coef(model4_loglinear)[grep("z", names(coef(model4_loglinear)))]))
 }
 ```
 
@@ -606,7 +636,5 @@ coefficients <- summary(model4_loglinear)$coefficients
 beta <- coefficients[, "Estimate"]
 se <- coefficients[, "Std. Error"]
 print(beta)
-#print(se)
+# print(se)
 ```
-
-
