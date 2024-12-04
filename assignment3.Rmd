@@ -113,7 +113,7 @@ The process halts while there are still
 second-order terms remaining.
 This is because the final model
 \((XY,XZ,XV,YV,ZV)\) has an AIC value (\(113.8\))
-that is lower than any of the models that obtained
+that is lower than any of the models obtained
 by removing yet another second-order term.
 This suggests that we cannot find a substantially
 better model by exploring the model space further.
@@ -166,7 +166,7 @@ select the best model:
 - Select the model with the lowest AIC.
 
 ```{r}
-model_table[order(model_table$AIC), ]
+model_table_short[order(model_table$AIC), ]
 ```
 
 The table above has been sorted by AIC in ascending order,
