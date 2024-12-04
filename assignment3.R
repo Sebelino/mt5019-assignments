@@ -1,29 +1,18 @@
-model_stats <- function(formula) {
-  model <- glm(formula, family = poisson, data = data)
-  return(list(
-    Deviance = summary(model)$deviance,
-    df = summary(model)$df,
-    AIC = AIC(model)
-  ))
-}
-
 main <- function() {
   # Exercise 3:1.1, 3:1.2
   data <- read.csv("data_ca3.csv")
 
   msat <- glm(n ~ x * y * z * v, family = poisson, data = data)
+
   cat("Running step from (x+y+z+v)^4 -> (x+y+z+v)^3\n")
-  m3 <- step(msat, scope = list(upper = n ~ (x + y + z + v)^4, lower = n ~ (x + y + z + v)^3), direction = "backward", trace = TRUE,)
-  # TODO here, assert that p-value of the selected model > 0.05
+  m3 <- step(msat, scope = list(upper = n ~ (x + y + z + v)^4, lower = n ~ (x + y + z + v)^3), direction = "backward", trace = TRUE)
   cat("Running step from (x+y+z+v)^3 -> (x+y+z+v)^2\n")
   m2 <- step(m3, scope = list(upper = n ~ (x + y + z + v)^3, lower = n ~ (x + y + z + v)^2), direction = "backward", trace = TRUE)
-  # TODO here, assert that p-value of the selected model > 0.05
   cat("Running step from (x+y+z+v)^2 -> x+y+z+v\n")
   m1 <- step(m2, scope = list(upper = n ~ (x + y + z + v)^2, lower = n ~ x + y + z + v), direction = "backward", trace = TRUE)
-  # TODO here, assert that p-value of the selected model > 0.05
 
   # Manually entered from the output of running `step` repeatedly
-  loglinear_formulas <- list(
+  loglinear_formulas <- c(
     # Four-way formulas
     "n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v + z:v + x:y:z + x:y:v + x:z:v + y:z:v + x:y:z:v",
     # Three-way formulas
@@ -47,14 +36,14 @@ main <- function() {
     "n ~ x + y + z + v + x:y + x:z + y:z + x:v + z:v",
     "n ~ x + y + z + v + x:y + y:z + x:v + y:v + z:v",
     "n ~ x + y + z + v + x:y + x:z + y:z + y:v + z:v",
-    "n ~ x + y + z + v + x:z + y:z + x:v + y:v + z:v",
-    "n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v",
+    "n ~ x + y + z + v + x:z + y:z + x:v + y:v + z:v", # p<0.05
+    "n ~ x + y + z + v + x:y + x:z + y:z + x:v + y:v", # p<0.05
     # 8-dimensional candidate set (all these suck)
     "n ~ x + y + z + v + x:y + x:v + y:v + z:v",
     "n ~ x + y + z + v + x:y + x:z + x:v + z:v",
     "n ~ x + y + z + v + x:y + x:z + y:v + z:v",
-    "n ~ x + y + z + v + x:z + x:v + y:v + z:v",
-    "n ~ x + y + z + v + x:y + x:z + x:v + y:v"
+    "n ~ x + y + z + v + x:z + x:v + y:v + z:v", # p<0.05
+    "n ~ x + y + z + v + x:y + x:z + x:v + y:v" # p<0.05
   )
   loglinear_models <- list()
   for (formula in loglinear_formulas) {
@@ -67,30 +56,34 @@ main <- function() {
   )
 
   for (model in loglinear_models) {
-    is_saturated_model = length(coef(model)) == length(coef(msat)) && all(coef(model) == coef(msat))
+    is_saturated_model <- length(coef(model)) == length(coef(msat)) && all(coef(model) == coef(msat))
     anova_res <- anova(model, msat, test = "LRT")
     p_value <- anova_res$`Pr(>Chi)`[2]
     model_table <- rbind(model_table, data.frame(
-      Model = model$formula,
+      Model = compress_formula(model$formula),
+      Formula = model$formula,
       AIC = AIC(model),
       Deviance = anova_res$Deviance[2],
       df = anova_res$Df[2],
       p_value = ifelse(is_saturated_model, NA, p_value)
     ))
   }
-  model_table$Model <- format(model_table$Model, justify="left")
+  model_table$Formula <- format(model_table$Formula, justify = "left")
   model_table$p_value <- ifelse(
     model_table$p_value < 0.001,
-    format(model_table$p_value, scientific=TRUE, digits=3),
-    format(round(model_table$p_value,3), scientific=FALSE)
+    format(model_table$p_value, scientific = TRUE, digits = 3),
+    format(round(model_table$p_value, 3), scientific = FALSE)
   )
+  
+  model_table_short <- model_table[,!(colnames(model_table) %in% "Formula")]
 
   # Print results
   print(model_table)
 
   # Exercise 3:1.3
-  best_model_row <- model_table[which.min(model_table$AIC),]
-  best_model_formula <- trimws(best_model_row$Model)
+  # TODO here, assert that p-value of the selected model > 0.05
+  best_model_row <- model_table[which.min(model_table$AIC), ]
+  best_model_formula <- trimws(best_model_row$Formula)
   best_model <- loglinear_models[[best_model_formula]]
 
   # Extract coefficients and standard errors
@@ -144,6 +137,7 @@ main <- function() {
     anova_res <- anova(model, saturated_model4, test = "LRT")
     model_table4 <- rbind(model_table4, data.frame(
       Model = model_name,
+      #Formula = model$formula,
       Deviance = anova_res$Deviance[2],
       df = anova_res$Df[2],
       p_value = ifelse(model_name == "xyz (Saturated)", NA, anova_res$`Pr(>Chi)`[2]),
@@ -183,6 +177,7 @@ main <- function() {
 
   return(list(
     model_table = model_table,
+    model_table_short = model_table_short,
     best_model = best_model,
     associations = associations,
     model_table4 = model_table4,
@@ -190,6 +185,61 @@ main <- function() {
     model4 = model4,
     model4_loglinear = model4_loglinear
   ))
+}
+
+extract_terms <- function(term_list, pattern) {
+  terms <- sapply(term_list[grep(pattern, term_list)], function(term) gsub(":", "", term))
+  return(terms)
+}
+
+is_included <- function(term, term_list) {
+  return(any(sapply(term_list, function(string) all(strsplit(term, NULL)[[1]] %in% strsplit(string, NULL)[[1]]))))
+}
+
+compress_formula <- function(f) {
+  term_string <- trimws(unlist(strsplit(f, "~"))[[2]])
+  term_list <- trimws(unlist(strsplit(term_string, "\\+")))
+  orders <- sapply(term_list, function(term) {
+    m <- gregexpr(":", term)[[1]]
+    return(1 + ifelse(m == -1, 0, length(m)))
+  })
+  fourth_order_terms <- extract_terms(term_list, "^.:.:.:.$")
+  third_order_terms <- extract_terms(term_list, "^.:.:.$")
+  second_order_terms <- extract_terms(term_list, "^.:.$")
+  first_order_terms <- extract_terms(term_list, "^.$")
+  compressed_term_list <- character()
+  for (term in fourth_order_terms) {
+    compressed_term_list <- append(compressed_term_list, term)
+  }
+  for (term in third_order_terms) {
+    if (!is_included(term, compressed_term_list)) {
+      compressed_term_list <- append(compressed_term_list, term)
+    }
+  }
+  for (term in second_order_terms) {
+    if (!is_included(term, compressed_term_list)) {
+      compressed_term_list <- append(compressed_term_list, term)
+    }
+  }
+  for (term in first_order_terms) {
+    if (!is_included(term, compressed_term_list)) {
+      compressed_term_list <- c(compressed_term_list, term)
+    }
+  }
+  
+  model_name <- toupper(paste(compressed_term_list, collapse=","))
+
+  result <- list(
+    orders = orders,
+    first_order_terms = first_order_terms,
+    second_order_terms = second_order_terms,
+    third_order_terms = third_order_terms,
+    fourth_order_terms = fourth_order_terms,
+    compressed_term_list = compressed_term_list,
+    model_name = model_name
+  )
+  result <- result$model_name
+  return(result)
 }
 
 ass <- main()

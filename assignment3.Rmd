@@ -64,7 +64,7 @@ removing (but not adding)
 interaction terms, we must run `step` with `direction="backward"`.
 
 The process of selecting the best model
-is based on the following greedy algorithm,
+is based on the following greedy backward elimination algorithm,
 where we seek to minimize AIC in each step
 under the additional constraint that the p-value
 must exceed 0.05:
@@ -106,9 +106,8 @@ n ~ x + y + z + v + x:y + x:z + x:v + y:v + z:v
 
 Result:
 ```{r}
-model_table
+model_table_short
 ```
-TODO: Ask about whether to list all combinations of interaction terms vs. total ordering of models, where set n is a subset of set n-1
 
 ## 2. Model selection
 
