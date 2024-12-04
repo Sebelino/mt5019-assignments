@@ -115,6 +115,8 @@ This is because the final model
 \((XY,XZ,XV,YV,ZV)\) has an AIC value (\(113.8\))
 that is lower than any of the models that obtained
 by removing yet another second-order term.
+This suggests that we cannot find a substantially
+better model by exploring the model space further.
 
 We summarize the models considered in the following table,
 along with the AIC, deviance, degrees of freedom (df),
