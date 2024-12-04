@@ -142,44 +142,22 @@ corresponding to the models that were selected in each step:
 
 ## 2. Model selection
 
-The table contains the following information which helps us
-select the best model:
-
-**1. Deviance**
-
-- Measures the difference in goodness-of-fit between the submodel and the saturated model.
-- A low deviance indicates a good fit.
-
-**2. Degrees of Freedom**
-
-- Reflects the number of parameters removed from the saturated model.
-- Higher df means a simpler model.
-
-**3. p-value**
-
-- Tests whether the submodel is significantly worse than the saturated model.
-- If \( p > 0.05 \), the simpler model is adequate.
-
-**4. AIC**
-
-- Evaluates the trade-off between model complexity and fit.
-- Select the model with the lowest AIC.
+We can sort the table of models by AIC in descending order:
 
 ```{r}
 model_table_short[order(model_table$AIC), ]
 ```
 
-The table above has been sorted by AIC in ascending order,
-to gauge which of the simpler model would be effective with
-respect to the saturated model.
+Based on our earlier discussion,
+we should select the model that satisfies two criteria:
 
-We should select the model that satisfies two criteria:
-
-* Minimal AIC value
+* The AIC value of the model is minimal
 * The p-value is greater than 0.05
 
-Based on the table above, we want to select model 6,
-which includes the interaction terms `XV, YV, ZV, XZ, XY, YZ`.
+Based on the table above, we want to select model 13, i.e.
+\((XY,XZ,XV,YV,ZV)\),
+which has the lowest AIC value (113.7953) and a p-value
+of 0.935.
 
 # 3. Model interpretation
 
