@@ -186,16 +186,26 @@ The model we selected looks like this:
 best_model
 ```
 
-Given the lack of three-way interactions, this model
-is much simpler relative to the relative model and the
-other three-way interaction model while retaining
+In addition to the main effects, this model includes the following two-way interactions:
+
+- \(XY\): Mother's age (\(X\)) and smoking habits (\(Y\)).
+- \(XZ\): Mother's age (\(X\)) and gestational age (\(Z\)).
+- \(XV\): Mother's age (\(X\)) and child survival (\(V\)).
+- \(YV\): Smoking habits (\(Y\)) and child survival (\(V\)).
+- \(ZV\): Gestational age (\(Z\)) and child survival (\(V\)).
+
+Given the lack of higher-order interactions, this model
+is much simpler relative to the saturated model and the
+three-way interaction models while retaining
 its ability to fit the data reasonably well.
+
+To quantify the associations, we calculate the odds ratio:
+
+\[OR_Y = \frac{odds(Y=1)}{odds(Y=0)}\]
 
 ```{r}
 associations
 ```
-
-\[OR_Y = \frac{odds(Y=1)}{odds(Y=0)}\]
 
 Critical Factors:
 
