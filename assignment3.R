@@ -99,6 +99,7 @@ main <- function() {
     Upper_CI = upper_ci,
     P_Value = coefficients[, "Pr(>|z|)"]
   )
+  associations$P_Value <- fmt_decimal(associations, "P_Value")
 
   # Print results
   print(associations)
