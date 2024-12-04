@@ -69,19 +69,15 @@ main <- function() {
     ))
   }
   model_table$Formula <- format(model_table$Formula, justify = "left")
-  model_table$p_value <- ifelse(
-    model_table$p_value < 0.001,
-    format(model_table$p_value, scientific = TRUE, digits = 3),
-    format(round(model_table$p_value, 3), scientific = FALSE)
-  )
-  
-  model_table_short <- model_table[,!(colnames(model_table) %in% "Formula")]
+  model_table$p_value <- fmt_decimal(model_table, "p_value")
+
+  model_table_short <- model_table[, !(colnames(model_table) %in% "Formula")]
 
   # Print results
   print(model_table)
 
   # Exercise 3:1.3
-  # TODO here, assert that p-value of the selected model > 0.05
+  # Here we should technically assert that p-value of the selected model > 0.05
   best_model_row <- model_table[which.min(model_table$AIC), ]
   best_model_formula <- trimws(best_model_row$Formula)
   best_model <- loglinear_models[[best_model_formula]]
@@ -137,7 +133,7 @@ main <- function() {
     anova_res <- anova(model, saturated_model4, test = "LRT")
     model_table4 <- rbind(model_table4, data.frame(
       Model = model_name,
-      #Formula = model$formula,
+      # Formula = model$formula,
       Deviance = anova_res$Deviance[2],
       df = anova_res$Df[2],
       p_value = ifelse(model_name == "xyz (Saturated)", NA, anova_res$`Pr(>Chi)`[2]),
@@ -189,6 +185,14 @@ main <- function() {
   ))
 }
 
+fmt_decimal <- function(tbl, colname) {
+  ifelse(
+    tbl[[colname]] < 0.001,
+    format(tbl[[colname]], scientific = TRUE, digits = 3),
+    format(round(tbl[[colname]], 3), scientific = FALSE)
+  )
+}
+
 extract_terms <- function(term_list, pattern) {
   terms <- sapply(term_list[grep(pattern, term_list)], function(term) gsub(":", "", term))
   return(terms)
@@ -228,8 +232,8 @@ compress_formula <- function(f) {
       compressed_term_list <- c(compressed_term_list, term)
     }
   }
-  
-  model_name <- toupper(paste(compressed_term_list, collapse=","))
+
+  model_name <- toupper(paste(compressed_term_list, collapse = ","))
 
   result <- list(
     orders = orders,
