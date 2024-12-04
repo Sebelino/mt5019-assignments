@@ -32,29 +32,48 @@ Our objective is to find a suitable loglinear model
 which strikes the best balance between goodness-of-fit
 and model complexity.
 
-To find a suitable model, we will generate a set of model by following this process:
+To find a suitable model, we will generate a set of models
+in a stepwise fashion. We will do this based on certain
+values and criteria which we will describe below.
 
-1. Read the CSV data.
-2. Use the data to fit the saturated model, \((XYZV)\).
-3. Remove interaction terms one by one, starting with the highest-order interactions.
-   For each set of interaction terms, use it to fit a model.
-   Each combination must include the main effects, i.e. \(X\), \(Y\), \(Z\) and \(V\).
-4. For each sub-model, calculate deviance, Akaike's information criterion (AIC) and p-value with respect to the saturated model.
+### Deviance
 
-The deviance is used to calculate the p-value as follows:
-\[\text{p-value} = P(\chi^2_{\text{df}} \geq T_{\chi^2})\]
-where \(T_{\chi^2} = 2(\ell(XYZ) - \ell(M))\) denotes the deviance and \(\text{df}\)
-is the degrees of freedom. \(\ell(M)\) denotes the log-likelihood under model \(M\).
+The deviance is calculated to evaluate the goodness-of-fit of each model and to compare nested models.
+It can be used to measure how well a model fits the data
+compared to the saturated model. If \(M1\) denotes the saturated model, \(M_0\) denotes a sub-model, and \(\ell\) denotes the log-likelihood
+function, then the deviance relative to the saturated model
+can be computed as:
+\[\Delta D = 2(\ell(M_1) - \ell(M_0))\]
 
-The degrees of freedom is calculated as:
-\[\text{df} = IJKL - \text{number of parameters of }M\]
+### P-value
+
+The deviance is also used to calculate the p-value
+of a likelihood ratio test between models.
+P-values are used here to evaluate whether the removal of certain interaction terms from a model leads to a statistically significant loss of fit.
+\[\text{p-value} = P(\chi^2_{q} > \Delta D)\]
+where \(\chi^2_q\) is a chi-square statistic with
+\(q\) is the degrees of freedom (df).
+If the p-value is lower than 0.05,
+we reject the null hypothesis that a simpler model
+fits the data as well as a more complex model.
+In that case, we disqualify the simpler model
+from being a candidate for the best model.
+
+### Degrees of freedom
+
+For each model \(M\), the degrees of freedom is calculated as:
+\[\text{df} = IJKL - \text{number of estimated parameters of }M\]
 where \(IJKL = 2\cdot2\cdot2\cdot2 = 16\) is the number of cells in the contingency table.
 
-The AIC of a model \(M\) is a measure of the model's balance between goodness-of-fit
+### AIC
+
+Aikaike's information criterion (AIC) of a model \(M\) is a measure of the model's balance between goodness-of-fit
 and model complexity, where a lower AIC value implies a better model. The AIC is given by:
 \[\text{AIC}(M) = -2\ell(M) + 2p\]
 where \(-2\ell(M)\) is the deviance and \(p\) is the number of parameters in \(M\),
 including intercept terms.
+
+### Model exploration
 
 The process of selecting the best model
 is based on the following greedy backward elimination algorithm,
