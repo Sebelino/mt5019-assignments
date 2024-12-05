@@ -246,7 +246,6 @@ This may continue until the main effects model,
 Output:
 
 ```{r}
-data <- read.csv("data_ca3.csv")
 msat <- glm(v ~ x * y * z, weights = n, family = binomial, data = data)
 mstep_AIC <- step(msat, direction = "backward", trace = TRUE, scope = list(upper = v ~ x * y * z, lower = v ~ x + y + z))
 ```
@@ -254,7 +253,7 @@ We see that the model with the lowest AIC (`1092.76`)
 is the main effects model, \(V \sim X+Y+Z\).
 We can compare its deviance and p-value compared to the saturated model:
 ```{r}
-anova(mstep_AIC, msat, test="LRT")
+anova(mstep_AIC, msat, test = "LRT")
 ```
 We see that the p-value is:
 \[\text{p-value} = P(\chi^2_4 > 1.4875) = 0.8288 < 0.05\]
@@ -438,13 +437,6 @@ we should expect the coefficients listed in Table 1 to have equal values.
 Fitting the logistic model yields the following estimates:
 
 ```{r}
-data <- data.frame(
-  x = c(0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1),
-  y = c(1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1),
-  z = c(0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1),
-  v = c(1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1),
-  n = c(40, 315, 9, 50, 6, 24, 459, 4012, 11, 4, 41, 147, 1594, 1, 14, 124)
-)
 model4 <- glm(v ~ x + y + z, weights = n, family = binomial(link = logit), data = data)
 coefficients <- summary(model4)$coefficients
 beta <- coefficients[, "Estimate"]
@@ -491,8 +483,6 @@ The biggest difference is smaller than \(10^{-10}\).
 This difference is negligible and likely due to loss of numerical precision
 when the values were computed.
 
-TODO: check significance p-value of models selected by step
-
 ### Standard errors
 Calculating the standard errors yields similar results.
 
@@ -516,7 +506,8 @@ comparison_se <- data.frame(
   Difference = c(
     se_ll["v"] - se["(Intercept)"],
     se_ll["x:v"] - se["x"]
-  )
+  ),
+  row.names = NULL
 )
 print(comparison_se)
 ```
