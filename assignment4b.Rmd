@@ -1,8 +1,9 @@
 ---
 title: "Computer Assignment 4"
 author:
-  - "Your Name (Your ID)"
-date: "2024-04-XX"
+  - "Ville Sebastian Olsson (19911231-1999)"
+  - "Arvind Guruprasad (19990212-6938)"
+date: "`r Sys.Date()`"
 output:
   html_document:
     fig_caption: true
@@ -10,7 +11,8 @@ output:
     fig_caption: true
 ---
 
-```{r, echo=FALSE, results='hide', fig.show='hide'}
+```{r, echo=FALSE, results='hide', fig.show='hide',message=FALSE}
+suppressMessages(library(pROC))
 source("assignment4.R")
 list2env(ass, envir = .GlobalEnv)
 knitr::opts_chunk$set(echo = FALSE, comment = "")

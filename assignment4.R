@@ -308,6 +308,8 @@ main <- function() {
   r42 <- exercise42(data)
 
   return(list(
+    data = data,
+    data4 = r42$data4,
     r42 = r42
   ))
 }
