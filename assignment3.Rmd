@@ -188,11 +188,11 @@ best_model
 
 In addition to the main effects, this model includes the following two-way interactions:
 
-- \(XY\): Mother's age (\(X\)) and smoking habits (\(Y\)).
-- \(XZ\): Mother's age (\(X\)) and gestational age (\(Z\)).
-- \(XV\): Mother's age (\(X\)) and child survival (\(V\)).
-- \(YV\): Smoking habits (\(Y\)) and child survival (\(V\)).
-- \(ZV\): Gestational age (\(Z\)) and child survival (\(V\)).
+- \(X:Y\): Mother's age (\(X\)) and smoking habits (\(Y\)).
+- \(X:Z\): Mother's age (\(X\)) and gestational age (\(Z\)).
+- \(X:V\): Mother's age (\(X\)) and child survival (\(V\)).
+- \(Y:V\): Smoking habits (\(Y\)) and child survival (\(V\)).
+- \(Z:V\): Gestational age (\(Z\)) and child survival (\(V\)).
 
 Given the lack of higher-order interactions, this model
 is much simpler relative to the saturated model and the
@@ -200,26 +200,30 @@ three-way interaction models while retaining
 its ability to fit the data reasonably well.
 
 To quantify the associations, we calculate the odds ratio:
-
-\[OR_Y = \frac{odds(Y=1)}{odds(Y=0)}\]
+\[OR = e^{\lambda_t}\]
+for each parameter \(\lambda_t\) in the model,
+along with a 95 \% confidence interval and p-value.
+Result:
 
 ```{r}
 associations
 ```
 
-Critical Factors:
+The significant associations (\(p<0.05\)) are:
 
-- **The main effects of \( Y \) (smoking) and \( Z \) (gestational age)** are significant predictors of child survival.
-- **The interaction \( V : Z \) (child survival and gestational age)** has the strongest effect, highlighting the importance of adequate gestational periods for child survival.
+- The intercept,
+- Smoking habits (\(Y\)),
+- Gestational age (\(Z\)),
+- Child survival (\(V\)),
+- The interaction between the mother's age and smoking habits (\(X:Y\)),
+- The interaction between the mother's age and child survival (\(X:V\)),
+- The interaction between gestational age and child survival (\(Z:V\)).
 
-Non-significant Effects:
+Non-significant associations (\(p\geq 0.05\)) are:
 
-- The interactions \( V : Y \), \( X : Z \), and \( Y : Z \) are not statistically significant, suggesting these effects are not strong enough to influence survival outcomes in this dataset.
-
-Implications:
-
-- Reducing smoking among mothers and improving gestational age outcomes are likely to have the most significant positive impact on child survival rates.
-
+- Mother's age (\(X\)),
+- The interaction between the mother's age and gestational age (\(X:Z\)),
+- The interaction between smoking habits and child survival (\(Y:V\)).
 
 # 4. Logistic model
 
