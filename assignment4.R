@@ -116,9 +116,6 @@ exercise41 <- function(data) {
 
   # Exercise 4:1.4
 
-  # Load the necessary library
-  library(pROC)
-
   # Fit the models
   full_model <- glm(v2 ~ ., family = binomial, data = data) # Full
   model_1 <- glm(v2 ~ v21 + v14 + v3 + v7 + v11 + v18 + v17, family = binomial, data = data) # AIC
@@ -180,6 +177,11 @@ exercise41 <- function(data) {
 }
 
 main <- function() {
+  # Load the necessary libraries
+  library(pROC)
+  library(rpart)
+  library(rpart.plot)
+
   # Load the dataset
   data_original <- read.csv("data_ca4.csv")
   data <- data_original
@@ -207,10 +209,6 @@ main <- function() {
   # exercise41(data)
 
   # Exercise 4:2.1
-
-  # Load necessary libraries
-  library(rpart)
-  library(rpart.plot)
 
   # Set working directory and read data (replace "path_to_file" with actual path)
   # TODO To Preprocess Or Not To Preprocess that is the question
