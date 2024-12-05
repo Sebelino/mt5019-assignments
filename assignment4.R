@@ -63,6 +63,9 @@ main <- function() {
   mstep1_BIC <- step(m1, direction="forward", scope = list(upper = full_model),
                      k = log(nrow(data)), trace = TRUE)
   
+  # Fit the logistic regression model (if not already done)
+  final_model <- glm(v2 ~ v21 + v14 + v3 + v7 + v11 + v18 + v17, family = binomial, data = data)
+  
   # Compute Odds and CI for final model's coefficients
   # TODO When writing RMD, interpret v211 and similar variable with its context - line by line
   exp_coef <- exp(coef(final_model))
@@ -79,10 +82,7 @@ main <- function() {
   # TODO: RMD explaining why other statistical tests wont work
   # Load the necessary library
   library(ResourceSelection)
-  
-  # Fit the logistic regression model (if not already done)
-  final_model <- glm(v2 ~ v21 + v14 + v3 + v7 + v11 + v18 + v17, family = binomial, data = data)
-  
+
   # Obtain predicted probabilities
   predicted_probs <- predict(final_model, type = "response")
   
@@ -195,8 +195,6 @@ main <- function() {
   legend("bottomright", legend = c("Full Model", "Model 1", "Model 2"),
          col = c("blue", "red", "green"), lwd = 2)
   
-    
 }
 
-  
-  
+ass <- main()
