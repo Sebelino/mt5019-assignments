@@ -179,8 +179,6 @@ exercise41 <- function(data) {
 
 exercise42 <- function(data) {
   # Exercise 4:2.1
-
-  # Set working directory and read data (replace "path_to_file" with actual path)
   # TODO To Preprocess Or Not To Preprocess that is the question
   data4 <- data
 
@@ -272,16 +270,7 @@ exercise42 <- function(data) {
   ))
 }
 
-main <- function() {
-  # Load the necessary libraries
-  library(pROC)
-  library(rpart)
-  library(rpart.plot)
-
-  # Load the dataset
-  data_original <- read.csv("data_ca4.csv")
-  data <- data_original
-
+preprocess <- function(data) {
   # RMD TODO - Explain Pre-processing using counts of the categories for ethnicities and consciousness level
   # Combine categories for Ethnicity (e.g., combine 2 and 3 into a single category)
   data$v5[data$v5 > 1] <- 0 # Combine categories 2 and 3 into 0 (other)
@@ -300,6 +289,18 @@ main <- function() {
   # TODO: Check before and after converting to factors - See if it makes a difference
   categorical_cols <- c("v4", "v5", "v6", "v7", "v8", "v9", "v10", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21")
   data[categorical_cols] <- lapply(data[categorical_cols], as.factor)
+  return(data)
+}
+
+main <- function() {
+  # Load the necessary libraries
+  library(pROC)
+  library(rpart)
+  library(rpart.plot)
+
+  # Load the dataset
+  data_original <- read.csv("data_ca4.csv")
+  data <- preprocess(data_original)
 
   ## Exercise 4:1
   # exercise41(data)
