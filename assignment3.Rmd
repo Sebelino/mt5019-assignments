@@ -178,7 +178,7 @@ Based on the table above, we want to select model 13, i.e.
 which has the lowest AIC value (113.7953) and a p-value
 of 0.935.
 
-# 3. Model interpretation
+## 3. Model interpretation
 
 The model we selected looks like this:
 
@@ -225,7 +225,7 @@ Non-significant associations (\(p\geq 0.05\)) are:
 - The interaction between the mother's age and gestational age (\(X:Z\)),
 - The interaction between smoking habits and child survival (\(Y:V\)).
 
-# 4. Logistic model
+## 4. Logistic model
 
 We now want to fit a logistic model
 where \(V\) (child survival) is a response variable.
@@ -300,7 +300,7 @@ results4 <- data.frame(
 print(results4)
 ```
 
-## Mother's age
+### Mother's age
 
 The estimated odds ratio of \(0.627\) for \(X\) is less than 1,
 suggesting that older mothers have lower odds of child survival.
@@ -319,7 +319,7 @@ If there were more age categories, or if \(X\)
 were an interval variable, we might have been able to
 make a more nuanced conclusion.
 
-## Gestational age
+### Gestational age
 
 The estimated odds ratio of \(27.4\) for \(Z\) is greater than 1,
 suggesting that children born after 260 days of gestation have higher odds of survival compared to those born before 260 days.
@@ -335,7 +335,7 @@ This result is hardly surprising, as children born prematurely
 may be miscarriages or premature births
 where the vital organs of the infant may be underdeveloped.
 
-## Smoking habits
+### Smoking habits
 
 The estimated odds ratio for the smoking risk factor (\(Y\)) indicates that mothers
 who smoke 5+ cigarettes per day
@@ -355,7 +355,7 @@ could be due to the small sample size
 or the fact that the effect of smoking on survival
 is mediated or overshadowed by other factors, such as gestational age (\(Z\)) which has a very strong effect.
 
-## Intercept
+### Intercept
 
 The estimated odds ratio of \(6.13\) for the intercept means
 that the odds of child survival are \(6.13\) times higher
@@ -383,7 +383,7 @@ Hence, it does not seem unreasonable
 that one child of this kind dies for each six children
 of the same kind who survive.
 
-# 5. Logistic-loglinear model relationship
+## 5. Logistic-loglinear model relationship
 
 In problem 4, we selected the logistic regression model with the lowest AIC
 value, namely:
@@ -424,7 +424,7 @@ we should expect the coefficients listed in Table 1 to have equal values.
 *Table 1: Each term in the logistic model and its matching term in the loglinear model.*
 </div>
 
-## Estimates
+### Estimates
 
 Fitting the logistic model yields the following estimates:
 
@@ -484,7 +484,7 @@ when the values were computed.
 
 TODO: check significance p-value of models selected by step
 
-## Standard errors
+### Standard errors
 Calculating the standard errors yields similar results.
 
 Standard errors in the logistic model:
