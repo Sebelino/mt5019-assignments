@@ -246,14 +246,13 @@ This may continue until the main effects model,
 Output:
 
 ```{r}
-msat <- glm(v ~ x * y * z, weights = n, family = binomial, data = data)
-mstep_AIC <- step(msat, direction = "backward", trace = TRUE, scope = list(upper = v ~ x * y * z, lower = v ~ x + y + z))
+model4 <- step(msat4, direction = "backward", trace = TRUE, scope = list(upper = v ~ x * y * z, lower = v ~ x + y + z))
 ```
 We see that the model with the lowest AIC (`1092.76`)
 is the main effects model, \(V \sim X+Y+Z\).
 We can compare its deviance and p-value compared to the saturated model:
 ```{r}
-anova(mstep_AIC, msat, test = "LRT")
+anova_msat4
 ```
 We see that the p-value is:
 \[\text{p-value} = P(\chi^2_4 > 1.4875) = 0.8288 < 0.05\]
@@ -264,8 +263,7 @@ We can also compare it to the model
 with the second-lowest AIC value (`1094.22`), i.e. \(V \sim X+Y+Z+X:Z\):
 
 ```{r}
-second_simplest_model <- glm(v ~ x + y + z + x:z, weights = n, family = binomial, data = data)
-anova(mstep_AIC, second_simplest_model, test = "LRT")
+anova_m
 ```
 
 The more complex model has a slightly lower residual deviance
@@ -281,31 +279,13 @@ Hence, we choose the simpler main effects model.
 
 The main effects model has the following coefficients:
 ```{r}
-summary(mstep_AIC)
+summary(model4)
 ```
 
 Based on these, we calculate the odds ratios and associated confidence intervals:
 
 ```{r}
-# Extract coefficients
-coefficients4 <- summary(mstep_AIC)$coefficients
-beta4 <- coefficients4[, "Estimate"]
-se4 <- coefficients4[, "Std. Error"]
-
-# Compute odds ratios and confidence intervals
-odds_ratios4 <- exp(beta4)
-lower_ci4 <- exp(beta4 - 1.96 * se4)
-upper_ci4 <- exp(beta4 + 1.96 * se4)
-
-# Combine results into a data frame
-results4 <- data.frame(
-  Odds_Ratio = odds_ratios4,
-  Lower_CI = lower_ci4,
-  Upper_CI = upper_ci4,
-  P_Value = coefficients4[, "Pr(>|z|)"]
-)
-results4$P_Value <- fmt_decimal(results4, "P_Value")
-print(results4)
+results4
 ```
 
 ### Mother's age
@@ -437,47 +417,16 @@ we should expect the coefficients listed in Table 1 to have equal values.
 Fitting the logistic model yields the following estimates:
 
 ```{r}
-model4 <- glm(v ~ x + y + z, weights = n, family = binomial(link = logit), data = data)
-coefficients <- summary(model4)$coefficients
-beta <- coefficients[, "Estimate"]
-print(beta)
+beta4
 ```
 Fitting the equivalent loglinear model yields the following estimates:
 ```{r}
-# https://stats.stackexchange.com/questions/476742/cant-find-loglinear-models-corresponding-logistic-regression-model
-# https://teaching.sociology.ul.ie/SSS/lugano/node58.html
-model4_loglinear <- glm(
-  n ~ x + y + z + v
-    + x:y
-    + x:z
-    + x:v
-    + y:z
-    + y:v
-    + z:v
-    + x:y:z,
-  family = poisson(link = log), data = data
-)
-coefficients_ll <- summary(model4_loglinear)$coefficients
-beta_ll <- coefficients_ll[, "Estimate"]
-print(beta_ll)
+beta4_ll
 ```
 When comparing each pair of terms according to Table 1,
 we see that each pair of coefficient values are virtually identical:
 ```{r}
-comparison <- data.frame(
-  LogisticParam = c("(Intercept)", "x", "y", "z"),
-  LoglinearParam = c("v", "x:v", "y:v", "z:v"),
-  Logistic = beta[c("(Intercept)", "x", "y", "z")],
-  Loglinear = beta_ll[c("v", "x:v", "y:v", "z:v")],
-  Difference = c(
-    beta_ll["v"] - beta["(Intercept)"],
-    beta_ll["x:v"] - beta["x"],
-    beta_ll["y:v"] - beta["y"],
-    beta_ll["z:v"] - beta["z"]
-  ),
-  row.names = NULL
-)
-print(comparison)
+comparison
 ```
 The biggest difference is smaller than \(10^{-10}\).
 This difference is negligible and likely due to loss of numerical precision
@@ -488,28 +437,15 @@ Calculating the standard errors yields similar results.
 
 Standard errors in the logistic model:
 ```{r}
-se <- coefficients[, "Std. Error"]
-print(se)
+se4
 ```
 Standard errors in the loglinear model:
 ```{r}
-se_ll <- coefficients_ll[, "Std. Error"]
-print(se_ll)
+se4_ll
 ```
 Again, we see that the standard errors are virtually identical:
 ```{r}
-comparison_se <- data.frame(
-  LogisticParam = c("(Intercept)", "x", "y", "z"),
-  LoglinearParam = c("v", "x:v", "y:v", "z:v"),
-  Logistic = se[c("(Intercept)", "x", "y", "z")],
-  Loglinear = se_ll[c("v", "x:v", "y:v", "z:v")],
-  Difference = c(
-    se_ll["v"] - se["(Intercept)"],
-    se_ll["x:v"] - se["x"]
-  ),
-  row.names = NULL
-)
-print(comparison_se)
+comparison_se
 ```
 The biggest difference is smaller than \(10^{-6}\) which is negligible.
 This confirms that the loglinear model matches the logistic model we chose.

@@ -106,72 +106,82 @@ main <- function() {
 
   # Exercise 3:1.4
   # Fit the model with main effects and interactions
+  msat4 <- glm(v ~ x * y * z, weights = n, family = binomial, data = data)
+  model4 <- step(msat4, direction = "backward", trace = TRUE, scope = list(upper = v ~ x * y * z, lower = v ~ x + y + z))
 
-  data4 <- data
+  # Deviance relative to saturated model
+  anova_msat4 <- anova(model4, msat4, test = "LRT")
 
-  saturated_model4 <- glm(v ~ x * y * z, weights = n, data = data4, family = binomial)
-
-  models4 <- list(
-    "xyz (Saturated)" = saturated_model4,
-    "xy, xz, yz" = glm(v ~ x * y + x * z + y * z, family = binomial, weights = n, data = data4),
-    "xy, xz" = glm(v ~ x * y + x * z, family = binomial, weights = n, data = data4),
-    "xy, yz" = glm(v ~ x * y + y * z, family = binomial, weights = n, data = data4),
-    "yz, xz" = glm(v ~ y * z + x * z, family = binomial, weights = n, data = data4),
-    "yz, x" = glm(v ~ y * z + x, family = binomial, weights = n, data = data4),
-    "xz, y" = glm(v ~ x * z + y, family = binomial, weights = n, data = data4),
-    "xy, z" = glm(v ~ x * y + z, family = binomial, weights = n, data = data4),
-    "x, y, z" = glm(v ~ x + y + z, family = binomial, weights = n, data = data4)
-  )
-
-  # Compare models
-  model_table4 <- data.frame(
-    Model = character(), Deviance = numeric(), df = numeric(),
-    p_value = numeric(), AIC = numeric()
-  )
-
-  for (model_name in names(models4)) {
-    model <- models4[[model_name]]
-    anova_res <- anova(model, saturated_model4, test = "LRT")
-    model_table4 <- rbind(model_table4, data.frame(
-      Model = model_name,
-      # Formula = model$formula,
-      Deviance = anova_res$Deviance[2],
-      df = anova_res$Df[2],
-      p_value = ifelse(model_name == "xyz (Saturated)", NA, anova_res$`Pr(>Chi)`[2]),
-      AIC = AIC(model)
-    ))
-  }
-
-  print(summary(saturated_model4))
-
-  model4 <- models4$"x, y, z"
-
+  # Deviance relative to the second simplest model
+  second_simplest_model <- glm(v ~ x + y + z + x:z, weights = n, family = binomial, data = data)
+  anova_m <- anova(model4, second_simplest_model, test = "LRT")
+  
   # Extract coefficients
-  coefficients <- summary(model4)$coefficients
-  beta <- coefficients[, "Estimate"]
-  se <- coefficients[, "Std. Error"]
-
+  coefficients4 <- summary(model4)$coefficients
+  beta4 <- coefficients4[, "Estimate"]
+  se4 <- coefficients4[, "Std. Error"]
+  
   # Compute odds ratios and confidence intervals
-  odds_ratios <- exp(beta)
-  lower_ci <- exp(beta - 1.96 * se)
-  upper_ci <- exp(beta + 1.96 * se)
-
+  odds_ratios4 <- exp(beta4)
+  lower_ci4 <- exp(beta4 - 1.96 * se4)
+  upper_ci4 <- exp(beta4 + 1.96 * se4)
+  
   # Combine results into a data frame
   results4 <- data.frame(
-    Odds_Ratio = odds_ratios,
-    Lower_CI = lower_ci,
-    Upper_CI = upper_ci,
-    P_Value = coefficients[, "Pr(>|z|)"]
+    Odds_Ratio = odds_ratios4,
+    Lower_CI = lower_ci4,
+    Upper_CI = upper_ci4,
+    P_Value = coefficients4[, "Pr(>|z|)"]
   )
-
-  # Print results
+  results4$P_Value <- fmt_decimal(results4, "P_Value")
   print(results4)
 
   # Exercise 3:1.5
+  # https://stats.stackexchange.com/questions/476742/cant-find-loglinear-models-corresponding-logistic-regression-model
+  # https://teaching.sociology.ul.ie/SSS/lugano/node58.html
+  model4_loglinear <- glm(
+    n ~ x + y + z + v
+    + x:y
+    + x:z
+    + x:v
+    + y:z
+    + y:v
+    + z:v
+    + x:y:z,
+    family = poisson(link = log), data = data
+  )
+  coefficients4_ll <- summary(model4_loglinear)$coefficients
+  beta4_ll <- coefficients4_ll[, "Estimate"]
+  se4_ll <- coefficients4_ll[, "Std. Error"]
 
-  print(data)
-  model4_loglinear <- glm(n ~ x + y + z + v, family = poisson, data = data)
-
+  comparison <- data.frame(
+    LogisticParam = c("(Intercept)", "x", "y", "z"),
+    LoglinearParam = c("v", "x:v", "y:v", "z:v"),
+    Logistic = beta4[c("(Intercept)", "x", "y", "z")],
+    Loglinear = beta4_ll[c("v", "x:v", "y:v", "z:v")],
+    Difference = c(
+      beta4_ll["v"] - beta4["(Intercept)"],
+      beta4_ll["x:v"] - beta4["x"],
+      beta4_ll["y:v"] - beta4["y"],
+      beta4_ll["z:v"] - beta4["z"]
+    ),
+    row.names = NULL
+  )
+  print(comparison)
+  
+  comparison_se <- data.frame(
+    LogisticParam = c("(Intercept)", "x", "y", "z"),
+    LoglinearParam = c("v", "x:v", "y:v", "z:v"),
+    Logistic = se4[c("(Intercept)", "x", "y", "z")],
+    Loglinear = se4_ll[c("v", "x:v", "y:v", "z:v")],
+    Difference = c(
+      se4_ll["v"] - se4["(Intercept)"],
+      se4_ll["x:v"] - se4["x"]
+    ),
+    row.names = NULL
+  )
+  print(comparison_se)
+  
   return(list(
     data = data,
     msat = msat,
@@ -179,10 +189,17 @@ main <- function() {
     model_table_short = model_table_short,
     best_model = best_model,
     associations = associations,
-    model_table4 = model_table4,
-    results4 = results4,
+    msat4 = msat4,
     model4 = model4,
-    model4_loglinear = model4_loglinear
+    anova_msat4 = anova_msat4,
+    anova_m = anova_m,
+    results4 = results4,
+    beta4 = beta4,
+    se4 = se4,
+    beta4_ll = beta4_ll,
+    se4_ll = se4_ll,
+    comparison = comparison,
+    comparison_se = comparison_se
   ))
 }
 
