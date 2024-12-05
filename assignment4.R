@@ -23,6 +23,7 @@ loocv_auc <- function(data, formula) {
 }
 
 exercise41 <- function(data) {
+  ## Exercise 4:1.1
   # Empty Model - AIC:212
   m1 <- glm(v2 ~ 1, family = binomial, data = data) # Empty model (only intercept)
 
@@ -176,38 +177,7 @@ exercise41 <- function(data) {
   )
 }
 
-main <- function() {
-  # Load the necessary libraries
-  library(pROC)
-  library(rpart)
-  library(rpart.plot)
-
-  # Load the dataset
-  data_original <- read.csv("data_ca4.csv")
-  data <- data_original
-
-  # RMD TODO - Explain Pre-processing using counts of the categories for ethnicities and consciousness level
-  # Combine categories for Ethnicity (e.g., combine 2 and 3 into a single category)
-  data$v5[data$v5 > 1] <- 0 # Combine categories 2 and 3 into 0 (other)
-
-  # Combine categories for Consciousness level (e.g., combine 1 and 2 into a single category)
-  data$v21[data$v21 > 1] <- 1 # Combine unconscious and coma into a single category
-
-  # Remove the column named "v1"
-  data <- data[, !names(data) %in% "v1"]
-
-  # Check the modified dataset
-  table(data$v5) # Verify the Ethnicity column changes
-  table(data$v21) # Verify the Consciousness level changes
-
-  # Optional: Ensure all categorical variables are factors
-  # TODO: Check before and after converting to factors - See if it makes a difference
-  categorical_cols <- c("v4", "v5", "v6", "v7", "v8", "v9", "v10", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21")
-  data[categorical_cols] <- lapply(data[categorical_cols], as.factor)
-
-  ## Exercise 4:1.1
-  # exercise41(data)
-
+exercise42 <- function(data) {
   # Exercise 4:2.1
 
   # Set working directory and read data (replace "path_to_file" with actual path)
@@ -240,58 +210,58 @@ main <- function() {
 
   # Plot the tree
   rpart.plot(tree_model, main = "Decision Tree (Initial Model)", digits = 3)
-  
+
   ## Exercise 4:2.2
-  
+
   # Predict probabilities for the decision tree
-  tree_probs <- predict(tree_model, type = "prob")[, 2]  # Probability for class "Not Survive" (v2 = 1)
-  
+  tree_probs <- predict(tree_model, type = "prob")[, 2] # Probability for class "Not Survive" (v2 = 1)
+
   # ROC and AUC for Decision Tree
   tree_roc <- roc(data4$v2, tree_probs)
   print(tree_roc)
   plot(tree_roc, main = "ROC Curve for Decision Tree Model", col = "blue")
-  
+
   # Logistic Regression Model
   logistic_model <- glm(v2 ~ v21 + v14 + v3 + v7 + v11 + v18 + v17, family = binomial, data = data)
-  
+
   # Predict probabilities for logistic regression
   logistic_probs <- predict(logistic_model, type = "response")
-  
+
   # ROC and AUC for Logistic Regression
   logistic_roc <- roc(data4$v2, logistic_probs)
   print(logistic_roc)
-  plot(logistic_roc, add = TRUE, col = "red")  # Add ROC curve for logistic regression
-  
+  plot(logistic_roc, add = TRUE, col = "red") # Add ROC curve for logistic regression
+
   # Compare AUC
   cat("AUC for Decision Tree:", auc(tree_roc), "\n")
   cat("AUC for Logistic Regression:", auc(logistic_roc), "\n")
-  
-  
+
+
   # Initialize a vector to store LOOCV predictions
   loocv_probs <- numeric(nrow(data4))
-  
+
   # Perform LOOCV
   for (i in 1:nrow(data4)) {
     # Training data (exclude the i-th observation)
     train_data <- data4[-i, ]
     # Test data (only the i-th observation)
     test_data <- data4[i, , drop = FALSE]
-    
+
     # Fit the decision tree model on training data
     loocv_tree <- rpart(v2 ~ ., method = "class", data = train_data, parms = list(split = "information"), cp = 0.001)
-    
+
     # Predict the probability for the test observation
     loocv_probs[i] <- predict(loocv_tree, test_data, type = "prob")[, 2]
   }
-  
+
   # Calculate the LOOCV-corrected AUC
   loocv_roc <- roc(data4$v2, loocv_probs)
   print(loocv_roc)
   plot(loocv_roc, main = "LOOCV-Corrected ROC Curve for Decision Tree", col = "blue")
-  
+
   logistic_roc_loocv <- loocv_auc(data4, v2 ~ v21 + v14 + v3 + v7 + v11 + v18 + v17)
   plot(logistic_roc_loocv$ROC, add = TRUE, col = "red")
-  
+
   # Print the LOOCV-corrected AUC
   cat("LOOCV-Corrected AUC for Decision Tree:", auc(loocv_roc), "\n")
   cat("LOOCV-Corrected AUC for Logistic Regression:", logistic_roc_loocv$AUC, "\n")
@@ -299,6 +269,46 @@ main <- function() {
   return(list(
     data4 = data4,
     tree_model = tree_model
+  ))
+}
+
+main <- function() {
+  # Load the necessary libraries
+  library(pROC)
+  library(rpart)
+  library(rpart.plot)
+
+  # Load the dataset
+  data_original <- read.csv("data_ca4.csv")
+  data <- data_original
+
+  # RMD TODO - Explain Pre-processing using counts of the categories for ethnicities and consciousness level
+  # Combine categories for Ethnicity (e.g., combine 2 and 3 into a single category)
+  data$v5[data$v5 > 1] <- 0 # Combine categories 2 and 3 into 0 (other)
+
+  # Combine categories for Consciousness level (e.g., combine 1 and 2 into a single category)
+  data$v21[data$v21 > 1] <- 1 # Combine unconscious and coma into a single category
+
+  # Remove the column named "v1"
+  data <- data[, !names(data) %in% "v1"]
+
+  # Check the modified dataset
+  table(data$v5) # Verify the Ethnicity column changes
+  table(data$v21) # Verify the Consciousness level changes
+
+  # Optional: Ensure all categorical variables are factors
+  # TODO: Check before and after converting to factors - See if it makes a difference
+  categorical_cols <- c("v4", "v5", "v6", "v7", "v8", "v9", "v10", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21")
+  data[categorical_cols] <- lapply(data[categorical_cols], as.factor)
+
+  ## Exercise 4:1
+  # exercise41(data)
+
+  ## Exercise 4:2
+  r42 <- exercise42(data)
+
+  return(list(
+    r42 = r42
   ))
 }
 

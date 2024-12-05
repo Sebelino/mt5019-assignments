@@ -19,5 +19,5 @@ knitr::opts_chunk$set(echo = FALSE, comment = "")
 # Exercise 4:2
 
 ```{r}
-rpart.plot(tree_model, main = "Decision Tree (Initial Model)", digits = 3)
+rpart.plot(r42$tree_model, main = "Decision Tree (Initial Model)", digits = 3)
 ```
