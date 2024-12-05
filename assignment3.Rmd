@@ -285,7 +285,7 @@ The main effects model has the following coefficients:
 summary(mstep_AIC)
 ```
 
-Based on these, we calculate the odds ratio and associated confidence intervals:
+Based on these, we calculate the odds ratios and associated confidence intervals:
 
 ```{r}
 # Extract coefficients
@@ -305,6 +305,7 @@ results4 <- data.frame(
   Upper_CI = upper_ci4,
   P_Value = coefficients4[, "Pr(>|z|)"]
 )
+results4$P_Value <- fmt_decimal(results4, "P_Value")
 print(results4)
 ```
 
@@ -313,7 +314,7 @@ print(results4)
 The estimated odds ratio of \(0.627\) for \(X\) is less than 1,
 suggesting that older mothers have lower odds of child survival.
 
-The p-value is \(0.00954\) which is less than \(0.05\).
+The p-value is approximately \(0.01\) which is less than \(0.05\).
 Hence, we reject the null hypothesis that the odds ratio is 1.
 We are 95 \% confident that the true odds ratio lies in the
 interval \([0.440, 0.892]\).
