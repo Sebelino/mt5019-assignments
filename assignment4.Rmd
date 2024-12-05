@@ -1,0 +1,196 @@
+---
+title: "Computer Assignment 4"
+author:
+  - "Your Name (Your ID)"
+date: "2024-04-XX"
+output:
+  pdf_document:
+    fig_caption: true
+  html_document:
+    fig_caption: true
+---
+
+```{r, echo=FALSE, results='hide', fig.show='hide'}
+source("assignment4.R")
+knitr::opts_chunk$set(echo = TRUE, comment = "")
+```
+
+# Exercise 4:1
+
+## 1. Data Pre-processing
+
+### Combining Categories
+
+The dataset includes categorical variables for Ethnicity (`v5`) and Consciousness level (`v21`). We combine categories to simplify the analysis:
+
+- **Ethnicity**: Categories 2 and 3 are combined into a single category (0: other).
+- **Consciousness level**: Categories 1 and 2 are combined into a single category (1: unconscious and coma).
+
+```{r}
+# Load the dataset
+data_original <- read.csv("data_ca4.csv")
+data <- data_original
+
+# Combine categories for Ethnicity
+data$v5[data$v5 > 1] <- 0  # Combine categories 2 and 3 into 0 (other)
+
+# Combine categories for Consciousness level
+data$v21[data$v21 > 1] <- 1  # Combine unconscious and coma into a single category
+
+# Remove the column named "v1"
+data <- data[, !names(data) %in% "v1"]
+
+# Check the modified dataset
+table(data$v5)  # Verify the Ethnicity column changes
+table(data$v21)  # Verify the Consciousness level changes
+```
+
+### Converting to Factors
+
+We convert the relevant columns to factors to ensure they are treated as categorical variables in the logistic regression models.
+
+```{r}
+# Convert categorical variables to factors
+categorical_cols <- c("v4", "v5", "v6", "v7", "v8", "v9", "v10", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21")
+data[categorical_cols] <- lapply(data[categorical_cols], as.factor)
+```
+
+## 2. Model Fitting
+
+### Empty Model
+
+We start with an empty model that includes only the intercept.
+
+```{r}
+# Empty model (only intercept)
+m1 <- glm(v2 ~ 1, family = binomial, data = data)
+summary(m1)
+```
+
+### Full Model
+
+Next, we fit a full model that includes all predictor variables.
+
+```{r}
+# Full model
+full_model <- glm(v2 ~ ., data = data, family = binomial)
+summary(full_model)
+```
+
+### Stepwise Model Selection
+
+We use stepwise model selection to find the best model based on AIC and BIC.
+
+```{r}
+# Stepwise model selection using AIC
+mstep1_AIC <- step(m1, direction = "forward", scope = list(upper = full_model), trace = TRUE)
+summary(mstep1_AIC)
+
+# Stepwise model selection using BIC
+mstep1_BIC <- step(m1, direction = "forward", scope = list(upper = full_model), k = log(nrow(data)), trace = TRUE)
+summary(mstep1_BIC)
+```
+
+## 3. Odds Ratios and Confidence Intervals
+
+We calculate the odds ratios and confidence intervals for the coefficients of the final model.
+
+```{r}
+# Fit the final model
+final_model <- glm(v2 ~ v21 + v14 + v3 + v7 + v11 + v18 + v17, family = binomial, data = data)
+
+# Compute Odds and CI for final model's coefficients
+exp_coef <- exp(coef(final_model))
+conf_intervals <- exp(confint(final_model))
+odds_ratios <- data.frame(
+  Variable = names(exp_coef),
+  Odds_Ratio = exp_coef,
+  Lower_CI = conf_intervals[, 1],
+  Upper_CI = conf_intervals[, 2]
+)
+print(odds_ratios)
+```
+
+### Interpretation of Odds Ratios
+
+- **v21**: The odds ratio for the combined category of unconscious and coma (1) compared to other consciousness levels (0) is approximately [Odds Ratio]. This means that the odds of the outcome are [Odds Ratio] times higher for individuals in the unconscious and coma category, holding other variables constant.
+- **v14**: The odds ratio for [description of v14] is approximately [Odds Ratio]. This means that the odds of the outcome are [Odds Ratio] times higher for a one-unit increase in [description of v14], holding other variables constant.
+- **v3**: The odds ratio for [description of v3] is approximately [Odds Ratio]. This means that the odds of the outcome are [Odds Ratio] times higher for a one-unit increase in [description of v3], holding other variables constant.
+- **v7**: The odds ratio for [description of v7] is approximately [Odds Ratio]. This means that the odds of the outcome are [Odds Ratio] times higher for a one-unit increase in [description of v7], holding other variables constant.
+- **v11**: The odds ratio for [description of v11] is approximately [Odds Ratio]. This means that the odds of the outcome are [Odds Ratio] times higher for a one-unit increase in [description of v11], holding other variables constant.
+- **v18**: The odds ratio for [description of v18] is approximately [Odds Ratio]. This means that the odds of the outcome are [Odds Ratio] times higher for a one-unit increase in [description of v18], holding other variables constant.
+- **v17**: The odds ratio for [description of v17] is approximately [Odds Ratio]. This means that the odds of the outcome are [Odds Ratio] times higher for a one-unit increase in [description of v17], holding other variables constant.
+
+## 4. Hosmer-Lemeshow Goodness-of-Fit Test
+
+We perform the Hosmer-Lemeshow goodness-of-fit test to assess the fit of the logistic regression model.
+
+```{r}
+# Load the necessary library
+library(ResourceSelection)
+
+# Obtain predicted probabilities
+predicted_probs <- predict(final_model, type = "response")
+
+# Perform the Hosmer-Lemeshow goodness-of-fit test
+hoslem_test <- hoslem.test(data$v2, predicted_probs, g = 10) # 'g' specifies number of groups
+print(hoslem_test)
+```
+
+### Interpretation of Hosmer-Lemeshow Test
+
+The Hosmer-Lemeshow test assesses whether the observed event rates match the expected event rates in subgroups of the model population. A non-significant p-value (p > 0.05) indicates a good fit. In this case, the p-value is [p-value], suggesting that the model fits the data well.
+
+## 5. Confusion Matrices and Metrics
+
+We generate confusion matrices and calculate accuracy, sensitivity, and specificity for different cutoff values.
+
+```{r}
+# Define cutoff values
+cutoffs <- c(0.5, 0.3, 0.7, 0.25, 0.4, 0.2)  # Cutoffs of 0.5, 0.3, and 0.7
+
+# Create an empty list to store confusion matrices and metrics
+results <- list()
+
+# Loop through each cutoff to calculate metrics
+for (cutoff in cutoffs) {
+  # Convert probabilities to binary predictions based on the cutoff
+  predicted_class <- ifelse(predicted_probs > cutoff, 1, 0)
+  
+  # Generate the confusion matrix
+  confusion_matrix <- table(Actual = data$v2, Predicted = predicted_class)
+  
+  # Calculate metrics
+  accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+  sensitivity <- confusion_matrix[2, 2] / sum(confusion_matrix[2, ])  # TP / (TP + FN)
+  specificity <- confusion_matrix[1, 1] / sum(confusion_matrix[1, ])  # TN / (TN + FP)
+  
+  # Store the results
+  results[[as.character(cutoff)]] <- list(
+    Confusion_Matrix = confusion_matrix,
+    Accuracy = accuracy,
+    Sensitivity = sensitivity,
+    Specificity = specificity
+  )
+}  
+# Print metrics for each cutoff
+for (cutoff in cutoffs) {
+  cat("\nCutoff:", cutoff, "\n")
+  print(results[[as.character(cutoff)]]$Confusion_Matrix)
+  cat("Accuracy:", results[[as.character(cutoff)]]$Accuracy, "\n")
+  cat("Sensitivity:", results[[as.character(cutoff)]]$Sensitivity, "\n")
+  cat("Specificity:", results[[as.character(cutoff)]]$Specificity, "\n")
+}
+```
+
+## 6. ROC Curves and AUC
+
+We plot ROC curves and calculate AUC for different models.
+
+```{r}
+# Load the necessary library
+library(pROC)
+
+# Fit the models
+full_model <- glm(v2 ~ ., family = binomial, data = data) # Full
+model_
