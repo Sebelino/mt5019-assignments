@@ -1,0 +1,23 @@
+---
+title: "Computer Assignment 4"
+author:
+  - "Your Name (Your ID)"
+date: "2024-04-XX"
+output:
+  html_document:
+    fig_caption: true
+  pdf_document:
+    fig_caption: true
+---
+
+```{r, echo=FALSE, results='hide', fig.show='hide'}
+source("assignment4.R")
+list2env(ass, envir = .GlobalEnv)
+knitr::opts_chunk$set(echo = FALSE, comment = "")
+```
+
+# Exercise 4:2
+
+```{r}
+rpart.plot(tree_model, main = "Decision Tree (Initial Model)", digits = 3)
+```
