@@ -243,8 +243,6 @@ term at a time.
 This may continue until the main effects model,
 \(V\sim X+Y+Z\), is found.
 
-**TODO: Are we finding the best model incorrectly here as well?**
-
 Output:
 
 ```{r}
@@ -266,8 +264,8 @@ The more complex model has a slightly lower residual deviance
 (`1084.2` vs. `1084.8`), indicating a marginally better fit
 at the cost of higher model complexity.
 
-\[\text{p-value} = P(T_{\chi^2,1} \geq 0.53951) = 0.4626\]
-where \(T_{\chi^2,1}\) denotes the chi-squared likelihood ratio test statistic
+\[\text{p-value} = P(\chi^2_1 \geq 0.53951) = 0.4626\]
+where \(\chi^2_1\) denotes the chi-squared likelihood ratio test statistic
 with 1 degree of freedom.
 The p-value is greater than 0.05, so
 there is no evidence to suggest that the added \(X:Z\) term
@@ -384,22 +382,6 @@ Most children in this study survived
 Hence, it does not seem unreasonable
 that one child of this kind dies for each six children
 of the same kind who survive.
-
-**TODO we can prolly remove the below**
-
-```{r}
-model_table4
-```
-
-Based on the table, AIC is minimized for the
-main effects model \((X, Y, Z)\)
-(with AIC: `1092.757`),
-so we consider it the model that strikes the best balance
-between goodness-of-fit and model complexity.
-
-```{r}
-results4
-```
 
 # 5. Logistic-loglinear model relationship
 
