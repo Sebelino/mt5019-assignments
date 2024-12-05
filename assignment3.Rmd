@@ -252,7 +252,16 @@ mstep_AIC <- step(msat, direction = "backward", trace = TRUE, scope = list(upper
 ```
 We see that the model with the lowest AIC (`1092.76`)
 is the main effects model, \(V \sim X+Y+Z\).
-We can compare it to the model
+We can compare its deviance and p-value compared to the saturated model:
+```{r}
+anova(mstep_AIC, msat, test="LRT")
+```
+We see that the p-value is:
+\[\text{p-value} = P(\chi^2_4 > 1.4875) = 0.8288 < 0.05\]
+which indicates that
+the simpler model fits the data just as well as the saturated model.
+
+We can also compare it to the model
 with the second-lowest AIC value (`1094.22`), i.e. \(V \sim X+Y+Z+X:Z\):
 
 ```{r}
@@ -263,11 +272,10 @@ anova(mstep_AIC, second_simplest_model, test = "LRT")
 The more complex model has a slightly lower residual deviance
 (`1084.2` vs. `1084.8`), indicating a marginally better fit
 at the cost of higher model complexity.
+The corresponding p-value is:
 
-\[\text{p-value} = P(\chi^2_1 \geq 0.53951) = 0.4626\]
-where \(\chi^2_1\) denotes the chi-squared likelihood ratio test statistic
-with 1 degree of freedom.
-The p-value is greater than 0.05, so
+\[\text{p-value} = P(\chi^2_1 > 0.53951) = 0.4626\]
+which is greater than 0.05, so
 there is no evidence to suggest that the added \(X:Z\) term
 improves the model's fit significantly.
 Hence, we choose the simpler main effects model.
