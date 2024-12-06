@@ -189,15 +189,64 @@ exercise42 <- function(data) {
 
   # Example: Optimal tree based on experimentation
   tm_good_cp <- 0.001
-  tm_good <- make_tree(data4, "gini", tm_good_cp)
-  rpart.plot(tm_good, main = paste("Gini index, cp =", tm_good_cp))
+  tm_good_split <- "gini"
+  tm_good_split_name <- "Gini index"
+  tm_good <- make_tree(data4, tm_good_split, tm_good_cp)
+  rpart.plot(tm_good, main = paste(tm_good_split_name, "with cp =", tm_good_cp))
 
   ## Exercise 4:2.2
+  # ROC of Decision Tree
+  tree_probs <- predict(tm_good, type = "prob")[, 2]
+  tree_roc <- roc(data4$v2, tree_probs, levels = c(0, 1), direction = "<")
+
+  # ROC of Logistic Model
+  logistic_model <- glm(v2 ~ v21 + v14 + v3 + v7 + v11 + v18 + v17, family = binomial, data = data)
+  logistic_probs <- predict(logistic_model, type = "response")
+  logistic_roc <- roc(data4$v2, logistic_probs, levels = c(0, 1), direction = "<")
+
+  # Plot comparison
+  plot_tree_against_logistic(tree_roc, logistic_roc)
+
+  ## Exercise 4:2.3
+
+  # Initialize a vector to store LOOCV predictions
+  loocv_probs <- numeric(nrow(data4))
+
+  # Perform LOOCV
+  for (i in 1:nrow(data4)) {
+    # Training data (exclude the i-th observation)
+    train_data <- data4[-i, ]
+    # Test data (only the i-th observation)
+    test_data <- data4[i, , drop = FALSE]
+
+    # Fit the decision tree model on training data
+    loocv_tree <- rpart(
+      v2 ~ .,
+      method = "class", data = train_data,
+      parms = list(split = tm_good_split), cp = tm_good_cp
+    )
+
+    # Predict the probability for the test observation
+    loocv_probs[i] <- predict(loocv_tree, test_data, type = "prob")[, 2]
+  }
+
+  # Calculate the LOOCV-corrected AUC
+  tree_roc_loocv <- roc(data4$v2, loocv_probs, levels = c(0, 1), direction = "<")
+
+  logistic_roc_loocv <- loocv_auc(
+    data4,
+    v2 ~ v21 + v14 + v3 + v7 + v11 + v18 + v17
+  )$ROC
+  plot_tree_against_logistic(tree_roc_loocv, logistic_roc_loocv)
 
   return(list(
     data4 = data4,
     tm_good = tm_good,
-    tm_good_cp = tm_good_cp
+    tm_good_cp = tm_good_cp,
+    tree_roc = tree_roc,
+    logistic_roc = logistic_roc,
+    tree_roc_loocv = tree_roc_loocv,
+    logistic_roc_loocv = logistic_roc_loocv
   ))
 }
 
@@ -205,6 +254,15 @@ make_tree <- function(data, split_method, cp) {
   parms <- list(split = split_method)
   tm <- rpart(v2 ~ ., data = data, method = "class", parms = parms, cp = cp)
   return(tm)
+}
+
+plot_tree_against_logistic <- function(tree_roc, logistic_roc) {
+  plot(tree_roc, main = "ROC Curve", col = "blue")
+  plot(logistic_roc, add = TRUE, col = "red")
+  legend("bottomright",
+    legend = c("Decision tree", "Logistic model"),
+    col = c("blue", "red"), lwd = 2
+  )
 }
 
 plot_good_tree <- function() {
@@ -267,7 +325,11 @@ main <- function() {
     data = data,
     data4 = r42$data4,
     tm_good = r42$tm_good,
-    tm_good_cp = r42$tm_good_cp
+    tm_good_cp = r42$tm_good_cp,
+    tree_roc = r42$tree_roc,
+    logistic_roc4 = r42$logistic_roc,
+    tree_roc_loocv = r42$tree_roc_loocv,
+    logistic_roc_loocv4 = r42$logistic_roc_loocv
   ))
 }
 
