@@ -25,8 +25,8 @@ knitr::opts_chunk$set(echo = FALSE, comment = "")
 We will now study the usefulness of decision trees
 as an alternative to the logistic models.
 We start by generating decision trees using both splitting methods
-(Gini index and information gain) with the following values of the complexity
-parameter:
+(Gini index and information gain)
+with the following values of the complexity parameter:
 \[\text{cp} \in \{0.1, 0.01, 0.001\}\]
 
 We plot each pair of trees and study the structure of each tree below.
@@ -59,7 +59,7 @@ we see that
 the choice of splitting method affects the structure of the tree.
 The Gini index tree consists of 11 nodes and 5 splits,
 whereas the Information gain tree consists of 15 nodes and 7 splits.
-It appears that the higher the value of the complexity parameter,
+It appears that the lower the value of the complexity parameter,
 the more complex the tree.
 
 ### Interpretation
@@ -155,7 +155,7 @@ in predictive power.
 The decision tree is even shown to outperform
 the logistic model overall,
 as evidenced by the higher AUC value.
-In particular, if the specificity is approximately 0.7,
+In particular, if the specificity is approximately 0.8,
 we see that the decision tree yields better values of sensitivity.
 However, we should take these results with a grain of salt,
 as this is done without any correction for overfitting.
