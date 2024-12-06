@@ -189,8 +189,8 @@ exercise42 <- function(data) {
 
   # Example: Optimal tree based on experimentation
   tm_good_cp <- 0.001
-  tm_good_split <- "gini"
-  tm_good_split_name <- "Gini index"
+  tm_good_split <- "information"
+  tm_good_split_name <- "Information gain"
   tm_good <- make_tree(data4, tm_good_split, tm_good_cp)
   rpart.plot(tm_good, main = paste(tm_good_split_name, "with cp =", tm_good_cp))
 
@@ -243,6 +243,7 @@ exercise42 <- function(data) {
     data4 = data4,
     tm_good = tm_good,
     tm_good_cp = tm_good_cp,
+    tm_good_split_name = tm_good_split_name,
     tree_roc = tree_roc,
     logistic_roc = logistic_roc,
     tree_roc_loocv = tree_roc_loocv,
@@ -263,12 +264,6 @@ plot_tree_against_logistic <- function(tree_roc, logistic_roc) {
     legend = c("Decision tree", "Logistic model"),
     col = c("blue", "red"), lwd = 2
   )
-}
-
-plot_good_tree <- function() {
-  cp <- 0.001
-  tm_good <- make_tree("gini", cp)
-  rpart.plot(tm_good, main = paste("Gini index, cp =", cp))
 }
 
 plot_decision_trees <- function(data, cp) {
@@ -326,6 +321,7 @@ main <- function() {
     data4 = r42$data4,
     tm_good = r42$tm_good,
     tm_good_cp = r42$tm_good_cp,
+    tm_good_split_name = r42$tm_good_split_name,
     tree_roc = r42$tree_roc,
     logistic_roc4 = r42$logistic_roc,
     tree_roc_loocv = r42$tree_roc_loocv,

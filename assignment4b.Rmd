@@ -66,48 +66,65 @@ the more complex the tree.
 
 A good decision tree is one that strikes the right balance between
 interpretability and predictive power.
-A tree may have a mediocre predictive power
-compared to a logistic model, but it can still be useful
-if it simple enough so that non-experts can
+A decision tree which has mediocre predictive power
+can still be useful if the tree simple enough so that non-experts can
 understand it.
 
-Let us examine the structure of the second-most complex decision
-tree. This is the tree that uses the Gini index splitting method
+Nevertheless,
+let us examine the structure of the most complex decision
+tree we found.
+This is the tree that uses the information gain splitting method
 with a complexity parameter value of \(\text{cp}=0.001\).
+Although the tree is relatively complex, it may pay off in predictive power.
 
 ```{r}
-rpart.plot(tm_good, main = paste("Gini index, cp =", tm_good_cp))
+rpart.plot(tm_good, main = paste(tm_good_split_name, "with cp =", tm_good_cp))
 ```
 
-The tree consists of 11 nodes and 5 splits.
+The tree consists of 15 nodes and 7 splits.
 The tree predicts the target variable \(V_2\) (survival),
 which has two possible outcomes, \(V_2=0\) (survived) and \(V_2=1\) (passed away).
 
-* Top node: If we do not know anything about the patient,
+* Top node: Assuming we do not know anything about the patient,
 the probability of non-survival is 0.20.
+
 * `v21=0`: This is the first split.
 If the patient is conscious (\(V_{21}=0\)),
 we proceed to the left child node.
 If not, we proceed to the right child node,
 which states that the patient will pass away with a probability
-of 0.87. This is estimated to happen for 8 % of all patients.
+of 0.87. This is predicted to happen for 8 % of all patients.
+
 * `v11>=88`: This is the second split. If the blood pressure is high (\(V_{11}\geq 88\) mm Hg),
 we proceed to the left child node.
 If not, the patient passes away with a probability of 0.67.
 Only 4 \% of the patients suffer this fate.
-* `v3<75`: This is the third split.
-If the patient is less than 75 years old (\(V_3\leq 75\)),
-the probability of passing away is only 0.08.
+
+* `v14=0`: This is the third split.
+If the admission is of type "not acute" (\(V_{14}=0\)),
+the patient is predicted to pass away with a probability of only 0.02.
+If it is acute, we proceed to the right child node.
+
+* `v3<49`: This is the fourth split.
+If the patient is less than 49 years old (\(V_3\leq 49\)),
+the probability of passing away is only 0.04.
 If not, we proceed to the right child node.
-* `v12<78`: This is the fourth split. If the heart rate
-is less than 78 beats per minute (\(V_{12}\leq 78\)),
-then the patient is estimated to to survive with full certainty.
-If not, we proceed to the right child node.
-* `v11>=137`: This is the fifth and final split.
-If the blood pressure is very high (\(V_{11}\geq 137\) mm Hg),
-the patient is estimated to pass away with a probability of
-only 0.17. If not, the patient is estimated to pass away with
-a probability of 0.53.
+
+* `v11>=149`: This is the fifth split.
+If the blood pressure is very high (\(V_{11}\geq 149\) mm Hg),
+the patient is predicted to pass away with a probability of
+only 0.09. If not, we proceed to the right child node.
+
+* `v3<74`: This is the sixth split.
+If the patient is less than 74 years old (\(V_3<74\)),
+we proceed to the left child node.
+If not, the probability of passing away is 0.42.
+
+* `v11<137`: This is the seventh and final split.
+If the blood pressure is relatively low (\(V_{11}<137\) mm Hg),
+the patient is predicted to pass away with a probability of
+only 0.14. If not, the patient is predicted
+to pass away with a probability of 0.57.
 
 ## 2. Predictive power
 
@@ -131,14 +148,15 @@ AUC for the logistic model:
 logistic_roc4$auc
 ```
 
-As we can see, the logistic model
-outperforms the decision tree in terms of predictive power,
+As we can see, the ROC curves for the logistic model
+and the decision tree overlap for the most part,
+suggesting that the two models are approximately equal
+in predictive power.
+The decision tree is even shown to outperform
+the logistic model overall,
 as evidenced by the higher AUC value.
-In particular, if the specificity is less than around 0.6,
-the logistic model yields better sensitivity.
-Otherwise, the two are roughly equally matched,
-with the decision tree even yielding a slightly
-higher sensitivity for a few values.
+In particular, if the specificity is approximately 0.7,
+we see that the decision tree yields better values of sensitivity.
 However, we should take these results with a grain of salt,
 as this is done without any correction for overfitting.
 
@@ -164,22 +182,25 @@ logistic_roc_loocv4$auc
 
 After applying LOOCV, we see that
 the predictive power of both models dropped.
-The AUC for the decision tree is now even lower than that of
-the logistic model.
-In particular, the decision tree is very poor at making
-correct predictions for low values of specificity.
+The AUC for the decision tree is now considerably lower than that of
+the logistic model, implying that the decision tree is
+comparatively worse overall.
+At a specificity around 1.0, the two models
+are shown to be equally matched.
+Between specificity values of 0.6 and 1.0,
+we see that the ROC curve of the logistic
+model is above that of the decision tree,
+suggesting that the logistic model outperforms
+the decision tree within this range.
+If high specificity is desired, the
+decision tree will probably not be useful.
+
+On the other hand, the decision tree is shown
+to outperform the logistic model
+for low values of specificity (0.0 to around 0.6).
 So if we are willing to accept a high rate of
-false positives, the logistic model may be a better choice.
+false positives, the decision tree may be a better choice.
 Indeed, in the context of an ICU, it may
 be wiser to err on the side of caution and
 assume that the patient is dying in times of doubt,
 as the decision we make is a matter of life or death.
-
-On the other hand,
-we observe that the decision tree
-yields sensitivity values comparable to those
-of the logistic model
-if we accept a specificity of around 70 \% - 100 \%.
-Perhaps a decision tree based on the Information gain
-splitting method would yield a better AUC value.
-
