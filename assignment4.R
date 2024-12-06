@@ -179,105 +179,43 @@ exercise41 <- function(data) {
 
 exercise42 <- function(data) {
   # Exercise 4:2.1
-  # TODO To Preprocess Or Not To Preprocess that is the question
+  # We are relying on the preprocessed data and that is probably fine
   data4 <- data
 
   # Fit and plot decision trees with different cp values
-  cp_values <- c(0.05, 0.01, 0.001)
-
-  for (cp in cp_values) {
-    cat("Fitting tree with cp =", cp, "\n")
-    tree <- rpart(v2 ~ ., data = data4, method = "class", parms = list(split = "gini"), cp = cp)
-    rpart.plot(tree, main = paste("Decision Tree (Gini) with cp =", cp), digits = 3)
-  }
-
-  tree3 <- rpart(v2 ~ ., method = "class", data = data4, parms = list(split = "information"), cp = 0.01)
-  rpart.plot(tree3, digits = 3, main = "Decision Tree (Information, cp=0.01)")
-
-  # Choose a 'good' tree
-  # Assess model simplicity and interpretability. The 'cp' value that results in a manageable number of splits
-  # and accurate predictions is often the best choice.
+  plot_decision_trees(data, 0.1)
+  plot_decision_trees(data, 0.01)
+  plot_decision_trees(data, 0.001)
 
   # Example: Optimal tree based on experimentation
-  optimal_tree <- rpart(v2 ~ ., method = "class", data = data4, parms = list(split = "information"), cp = 0.05)
-  rpart.plot(optimal_tree, digits = 3, main = "Optimal Decision Tree (Information, cp=0.05)")
-
-  # Fit a decision tree model
-  tree_model <- rpart(v2 ~ ., data = data4, method = "class", parms = list(split = "gini"), cp = 0.1)
-  tree_model <- rpart(v2 ~ ., data = data4, method = "class", parms = list(split = "information"), cp = 0.001)
-
-  # Plot the tree
-  rpart.plot(tree_model, main = "Decision Tree (Initial Model)", digits = 3)
+  tm_good_cp <- 0.001
+  tm_good <- make_tree(data4, "gini", tm_good_cp)
+  rpart.plot(tm_good, main = paste("Gini index, cp =", tm_good_cp))
 
   ## Exercise 4:2.2
 
-  # Predict probabilities for the decision tree
-  tree_probs <- predict(tree_model, type = "prob")[, 2] # Probability for class "Not Survive" (v2 = 1)
-
-  # ROC and AUC for Decision Tree
-  tree_roc <- roc(data4$v2, tree_probs, levels=c(0,1), direction="<")
-  print(tree_roc)
-  plot(tree_roc, main = "ROC Curve for Decision Tree Model", col = "blue")
-
-  # Logistic Regression Model
-  logistic_model <- glm(v2 ~ v21 + v14 + v3 + v7 + v11 + v18 + v17, family = binomial, data = data)
-
-  # Predict probabilities for logistic regression
-  logistic_probs <- predict(logistic_model, type = "response")
-
-  # ROC and AUC for Logistic Regression
-  logistic_roc <- roc(data4$v2, logistic_probs)
-  print(logistic_roc)
-  plot(logistic_roc, add = TRUE, col = "red") # Add ROC curve for logistic regression
-
-  # Compare AUC
-  cat("AUC for Decision Tree:", auc(tree_roc), "\n")
-  cat("AUC for Logistic Regression:", auc(logistic_roc), "\n")
-
-  # Initialize a vector to store LOOCV predictions
-  loocv_probs <- numeric(nrow(data4))
-
-  # Perform LOOCV
-  for (i in 1:nrow(data4)) {
-    # Training data (exclude the i-th observation)
-    train_data <- data4[-i, ]
-    # Test data (only the i-th observation)
-    test_data <- data4[i, , drop = FALSE]
-
-    # Fit the decision tree model on training data
-    loocv_tree <- rpart(v2 ~ ., method = "class", data = train_data, parms = list(split = "information"), cp = 0.001)
-
-    # Predict the probability for the test observation
-    loocv_probs[i] <- predict(loocv_tree, test_data, type = "prob")[, 2]
-  }
-
-  # Calculate the LOOCV-corrected AUC
-  loocv_roc <- roc(data4$v2, loocv_probs)
-  print(loocv_roc)
-  plot(loocv_roc, main = "LOOCV-Corrected ROC Curve for Decision Tree", col = "blue")
-
-  logistic_roc_loocv <- loocv_auc(data4, v2 ~ v21 + v14 + v3 + v7 + v11 + v18 + v17)
-  plot(logistic_roc_loocv$ROC, add = TRUE, col = "red")
-
-  # Print the LOOCV-corrected AUC
-  cat("LOOCV-Corrected AUC for Decision Tree:", auc(loocv_roc), "\n")
-  cat("LOOCV-Corrected AUC for Logistic Regression:", logistic_roc_loocv$AUC, "\n")
-
   return(list(
     data4 = data4,
-    tree_model = tree_model
+    tm_good = tm_good,
+    tm_good_cp = tm_good_cp
   ))
 }
 
-make_tree <- function(split_method, cp) {
+make_tree <- function(data, split_method, cp) {
   parms <- list(split = split_method)
-  tm <- rpart(v2 ~ ., data = data4, method = "class", parms = parms, cp = cp)
+  tm <- rpart(v2 ~ ., data = data, method = "class", parms = parms, cp = cp)
   return(tm)
 }
 
-plot_decision_trees <- function(cp) {
-  tm_gini <- make_tree("gini", cp)
-  tm_info <- make_tree("information", cp)
+plot_good_tree <- function() {
+  cp <- 0.001
+  tm_good <- make_tree("gini", cp)
+  rpart.plot(tm_good, main = paste("Gini index, cp =", cp))
+}
+
+plot_decision_trees <- function(data, cp) {
+  tm_gini <- make_tree(data, "gini", cp)
+  tm_info <- make_tree(data, "information", cp)
   par(mfrow = c(1, 2))
   rpart.plot(tm_gini, main = paste("Gini index, cp =", cp))
   rpart.plot(tm_info, main = paste("Information gain, cp =", cp))
@@ -328,9 +266,10 @@ main <- function() {
   return(list(
     data = data,
     data4 = r42$data4,
-    r42 = r42
+    tm_good = r42$tm_good,
+    tm_good_cp = r42$tm_good_cp
   ))
 }
 
-# ass <- main()
-ass <- list()
+ass <- main()
+# ass <- list()

@@ -20,20 +20,6 @@ knitr::opts_chunk$set(echo = FALSE, comment = "")
 
 # Exercise 4:2
 
-```{r}
-library(pROC)
-library(rpart)
-library(rpart.plot)
-```
-
-```{r}
-# Load the dataset
-data_original <- read.csv("data_ca4.csv")
-data <- preprocess(data_original)
-# We are relying on the preprocessed data and that is probably fine
-data4 <- data
-```
-
 ## 1. Decision trees
 
 We will now study the usefulness of decision trees
@@ -46,7 +32,7 @@ parameter:
 We plot each pair of trees and study the structure of each tree below.
 
 ```{r}
-plot_decision_trees(0.1)
+plot_decision_trees(data4, 0.1)
 ```
 
 For a high value of the complexity parameter (\(\text{cp}=0.1\)),
@@ -55,7 +41,7 @@ with a single split separating the top node from the leaves.
 In this case, both splitting methods produced the same tree.
 
 ```{r}
-plot_decision_trees(0.01)
+plot_decision_trees(data4, 0.01)
 ```
 
 For a medium value of the complexity parameter (\(\text{cp}=0.01\)),
@@ -65,7 +51,7 @@ Perhaps the choice of splitting method does not matter much when
 the requested trees are relatively simple.
 
 ```{r}
-plot_decision_trees(0.001)
+plot_decision_trees(data4, 0.001)
 ```
 
 For a low value of the complexity parameter (\(\text{cp}=0.001\)),
@@ -90,9 +76,7 @@ tree. This is the tree that uses the Gini index splitting method
 with a complexity parameter value of \(\text{cp}=0.001\).
 
 ```{r}
-cp <- 0.001
-tm_good <- make_tree("gini", cp)
-rpart.plot(tm_good, main = paste("Gini index, cp =", cp))
+rpart.plot(tm_good, main = paste("Gini index, cp =", tm_good_cp))
 ```
 
 The tree consists of 11 nodes and 5 splits.
