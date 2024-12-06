@@ -16,7 +16,7 @@ loocv_auc <- function(data, formula) {
   }
 
   # Calculate the ROC and AUC
-  roc_obj <- roc(data$v2, pred_probs)
+  roc_obj <- roc(data$v2, pred_probs, levels = c(0, 1), direction = "<")
   auc_value <- auc(roc_obj)
 
   return(list(AUC = auc_value, ROC = roc_obj))
@@ -215,7 +215,7 @@ exercise42 <- function(data) {
   tree_probs <- predict(tree_model, type = "prob")[, 2] # Probability for class "Not Survive" (v2 = 1)
 
   # ROC and AUC for Decision Tree
-  tree_roc <- roc(data4$v2, tree_probs)
+  tree_roc <- roc(data4$v2, tree_probs, levels=c(0,1), direction="<")
   print(tree_roc)
   plot(tree_roc, main = "ROC Curve for Decision Tree Model", col = "blue")
 
@@ -233,7 +233,6 @@ exercise42 <- function(data) {
   # Compare AUC
   cat("AUC for Decision Tree:", auc(tree_roc), "\n")
   cat("AUC for Logistic Regression:", auc(logistic_roc), "\n")
-
 
   # Initialize a vector to store LOOCV predictions
   loocv_probs <- numeric(nrow(data4))
@@ -270,6 +269,21 @@ exercise42 <- function(data) {
   ))
 }
 
+make_tree <- function(split_method, cp) {
+  parms <- list(split = split_method)
+  tm <- rpart(v2 ~ ., data = data4, method = "class", parms = parms, cp = cp)
+  return(tm)
+}
+
+plot_decision_trees <- function(cp) {
+  tm_gini <- make_tree("gini", cp)
+  tm_info <- make_tree("information", cp)
+  par(mfrow = c(1, 2))
+  rpart.plot(tm_gini, main = paste("Gini index, cp =", cp))
+  rpart.plot(tm_info, main = paste("Information gain, cp =", cp))
+  par(mfrow = c(1, 1))
+}
+
 preprocess <- function(data) {
   # RMD TODO - Explain Pre-processing using counts of the categories for ethnicities and consciousness level
   # Combine categories for Ethnicity (e.g., combine 2 and 3 into a single category)
@@ -287,7 +301,10 @@ preprocess <- function(data) {
 
   # Optional: Ensure all categorical variables are factors
   # TODO: Check before and after converting to factors - See if it makes a difference
-  categorical_cols <- c("v4", "v5", "v6", "v7", "v8", "v9", "v10", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21")
+  categorical_cols <- c(
+    "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v13",
+    "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21"
+  )
   data[categorical_cols] <- lapply(data[categorical_cols], as.factor)
   return(data)
 }
@@ -315,4 +332,5 @@ main <- function() {
   ))
 }
 
-ass <- main()
+# ass <- main()
+ass <- list()

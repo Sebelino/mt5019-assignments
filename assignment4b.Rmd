@@ -21,5 +21,221 @@ knitr::opts_chunk$set(echo = FALSE, comment = "")
 # Exercise 4:2
 
 ```{r}
-rpart.plot(r42$tree_model, main = "Decision Tree (Initial Model)", digits = 3)
+library(pROC)
+library(rpart)
+library(rpart.plot)
 ```
+
+```{r}
+# Load the dataset
+data_original <- read.csv("data_ca4.csv")
+data <- preprocess(data_original)
+# We are relying on the preprocessed data and that is probably fine
+data4 <- data
+```
+
+## 1. Decision trees
+
+We will now study the usefulness of decision trees
+as an alternative to the logistic models.
+We start by generating decision trees using both splitting methods
+(Gini index and information gain) with the following values of the complexity
+parameter:
+\[\text{cp} \in \{0.1, 0.01, 0.001\}\]
+
+We plot each pair of trees and study the structure of each tree below.
+
+```{r}
+plot_decision_trees(0.1)
+```
+
+For a high value of the complexity parameter (\(\text{cp}=0.1\)),
+we see that the decision tree consists of only three nodes,
+with a single split separating the top node from the leaves.
+In this case, both splitting methods produced the same tree.
+
+```{r}
+plot_decision_trees(0.01)
+```
+
+For a medium value of the complexity parameter (\(\text{cp}=0.01\)),
+we see that the decision tree now consists of five nodes and two splits.
+Again, both splitting methods produced the same tree.
+Perhaps the choice of splitting method does not matter much when
+the requested trees are relatively simple.
+
+```{r}
+plot_decision_trees(0.001)
+```
+
+For a low value of the complexity parameter (\(\text{cp}=0.001\)),
+we see that
+the choice of splitting method affects the structure of the tree.
+The Gini index tree consists of 11 nodes and 5 splits,
+whereas the Information gain tree consists of 15 nodes and 7 splits.
+It appears that the higher the value of the complexity parameter,
+the more complex the tree.
+
+### Interpretation
+
+A good decision tree is one that strikes the right balance between
+interpretability and predictive power.
+A tree may have a mediocre predictive power
+compared to a logistic model, but it can still be useful
+if it simple enough so that non-experts can
+understand it.
+
+Let us examine the structure of the second-most complex decision
+tree. This is the tree that uses the Gini index splitting method
+with a complexity parameter value of \(\text{cp}=0.001\).
+
+```{r}
+cp <- 0.001
+tm_good <- make_tree("gini", cp)
+rpart.plot(tm_good, main = paste("Gini index, cp =", cp))
+```
+
+The tree consists of 11 nodes and 5 splits.
+The tree predicts the target variable \(V_2\) (survival),
+which has two possible outcomes, \(V_2=0\) (survived) and \(V_2=1\) (passed away).
+
+* Top node: If we do not know anything about the patient,
+the probability of non-survival is 0.20.
+* `v21=0`: This is the first split.
+If the patient is conscious (\(V_{21}=0\)),
+we proceed to the left child node.
+If not, we proceed to the right child node,
+which states that the patient will pass away with a probability
+of 0.87. This is estimated to happen for 8 % of all patients.
+* `v11>=88`: This is the second split. If the blood pressure is high (\(V_{11}\geq 88\) mm Hg),
+we proceed to the left child node.
+If not, the patient passes away with a probability of 0.67.
+Only 4 \% of the patients suffer this fate.
+* `v3<75`: This is the third split.
+If the patient is less than 75 years old (\(V_3\leq 75\)),
+the probability of passing away is only 0.08.
+If not, we proceed to the right child node.
+* `v12<78`: This is the fourth split. If the heart rate
+is less than 78 beats per minute (\(V_{12}\leq 78\)),
+then the patient is estimated to to survive with full certainty.
+If not, we proceed to the right child node.
+* `v11>=137`: This is the fifth and final split.
+If the blood pressure is very high (\(V_{11}\geq 137\) mm Hg),
+the patient is estimated to pass away with a probability of
+only 0.17. If not, the patient is estimated to pass away with
+a probability of 0.53.
+
+## 2. Predictive power
+
+Next, let us evaluate the predictive power of our decision tree.
+For comparison, we will plot the ROC curve for
+both the decision tree and the logistic regression model
+we chose in Exercise 4:1,
+then calculate the AUC.
+
+```{r}
+tree_probs <- predict(tm_good, type = "prob")[, 2]
+tree_roc <- roc(data4$v2, tree_probs, levels = c(0, 1), direction = "<")
+plot(tree_roc, main = "ROC Curve", col = "blue")
+
+# Logistic Regression Model
+logistic_model <- glm(v2 ~ v21 + v14 + v3 + v7 + v11 + v18 + v17, family = binomial, data = data)
+
+# Predict probabilities for logistic regression
+logistic_probs <- predict(logistic_model, type = "response")
+
+# ROC and AUC for Logistic Regression
+logistic_roc <- roc(data4$v2, logistic_probs, levels = c(0, 1), direction = "<")
+plot(logistic_roc, add = TRUE, col = "red")
+legend("bottomright",
+  legend = c("Decision tree", "Logistic model"),
+  col = c("blue", "red"), lwd = 2
+)
+```
+
+AUC for the decision tree:
+```{r}
+tree_roc$auc
+```
+
+AUC for the logistic model:
+```{r}
+logistic_roc$auc
+```
+
+As we can see, the logistic model
+outperforms the decision tree in terms of predictive power,
+as evidenced by the higher AUC value.
+In particular, if the specificity is less than around 0.6,
+the logistic model yields better sensitivity.
+Otherwise, the two are roughly equally matched,
+with the decision tree even yielding a slightly
+higher sensitivity for a few values.
+However, we should take these results with a grain of salt,
+as this is done without any correction for overfitting.
+
+## 3. LOOCV-correction
+
+To correct for overfitting, we will again perform
+leave-one-out-cross-validation and recompute
+the ROC and AUC.
+
+```{r}
+# Initialize a vector to store LOOCV predictions
+loocv_probs <- numeric(nrow(data4))
+
+# Perform LOOCV
+for (i in 1:nrow(data4)) {
+  # Training data (exclude the i-th observation)
+  train_data <- data4[-i, ]
+  # Test data (only the i-th observation)
+  test_data <- data4[i, , drop = FALSE]
+
+  # Fit the decision tree model on training data
+  loocv_tree <- rpart(v2 ~ ., method = "class", data = train_data, parms = list(split = "information"), cp = 0.001)
+
+  # Predict the probability for the test observation
+  loocv_probs[i] <- predict(loocv_tree, test_data, type = "prob")[, 2]
+}
+
+# Calculate the LOOCV-corrected AUC
+loocv_roc <- roc(data4$v2, loocv_probs, levels = c(0, 1), direction = "<")
+plot(loocv_roc, main = "LOOCV-corrected ROC curve", col = "blue")
+
+logistic_roc_loocv <- loocv_auc(data4, v2 ~ v21 + v14 + v3 + v7 + v11 + v18 + v17)
+plot(logistic_roc_loocv$ROC, add = TRUE, col = "red")
+legend("bottomright",
+  legend = c("Decision tree", "Logistic model"),
+  col = c("blue", "red"), lwd = 2
+)
+```
+
+AUC for the decision tree:
+
+```{r}
+cat("LOOCV-Corrected AUC for Decision Tree:", auc(loocv_roc), "\n")
+```
+
+AUC for the logistic model:
+
+```{r}
+cat("LOOCV-Corrected AUC for Logistic Regression:", logistic_roc_loocv$AUC, "\n")
+```
+
+After applying LOOCV, we see that
+the predictive power of both models dropped.
+The AUC for the decision tree is now even lower than that of
+the logistic model.
+In particular, the decision tree is poor at making
+correct predictions for high values of specificity.
+
+On the other hand,
+we observe that the decision tree
+yields considerably better sensitivity
+if we accept a specificity of around 30 \% - 60 \%.
+So if we are willing to accept a high rate of
+false positives, the decision tree may be a better choice.
+Indeed, in the context of an ICU, it may
+be wiser to err on the side of caution and
+assume that the patient is dying in times of doubt,
+as the decision we make is a matter of life or death.
