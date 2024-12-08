@@ -1,5 +1,5 @@
 ---
-title: "Computer Assignment 3"
+title: "Computer Assignment 4"
 author:
   - "Ville Sebastian Olsson (19911231-1999)"
   - "Arvind Guruprasad (19990212-6938)"
@@ -22,7 +22,7 @@ knitr::opts_chunk$set(echo = FALSE, comment = "")
 
 In this exercise, we will build a logistic regression model to predict the survival of a patient admitted to the ICU. In this process, we also want to identify the significant risk factors that affect the probability of the survival outcome. 
 
-The data is provided as a CSV file that consists of records on 200 patients admitted to an Itensive Care Unit (ICU) during a certain period. It contains 21 columns in total with 1 unique identifier, 3 continuous variables, and 17 categorical variables. 
+The data is provided as a CSV file that consists of records on 200 patients admitted to an Intensive Care Unit (ICU) during a certain period. It contains 21 columns in total with 1 unique identifier, 3 continuous variables, and 17 categorical variables. 
 To do this, we will pre-process the data and build logistic regression models. We will then assess the goodness-of-fit to compare different logistic regression models. 
 
 ## 1. Model selection
