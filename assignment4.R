@@ -139,7 +139,7 @@ exercise41 <- function(data) {
 
   # Add legend
   legend("bottomright",
-    legend = c("Full Model", "Model 1", "Model 2"),
+    legend = c("Full Model", "Model 1 (AIC)", "Model 2 (BIC)"),
     col = c("blue", "red", "green"), lwd = 2
   )
   cat("AUC for Full Model:", auc(roc_full), "\n")

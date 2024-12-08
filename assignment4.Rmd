@@ -11,7 +11,8 @@ output:
     fig_caption: true
 ---
 
-```{r, echo=FALSE, results='hide', fig.show='hide'}
+```{r, echo=FALSE, results='hide', fig.show='hide',message=FALSE}
+suppressMessages(library(pROC))
 source("assignment4.R")
 list2env(ass, envir = .GlobalEnv)
 knitr::opts_chunk$set(echo = FALSE, comment = "")
@@ -19,8 +20,10 @@ knitr::opts_chunk$set(echo = FALSE, comment = "")
 
 # Exercise 4:1 - Multiple Logistic Regression 
 
-Predict patient mortality for those admitted in ICU - Describe Question
-Describe dataset. 
+In this exercise, we will build a logistic regression model to predict the survival of a patient admitted to the ICU. In this process, we also want to identify the significant risk factors that affect the probability of the survival outcome. 
+
+The data is provided as a CSV file that consists of records on 200 patients admitted to an Itensive Care Unit (ICU) during a certain period. It contains 21 columns in total with 1 unique identifier, 3 continuous variables, and 17 categorical variables. 
+To do this, we will pre-process the data and build logistic regression models. We will then assess the goodness-of-fit to compare different logistic regression models. 
 
 ## 1. Model selection
 
@@ -65,7 +68,7 @@ We also removed the column Patient ID to ensure its not treated as a predictor a
 
 ### Model Selection
 
-We start with an empty model that includes only the intercept. We then fit a full model that includes all predictor variables. Using these two models as the lower and the upper bounds, we perform stepwise model selection using both AIC and BIC to compare the two best models possible. 
+We start with an empty model that includes only the intercept. We then fit a full model that includes all predictor variables. Using these two models as the lower and the upper bounds, we perform **stepwise model selection** using both AIC and BIC to compare the two best models possible. 
 
 #### Akaike's Information Criteria (AIC)
 
@@ -118,7 +121,7 @@ AIC(mstep1_BIC)
 BIC(mstep1_BIC)
 ```
 
-Both models offer comparable AIC and BIC. The model `mstep1_AIC` offers the lowest AIC, prioritizing prediction accuracy while `mstep1_BIC` provides the lowest BIC value, prioritizing model simplicity given the lack of predictor variables. Given the small sample size of the data, the trade-off between complexity and accuracy of the prediction is not significant. On prioritizing prediction accuracy over simplicity, we will be choosing the model with the lowest AIC `mstep1_AIC`. However, we will continue to compare the other model in the upcoming sections to ensure the other goodness of fit tests continue to validate our model.
+Both models offer comparable AIC and BIC. The model `mstep1_AIC` offers the lowest AIC, prioritizing prediction accuracy while `mstep1_BIC` provides the lowest BIC value, prioritizing model simplicity given the lack of predictor variables. Given the small sample size of the data, the trade-off between complexity and accuracy of the prediction is not significant. On prioritizing prediction accuracy over simplicity, we will be choosing the model with the lowest AIC `mstep1_AIC`. However, we will continue to compare the other model in the upcoming sections on ROC curves to ensure the other tests validate our choice.
 
 #### Factors affecting patient survival
 
@@ -290,7 +293,6 @@ The Hosmer-Lemeshow test assesses whether the observed event rates match the exp
 
 ## 3. Confusion Matrices and Metrics
 
-Why we need to measure these metrics? What does it answer?
 This section involves evaluating the performance of the chosen logistic regression model using a confusion matrix. The metrics used for evaluation are:
 
 1. Accuracy: Overall correctness of the model.
@@ -323,10 +325,7 @@ This section involves evaluating the performance of the chosen logistic regressi
    - FP = False Positives  
 
 We generate confusion matrices and calculate accuracy, sensitivity, and specificity for different cutoff values.
-
-TODO: How did we create the confusion matrix? 
-
-We first identify the relevant cutoff values. For each cutoff value, we compare the predicted probabilities against the cutoff and assign a binary outcome to determine the patient mortality. We then compare this predicted binary outcome against the actual outcome provided in the original dataset before pre-processing. Based on this comparison, we understand how well the model is able to predict the outcome and we create a table (Confusion matrix) consisting of True positives, True negatives, False positive, and False negatives. 
+We first identify the relevant cutoff values. For each cutoff value, we compare the predicted probabilities against the cutoff and assign a binary outcome to determine the patient mortality. We then compare this predicted binary outcome against the actual outcome provided in the original dataset. Based on this comparison, we create a table (Confusion matrix) consisting of the True positives, True negatives, False positive, and False negatives. This will allow us to numerically compute Accuracy, Sensitivity, and Specificity.
 
 ```{r}
   predicted_probs <- predict(final_model, type = "response")
@@ -362,26 +361,26 @@ for (cutoff in cutoffs) {
 
 We included the cutoff values of `0.5, 0.25, 0.75` initially to gauge how the predicted probabilities are varying with the actual outcome. We observed the following:
 
-TODO: Mention the metrics explicitly while discussing it.
 1. Cutoff = 0.5
-At this threshold, the model achieves high accuracy and specificity, meaning it correctly identifies most of the "Survive" cases. However, sensitivity is low, indicating the model struggles to identify "Not Survive" cases.
+At this threshold, the model achieves high accuracy (0.87) and specificity (0.981), meaning it correctly identifies most of the "Survive" cases. However, sensitivity (0.425) is low, indicating the model struggles to identify "Not Survive" cases.
   
 2. Cutoff = 0.75
-Increasing the cutoff reduces sensitivity further (fewer "Not Survive" cases are identified) but increases specificity slightly. This cutoff might prioritize avoiding false positives ("Not Survive" predicted when "Survive") over identifying all "Not Survive" cases.
+Increasing the cutoff reduces sensitivity (0.325) further (fewer "Not Survive" cases are identified) but increases specificity (0.993) slightly. This cutoff might prioritize avoiding false positives ("Not Survive" predicted when "Survive") over identifying all "Not Survive" cases.
 
 3. Cutoff = 0.25
-Lowering the cutoff significantly improves sensitivity (better identification of "Not Survive" cases) but reduces specificity and overall accuracy. This cutoff is useful when identifying "Not Survive" cases is more critical.
+Lowering the cutoff significantly improves sensitivity (0.7) (better identification of "Not Survive" cases) but reduces specificity (0.85) and overall accuracy (0.82). This cutoff is useful when identifying "Not Survive" cases is more critical.
 
 For predicting survival in ICU, sensitivity is more important as the cost of missing critical cases is much higher than the cost of over-monitoring patients. The model should ensure it captures the majority of high-risk patients, even if it results in some false positives. However, this is completely subjective. We could also balance sensitivity and specificity when
 ICU resources (e.g., staff, equipment) are limited, and one needs to minimize unnecessary interventions while still identifying most critical cases.
 
 ## 4. ROC Curves and AUC
 
-From the previous section, we understand that we cannot choose an optimal cutoff to prioritize sensitivity or balance sensitivity and specificity. To identify the ideal cutoff, we make use of ROC curves and AUC. 
+From the previous section, we understand that we would to choose an optimal cutoff value to prioritize sensitivity or balance sensitivity and specificity. To identify the ideal cutoff, we make use of ROC curves and AUC. 
 
 **Receiver Operating Characteristic (ROC) Curve** plots the True Positive Rate (Sensitivity) against the False Positive Rate (1 - Specificity) at various threshold settings. ROC curves help evaluate the performance of a binary classifier across different classification thresholds.The ROC Curve shows the trade-off between sensitivity and specificity for each model.
 
 The **Area Under the Curve (AUC)** is a single metric summarizing the performance of a classifier.
+
   - **AUC = 1.0**: Perfect model.
   - **AUC = 0.5**: Model performs no better than random guessing.
   - **Higher AUC** indicates better model performance.
@@ -416,20 +415,14 @@ The plot includes ROC curves for three logistic regression models:
 
 #### Key Insights
 
-On observing the plots:
+On observing the plots, We notice a lot of overlap between the three curves, indicating similar performance. Investigating further:
 
-- The Full Model (Blue curve) shows the highest curve and AUC, indicating the best performance among the three models.
-- Model 1 (AIC) (Red curve) performs slightly worse than the full model but better than Model 2.
-- Model 2 (BIC) (Green curve) has the lowest curve and AUC, indicating comparatively weaker classification performance.
+- The Full Model (Blue curve) shows the highest curve and AUC, indicating the best performance among the three models. The AUC of 0.8847 indicates excellent performance, with high sensitivity and specificity across thresholds.
 
-The AUC values for the models are as follows:
+- Model 1 (AIC) (Red curve) performs slightly worse than the full model but better than Model 2. The AUC (0.8678) here is slightly lower than the Full Model, but still a strong classifier.
 
-1. Full Model (Blue): `0.8847`  
-   - Indicates excellent performance, with high sensitivity and specificity across thresholds.
-2. Model 1 (AIC, Red): `0.8678`  
-   - Slightly lower than the Full Model, but still a strong classifier.
-3. Model 2 (BIC, Green): `0.8533`  
-   - Lower performance compared to the other models, though still reasonable.
+- Model 2 (BIC) (Green curve) has the lowest curve, indicating comparatively weaker classification performance. Here, the AUC (0.8533) is the least performing compared to the other models, though still reasonable.
+
 
 #### Conclusion
 
@@ -437,9 +430,107 @@ The AUC values for the models are as follows:
 - **Model 1 (AIC)** offers a good trade-off, with reduced complexity and slightly lower AUC (`0.8678`).
 - **Model 2 (BIC)** sacrifices performance for simplicity, resulting in the lowest AUC (`0.8533`).
 
-Based on the results above, it's a subjective decision between simpler interpretation and predictive performance. If the emphasis is on simpler interpretation with minimal loss in performance, **Model 1 (AIC)** will be considered. 
+Based on the results above, it's a subjective decision between simpler interpretation and predictive performance. If the emphasis is on simpler interpretation with minimal loss in performance, **Model 1 (AIC)** will be considered. However, the model with the highest AUC is the **Full Model**.
 
 ## 5. LOOCV-adjusted ROC Curves and AUC
 
+In the previous section, we constructed the ROC curves and computed the AUC for each curve for the same dataset that was used for model fitting. This may result in overfitting and to combat this, we make use of the validation technique called LOOCV.
 
+Leave-One-Out Cross-Validation (LOOCV) is a validation technique used to estimate the predictive performance of a model while minimizing overfitting. It is especially useful in small datasets, such as this ICU study, where holding out a significant portion of the data (e.g., using 80-20 split) might not leave enough data for training.
+
+#### Key Advantages:
+- **Avoids Overfitting**: By iteratively training the model on all data except one observation and then testing on the excluded observation, LOOCV ensures the model's performance is not overly optimistic.
+- **Reliable Estimate**: Each data point serves as the validation set once, leading to an almost unbiased estimate of prediction error.
+
+We will now implement LOOCV for the three models we selected earlier including the full model, Model 1 (AIC), and Model 2 (BIC). 
+
+To implement LOOCV, we follow the below steps:
+
+1. Partitioning: The dataset with \(n\) observations is divided such that in each iteration, \(n-1\) observations are used for training, and the remaining 1 observation is used for validation.
+
+2. Iterative Training and Prediction:
+  - For each iteration \(i\) (from \(1\) to \(n\)):
+    - Exclude the \(i\)-th observation from the training data.
+    - Train the logistic regression model on the remaining \(n-1\) observations.
+    - Predict the probability of the excluded observation using the trained model.
+
+3. Performance Calculation:
+  - After iterating through all \(n\) observations, predictions are collected.
+  - The performance metric (e.g., ROC curve and AUC) is calculated using the actual outcomes and the LOOCV-predicted probabilities.
+
+The LOOCV-adjusted AUC and ROC curves are shown below:
+
+```{r}
+  cat("LOOCV AUC for Full Model:", loocv_full$AUC, "\n")
+  cat("LOOCV AUC for Model 1:", loocv_model_1$AUC, "\n")
+  cat("LOOCV AUC for Model 2:", loocv_model_2$AUC, "\n")
+
+  # Plot the ROC curves
+  plot(loocv_full$ROC, col = "blue", legacy.axes = TRUE, main = "LOOCV ROC Curves")
+  lines(loocv_model_1$ROC, col = "red")
+  lines(loocv_model_2$ROC, col = "green")
+
+  # Add a legend
+  legend("bottomright",
+    legend = c("Full Model", "Model 1 (AIC)", "Model 2 (BIC)"),
+    col = c("blue", "red", "green"), lwd = 2
+  )
+```
+
+The plot above shows the ROC curves for three logistic regression models:
+
+1. **Full Model (Blue)**: Includes all predictors.
+2. **Model 1 (Red)**: Includes predictors selected using AIC-based stepwise selection.
+3. **Model 2 (Green)**: Includes predictors selected using BIC-based stepwise selection.
+
+####  Interpretation
+
+1. **Shape of the Curves**:
+   - All three curves show the relationship between **Sensitivity (True Positive Rate)** and **1 - Specificity (False Positive Rate)** across different classification thresholds.
+   - A curve closer to the top-left corner of the graph represents better performance.
+   - Model 2 (BIC) and the Model 1 (AIC) indicate higher performance compared to the full model.
+
+2. **Comparison of Models**:
+   - **Model 2 (Green)** has the highest AUC (0.8244) and demonstrates slightly better performance than the other two models.
+   - **Model 1 (Red)** has an AUC of 0.8203, which is very close to Model 2, indicating comparable performance.
+   - **Full Model (Blue)** has the lowest AUC (0.7547), suggesting that including all predictors does not improve predictive performance, potentially due to overfitting or the inclusion of less relevant predictors. This suggests that the full model may be less effective at distinguishing between "Survive" and "Not Survive" outcomes.
+
+
+#### Effects of LOOCV-adjustment
+
+| Model           | AUC (Non-LOOCV) | AUC (LOOCV) | Difference |
+|------------------|-----------------|-------------|------------|
+| Full Model       | 0.8847          | 0.7547      | -0.1300    |
+| Model 1 (AIC)    | 0.8678          | 0.8203      | -0.0475    |
+| Model 2 (BIC)    | 0.8533          | 0.8244      | -0.0289    |
+
+
+1. **Full Model**:
+   - AUC drops significantly from **0.8847** to **0.7547** with LOOCV adjustment.
+   - This indicates that the full model likely overfits the training data, as its performance on unseen data (approximated by LOOCV) is much worse.
+
+2. **Model 1 (AIC)**:
+   - AUC decreases modestly from **0.8678** to **0.8203**, showing a more balanced model with better generalization than the full model.
+   - Stepwise selection using AIC reduces overfitting by focusing on significant predictors.
+
+3. **Model 2 (BIC)**:
+   - AUC decreases slightly from **0.8533** to **0.8244**, demonstrating the best generalization among all models.
+   - BIC penalizes model complexity more heavily than AIC, which likely results in a simpler, more robust model.
+
+**Effects Observed:**
+
+1. Overfitting Detection:
+   - The full model exhibits the largest drop in AUC (from **0.8847** to **0.7547**), indicating overfitting due to the inclusion of all predictors.
+
+2. Preference for Simpler Models:
+   - Both Model 1 (AIC) and Model 2 (BIC) show smaller reductions in AUC, highlighting their better ability to generalize.
+   - Model 2 (BIC), which is simpler than Model 1 (AIC), maintains the highest LOOCV-adjusted AUC, making it the preferred model.
+
+3. Model Selection:
+   - Without LOOCV, the Full Model might appear superior due to its higher AUC on the training data.
+   - With LOOCV, Model 2 emerges as the most robust choice, balancing performance and simplicity.
+
+#### **Conclusion**
+
+LOOCV highlights the importance of model simplicity by penalizing overfitting, making it an essential step in robust model selection. **Model 2 (BIC)** maintains the highest LOOCV-adjusted AUC, making it the preferred model. 
 
