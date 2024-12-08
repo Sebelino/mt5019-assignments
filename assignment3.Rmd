@@ -25,7 +25,7 @@ The data comes from a study reported by Wermuth (1976), which was collected in a
 
 - **Mother's age (\(X\)):** `<30` and `30+`.
 - **Smoking habits (\(Y\)):** `<5 cigarettes/day` and `5+ cigarettes/day`.
-- **Gestational age (\(Z\)):** `<260 days` and `≥260 days`.
+- **Gestational age (\(Z\)):** `<260 days` and `>=260 days`.
 - **Child survival (\(V\)):** Binary outcome indicating survival (`Yes`/`No`).
 
 Our objective is to find a suitable loglinear model
