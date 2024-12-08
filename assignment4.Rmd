@@ -328,35 +328,35 @@ We generate confusion matrices and calculate accuracy, sensitivity, and specific
 We first identify the relevant cutoff values. For each cutoff value, we compare the predicted probabilities against the cutoff and assign a binary outcome to determine the patient mortality. We then compare this predicted binary outcome against the actual outcome provided in the original dataset. Based on this comparison, we create a table (Confusion matrix) consisting of the True positives, True negatives, False positive, and False negatives. This will allow us to numerically compute Accuracy, Sensitivity, and Specificity.
 
 ```{r}
-  predicted_probs <- predict(final_model, type = "response")
+predicted_probs <- predict(final_model, type = "response")
 for (cutoff in cutoffs) {
-    # Convert probabilities to binary predictions based on the cutoff
-    predicted_class <- ifelse(predicted_probs > cutoff, 1, 0)
+  # Convert probabilities to binary predictions based on the cutoff
+  predicted_class <- ifelse(predicted_probs > cutoff, 1, 0)
 
-    # Generate the confusion matrix
-    confusion_matrix <- table(Actual = data$v2, Predicted = predicted_class)
+  # Generate the confusion matrix
+  confusion_matrix <- table(Actual = data$v2, Predicted = predicted_class)
 
-    # Calculate metrics
-    accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
-    sensitivity <- confusion_matrix[2, 2] / sum(confusion_matrix[2, ]) # TP / (TP + FN)
-    specificity <- confusion_matrix[1, 1] / sum(confusion_matrix[1, ]) # TN / (TN + FP)
+  # Calculate metrics
+  accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+  sensitivity <- confusion_matrix[2, 2] / sum(confusion_matrix[2, ]) # TP / (TP + FN)
+  specificity <- confusion_matrix[1, 1] / sum(confusion_matrix[1, ]) # TN / (TN + FP)
 
-    # Store the results
-    results[[as.character(cutoff)]] <- list(
-      Confusion_Matrix = confusion_matrix,
-      Accuracy = accuracy,
-      Sensitivity = sensitivity,
-      Specificity = specificity
-    )
-  }
-  # Print metrics for each cutoff
-  for (cutoff in cutoffs) {
-    cat("\nCutoff:", cutoff, "\n")
-    print(results[[as.character(cutoff)]]$Confusion_Matrix)
-    cat("Accuracy:", results[[as.character(cutoff)]]$Accuracy, "\n")
-    cat("Sensitivity:", results[[as.character(cutoff)]]$Sensitivity, "\n")
-    cat("Specificity:", results[[as.character(cutoff)]]$Specificity, "\n")
-  }
+  # Store the results
+  results[[as.character(cutoff)]] <- list(
+    Confusion_Matrix = confusion_matrix,
+    Accuracy = accuracy,
+    Sensitivity = sensitivity,
+    Specificity = specificity
+  )
+}
+# Print metrics for each cutoff
+for (cutoff in cutoffs) {
+  cat("\nCutoff:", cutoff, "\n")
+  print(results[[as.character(cutoff)]]$Confusion_Matrix)
+  cat("Accuracy:", results[[as.character(cutoff)]]$Accuracy, "\n")
+  cat("Sensitivity:", results[[as.character(cutoff)]]$Sensitivity, "\n")
+  cat("Specificity:", results[[as.character(cutoff)]]$Specificity, "\n")
+}
 ```
 
 We included the cutoff values of `0.5, 0.25, 0.75` initially to gauge how the predicted probabilities are varying with the actual outcome. We observed the following:
@@ -392,19 +392,19 @@ We plot ROC curves and calculate AUC for three models. The three models include:
 - The model that is a result of the step function optimizing for BIC.
 
 ```{r}
-  # Plot the ROC curves
-  plot(roc_full, col = "blue", legacy.axes = TRUE, main = "ROC Curves for Logistic Models")
-  lines(roc_model_1, col = "red") # Add Model 1 ROC curve
-  lines(roc_model_2, col = "green") # Add Model 2 ROC curve
+# Plot the ROC curves
+plot(roc_full, col = "blue", legacy.axes = TRUE, main = "ROC Curves for Logistic Models")
+lines(roc_model_1, col = "red") # Add Model 1 ROC curve
+lines(roc_model_2, col = "green") # Add Model 2 ROC curve
 
-  # Add legend
-  legend("bottomright",
-    legend = c("Full Model", "Model 1 (AIC)", "Model 2 (BIC)"),
-    col = c("blue", "red", "green"), lwd = 2
-  )
-  cat("AUC for Full Model:", auc(roc_full), "\n")
-  cat("AUC for Model 1 (AIC):", auc(roc_model_1), "\n")
-  cat("AUC for Model 2 (BIC):", auc(roc_model_2), "\n")
+# Add legend
+legend("bottomright",
+  legend = c("Full Model", "Model 1 (AIC)", "Model 2 (BIC)"),
+  col = c("blue", "red", "green"), lwd = 2
+)
+cat("AUC for Full Model:", auc(roc_full), "\n")
+cat("AUC for Model 1 (AIC):", auc(roc_model_1), "\n")
+cat("AUC for Model 2 (BIC):", auc(roc_model_2), "\n")
 ```
 
 The plot includes ROC curves for three logistic regression models:
@@ -461,20 +461,20 @@ To implement LOOCV, we follow the below steps:
 The LOOCV-adjusted AUC and ROC curves are shown below:
 
 ```{r}
-  cat("LOOCV AUC for Full Model:", loocv_full$AUC, "\n")
-  cat("LOOCV AUC for Model 1:", loocv_model_1$AUC, "\n")
-  cat("LOOCV AUC for Model 2:", loocv_model_2$AUC, "\n")
+cat("LOOCV AUC for Full Model:", loocv_full$AUC, "\n")
+cat("LOOCV AUC for Model 1:", loocv_model_1$AUC, "\n")
+cat("LOOCV AUC for Model 2:", loocv_model_2$AUC, "\n")
 
-  # Plot the ROC curves
-  plot(loocv_full$ROC, col = "blue", legacy.axes = TRUE, main = "LOOCV ROC Curves")
-  lines(loocv_model_1$ROC, col = "red")
-  lines(loocv_model_2$ROC, col = "green")
+# Plot the ROC curves
+plot(loocv_full$ROC, col = "blue", legacy.axes = TRUE, main = "LOOCV ROC Curves")
+lines(loocv_model_1$ROC, col = "red")
+lines(loocv_model_2$ROC, col = "green")
 
-  # Add a legend
-  legend("bottomright",
-    legend = c("Full Model", "Model 1 (AIC)", "Model 2 (BIC)"),
-    col = c("blue", "red", "green"), lwd = 2
-  )
+# Add a legend
+legend("bottomright",
+  legend = c("Full Model", "Model 1 (AIC)", "Model 2 (BIC)"),
+  col = c("blue", "red", "green"), lwd = 2
+)
 ```
 
 The plot above shows the ROC curves for three logistic regression models:
@@ -533,4 +533,3 @@ The plot above shows the ROC curves for three logistic regression models:
 #### **Conclusion**
 
 LOOCV highlights the importance of model simplicity by penalizing overfitting, making it an essential step in robust model selection. **Model 2 (BIC)** maintains the highest LOOCV-adjusted AUC, making it the preferred model. 
-
