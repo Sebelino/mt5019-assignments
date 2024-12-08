@@ -43,7 +43,6 @@ exercise41 <- function(data) {
     k = log(nrow(data)), trace = TRUE
   )
 
-  # Fit the logistic regression model (if not already done)
   final_model <- glm(v2 ~ v21 + v14 + v3 + v7 + v11 + v18 + v17, family = binomial, data = data)
 
   # Compute Odds and CI for final model's coefficients
@@ -80,7 +79,7 @@ exercise41 <- function(data) {
   predicted_probs <- predict(final_model, type = "response")
 
   # Define cutoff values
-  cutoffs <- c(0.5, 0.3, 0.7, 0.25, 0.4, 0.2) # Cutoffs of 0.5, 0.3, and 0.7
+  cutoffs <- c(0.5, 0.75, 0.25) # Cutoffs of 0.5, 0.3, and 0.7
 
   # Create an empty list to store confusion matrices and metrics
   results <- list()
@@ -175,6 +174,23 @@ exercise41 <- function(data) {
     legend = c("Full Model", "Model 1", "Model 2"),
     col = c("blue", "red", "green"), lwd = 2
   )
+  
+  return(list(
+    mstep1_AIC = mstep1_AIC,
+    mstep1_BIC = mstep1_BIC,
+    final_model = final_model,
+    odds_ratios = odds_ratios,
+    hoslem_test = hoslem_test,
+    cutoffs = cutoffs,
+    results = results,
+    roc_model_1 = roc_model_1,
+    roc_model_2 = roc_model_2,
+    roc_full = roc_full,
+    #tree_roc = tree_roc,
+    loocv_model_1 = loocv_model_1,
+    loocv_model_2 = loocv_model_2,
+    loocv_full = loocv_full 
+    ))
 }
 
 exercise42 <- function(data) {
@@ -311,13 +327,27 @@ main <- function() {
   data <- preprocess(data_original)
 
   ## Exercise 4:1
-  # exercise41(data)
+  r41 <- exercise41(data)
 
   ## Exercise 4:2
   r42 <- exercise42(data)
 
   return(list(
+    data_original = data_original,
     data = data,
+    mstep1_AIC = r41$mstep1_AIC,
+    mstep1_BIC = r41$mstep1_BIC,
+    final_model = r41$final_model,
+    odds_ratios = r41$odds_ratios,
+    hoslem_test = r41$hoslem_test,
+    cutoffs = r41$cutoffs,
+    results = r41$results,
+    roc_model_1 = r41$roc_model_1,
+    roc_model_2 = r41$roc_model_2,
+    roc_full = r41$roc_full,
+    loocv_model_1 = r41$loocv_model_1,
+    loocv_model_2 = r41$loocv_model_2,
+    loocv_full = r41$loocv_full, 
     data4 = r42$data4,
     tm_good = r42$tm_good,
     tm_good_cp = r42$tm_good_cp,

@@ -1,97 +1,139 @@
 ---
-title: "Computer Assignment 4"
+title: "Computer Assignment 3"
 author:
-  - "Your Name (Your ID)"
-date: "2024-04-XX"
+  - "Ville Sebastian Olsson (19911231-1999)"
+  - "Arvind Guruprasad (19990212-6938)"
+date: "`r Sys.Date()`"
 output:
-  pdf_document:
-    fig_caption: true
   html_document:
+    fig_caption: true
+  pdf_document:
     fig_caption: true
 ---
 
 ```{r, echo=FALSE, results='hide', fig.show='hide'}
 source("assignment4.R")
-knitr::opts_chunk$set(echo = TRUE, comment = "")
+list2env(ass, envir = .GlobalEnv)
+knitr::opts_chunk$set(echo = FALSE, comment = "")
 ```
 
-# Exercise 4:1
+# Exercise 4:1 - Multiple Logistic Regression 
 
-## 1. Data Pre-processing
+Predict patient mortality for those admitted in ICU - Describe Question
+Describe dataset. 
 
-### Combining Categories
+## 1. Model selection
 
-The dataset includes categorical variables for Ethnicity (`v5`) and Consciousness level (`v21`). We combine categories to simplify the analysis:
+### Data Pre-processing
 
-- **Ethnicity**: Categories 2 and 3 are combined into a single category (0: other).
-- **Consciousness level**: Categories 1 and 2 are combined into a single category (1: unconscious and coma).
+#### Data cleaning 
 
+The dataset includes categorical variables for Ethnicity (`v5`) and Consciousness level (`v21`).   
+
+**Ethnicity**: We noticed that the category counts for 2 ('black') and 3 ('other') in Ethnicity (`v5`) are quite low relative to the category count for 1 ('white'). To balance the distribution, categories 2 and 3 are combined into a single category (0: other).
+
+Original counts are shown below:
 ```{r}
-# Load the dataset
-data_original <- read.csv("data_ca4.csv")
-data <- data_original
-
-# Combine categories for Ethnicity
-data$v5[data$v5 > 1] <- 0  # Combine categories 2 and 3 into 0 (other)
-
-# Combine categories for Consciousness level
-data$v21[data$v21 > 1] <- 1  # Combine unconscious and coma into a single category
-
-# Remove the column named "v1"
-data <- data[, !names(data) %in% "v1"]
-
-# Check the modified dataset
-table(data$v5)  # Verify the Ethnicity column changes
-table(data$v21)  # Verify the Consciousness level changes
+table(data_original$v5)
 ```
 
-### Converting to Factors
-
-We convert the relevant columns to factors to ensure they are treated as categorical variables in the logistic regression models.
-
+Counts after combining categories:
 ```{r}
-# Convert categorical variables to factors
-categorical_cols <- c("v4", "v5", "v6", "v7", "v8", "v9", "v10", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21")
-data[categorical_cols] <- lapply(data[categorical_cols], as.factor)
+table(data$v5)
 ```
 
-## 2. Model Fitting
+**Consciousness level**: Similarly, the category count for 1 ('unconscious') and 2 ('coma') in Consciousness level (`v21`) are low compared to 0 ('awake'). We have combined categories 1 and 2 into a single category (1: unconscious and coma).
 
-### Empty Model
-
-We start with an empty model that includes only the intercept.
-
+Original counts are shown below:
 ```{r}
-# Empty model (only intercept)
-m1 <- glm(v2 ~ 1, family = binomial, data = data)
-summary(m1)
+table(data_original$v21)
 ```
 
-### Full Model
-
-Next, we fit a full model that includes all predictor variables.
-
+Counts after combining categories:
 ```{r}
-# Full model
-full_model <- glm(v2 ~ ., data = data, family = binomial)
-summary(full_model)
+table(data$v21)
 ```
 
-### Stepwise Model Selection
+#### Converting categorical variables to factors
 
-We use stepwise model selection to find the best model based on AIC and BIC.
+We convert the relevant columns to factors to ensure they are treated as categorical variables in the logistic regression models. All the columns that do not contain numerical values are converted to factors here. 
 
+#### Remove Patient ID
+
+We also removed the column Patient ID to ensure its not treated as a predictor as it does not provide any value in describing the patient but rather it acts as the unique identifier for each key. While training the models, it is recommended to remove the columns that would not add any contextual significance in describing patient mortality. 
+
+
+### Model Selection
+
+We start with an empty model that includes only the intercept. We then fit a full model that includes all predictor variables. Using these two models as the lower and the upper bounds, we perform stepwise model selection using both AIC and BIC to compare the two best models possible. 
+
+#### Akaike's Information Criteria (AIC)
+
+The Akaike Information Criterion (AIC) is a statistical measure used for model selection. It evaluates the quality of a statistical model by balancing the trade-off between goodness of fit (how well the model fits the data) and model complexity (the number of parameters in the model). AIC helps in identifying the model that explains the data with the minimum necessary complexity. The Akaike Information Criterion (AIC) is given by:
+
+\[
+AIC = -2 \cdot \ln(l) + 2k
+\]
+
+where:
+
+- \(l\) = maximized value of the likelihood function of the model,
+- \(k\) = number of parameters in the model.
+
+The summary of the final model as a result of the step function using AIC:
 ```{r}
-# Stepwise model selection using AIC
-mstep1_AIC <- step(m1, direction = "forward", scope = list(upper = full_model), trace = TRUE)
 summary(mstep1_AIC)
+```
 
-# Stepwise model selection using BIC
-mstep1_BIC <- step(m1, direction = "forward", scope = list(upper = full_model), k = log(nrow(data)), trace = TRUE)
+#### Bayesian Information Criterion (BIC)
+
+It is a model selection criterion used to evaluate the goodness of fit of a model while penalizing model complexity to avoid overfitting. It is similar in concept with that of AIC but the difference lies in its penality criteria. BIC penalizes complexity more heavily than AIC, especially for large sample sizes. The Bayesian Information Criterion (BIC) is given by:
+
+\[
+BIC = -2 \cdot \ln(l) + k \cdot \ln(n)
+\]
+
+where:
+
+- \(l\) = maximized value of the likelihood function of the model,
+- \(k\) = number of parameters in the model,
+- \(n\) = number of observations.
+
+The summary of the final model as a result of the step function using BIC:
+```{r}
 summary(mstep1_BIC)
 ```
 
-## 3. Odds Ratios and Confidence Intervals
+#### Comparison of the Model
+
+AIC and BIC value of the model that is AIC optimized:
+```{r}
+AIC(mstep1_AIC)
+BIC(mstep1_AIC)
+```
+
+AIC and BIC value of the model that is BIC optimized:
+```{r}
+AIC(mstep1_BIC)
+BIC(mstep1_BIC)
+```
+
+Both models offer comparable AIC and BIC. The model `mstep1_AIC` offers the lowest AIC, prioritizing prediction accuracy while `mstep1_BIC` provides the lowest BIC value, prioritizing model simplicity given the lack of predictor variables. Given the small sample size of the data, the trade-off between complexity and accuracy of the prediction is not significant. On prioritizing prediction accuracy over simplicity, we will be choosing the model with the lowest AIC `mstep1_AIC`. However, we will continue to compare the other model in the upcoming sections to ensure the other goodness of fit tests continue to validate our model.
+
+#### Factors affecting patient survival
+
+Finally, based on the chosen model, the factors that affect the probability of the patient admitted to the ICU to not survive include 
+
+- **Consciousness Level (v21: Unconscious/Coma vs. Awake)**
+- **Type of Admission (v14: Acute vs. Non-Acute)**
+- **Age (v3)**
+- **Cancer (v7: Yes vs. No)**
+- **Blood Pressure (v11: Per mm Hg)**
+- **Blood Carbon Dioxide (v18: Above 45 vs. Below 45)**
+- **Blood pH (v17: Below 7.25 vs. Above 7.25)**
+
+
+### Odds Ratios and Confidence Intervals
 
 We calculate the odds ratios and confidence intervals for the coefficients of the final model.
 
@@ -111,86 +153,293 @@ odds_ratios <- data.frame(
 print(odds_ratios)
 ```
 
-### Interpretation of Odds Ratios
 
-- **v21**: The odds ratio for the combined category of unconscious and coma (1) compared to other consciousness levels (0) is approximately [Odds Ratio]. This means that the odds of the outcome are [Odds Ratio] times higher for individuals in the unconscious and coma category, holding other variables constant.
-- **v14**: The odds ratio for [description of v14] is approximately [Odds Ratio]. This means that the odds of the outcome are [Odds Ratio] times higher for a one-unit increase in [description of v14], holding other variables constant.
-- **v3**: The odds ratio for [description of v3] is approximately [Odds Ratio]. This means that the odds of the outcome are [Odds Ratio] times higher for a one-unit increase in [description of v3], holding other variables constant.
-- **v7**: The odds ratio for [description of v7] is approximately [Odds Ratio]. This means that the odds of the outcome are [Odds Ratio] times higher for a one-unit increase in [description of v7], holding other variables constant.
-- **v11**: The odds ratio for [description of v11] is approximately [Odds Ratio]. This means that the odds of the outcome are [Odds Ratio] times higher for a one-unit increase in [description of v11], holding other variables constant.
-- **v18**: The odds ratio for [description of v18] is approximately [Odds Ratio]. This means that the odds of the outcome are [Odds Ratio] times higher for a one-unit increase in [description of v18], holding other variables constant.
-- **v17**: The odds ratio for [description of v17] is approximately [Odds Ratio]. This means that the odds of the outcome are [Odds Ratio] times higher for a one-unit increase in [description of v17], holding other variables constant.
+#### Interpreting Coefficients
 
-## 4. Hosmer-Lemeshow Goodness-of-Fit Test
+**Intercept**
 
-We perform the Hosmer-Lemeshow goodness-of-fit test to assess the fit of the logistic regression model.
+- Odds Ratio (OR): 0.0049
+- Confidence Interval (CI): (0.00016, 0.0961)
+
+The baseline odds of not surviving when all predictors are at their reference levels are extremely low.
+
+---
+
+**Consciousness Level (v211: Unconscious/Coma vs. Awake)**
+
+- OR: 89.68
+- CI: (15.42, 894.72)
+Patients who are unconscious or in a coma have **89.68 times higher odds** of not surviving compared to those who are awake. The large odds ratio reflects the severe impact of a lack of consciousness on survival outcomes.
+
+---
+
+**Type of Admission (v141: Acute vs. Non-Acute)**
+
+- OR: 20.65
+- CI: (4.03, 186.17)
+Patients admitted for acute conditions have **20.65 times higher odds** of not surviving compared to non-acute admissions. Acute admissions likely indicate critical conditions requiring immediate attention, which correlates with poorer outcomes.
+
+---
+
+**Age (v3)**
+
+- OR: 1.0436
+- CI: (1.0179, 1.0746)
+For every additional year of age, the odds of not surviving increase by **4.36%**.  
+Age is a significant factor in survival, likely due to declining health and resilience in older patients.
+
+---
+
+**Cancer (v71: Yes vs. No)**
+
+- OR: 11.05
+- CI: (1.99, 73.21)
+Patients with cancer have **11.05 times higher odds** of not surviving compared to those without cancer.  
+The presence of cancer reflects a chronic condition that exacerbates the risk of mortality.
+
+---
+
+**Blood Pressure (v11: Per mm Hg)**
+
+- OR: 0.986
+- CI: (0.971, 0.999)
+For each 1 mm Hg increase in blood pressure, the odds of not surviving decrease by **1.44%**.  
+A higher blood pressure within a safe range might reflect better cardiovascular health, reducing mortality risk.
+
+---
+
+**Blood Carbon Dioxide (v181: Above 45 vs. Below 45)**
+
+- OR: 0.1051
+- CI: (0.012, 0.641)
+Patients with carbon dioxide levels above 45 have significantly **lower odds** of not surviving (89.49% decrease) compared to those with levels below 45.  
+Elevated carbon dioxide may reflect physiological compensation mechanisms for certain conditions.
+
+---
+
+**Blood pH (v171: Below 7.25 vs. Above 7.25)**
+
+- OR: 6.39
+- CI: (1.14, 38.48)
+Patients with a blood pH below 7.25 have **6.39 times higher odds** of not surviving compared to those above 7.25.  
+
+---
+
+Below is the summary of the various factors used in the final model distinguished based on its significance:
+
+1. **Significant Risk Factors for Not Surviving:**
+
+   - Consciousness Level (Unconscious/Coma)
+   - Type of Admission (Acute)
+   - Age
+   - Cancer
+   - Blood pH (Below 7.25)
+
+2. **Protective Factors:**
+   - Blood Pressure (Higher)
+   - Blood Carbon Dioxide (Above 45)
+
+Protective predictors refer to variables that are associated with a decreased risk of the outcome of interest (in this case, not surviving) when their values increase or change in a specific way. Essentially, these predictors reduce the likelihood of the patient not surviving. Whereas Significant risk factors are the opposite. They increase the likelihood of the patient not surviving with increase in their values. 
+
+These results underscore the importance of critical physiological and clinical indicators in predicting survival outcomes in ICU patients.
+
+## 2. Goodness of Fit
+
+Now that we have chosen the model, we need to understand how well the chosen model fit the data. We do this using the Hosmer-Lemeshow test. 
+The Hosmer-Lemeshow goodness-of-fit test is widely used to evaluate the calibration of logistic regression models, particularly when the data is at the **individual level**. Unlike deviance-based tests, which are suitable for grouped data, this test measures how well the predicted probabilities from the model align with the observed outcomes across subgroups of the data. 
+
+Key reasons to use the Hosmer-Lemeshow test:
+
+- **Assess Calibration**: It determines whether the model adequately predicts probabilities for each risk group.
+- **Group Data into Deciles**: It partitions the data into a specified number of groups (typically 10) based on predicted probabilities and compares the observed and expected counts in each group.
+- **Test Null Hypothesis**: The null hypothesis states that the model fits the data well.
+
+
+*Check if this is overkill*
+The test statistic for the Hosmer-Lemeshow test is given by:
+
+\[
+\chi^2 = \sum_{g=1}^{G} \frac{(O_g - E_g)^2}{E_g (1 - \frac{E_g}{N_g})}
+\]
+
+Where:
+
+- \( g \): Index for each group (e.g., deciles of risk).
+- \( O_g \): Observed count of events (e.g., non-survivals) in group \( g \).
+- \( E_g \): Expected count of events in group \( g \) based on the model.
+- \( N_g \): Total number of observations in group \( g \).
+- \( G \): Total number of groups (typically 10).
+
+The test statistic follows a chi-squared distribution with \( G - 2 \) degrees of freedom.
+
+On running this test, we obtain:
 
 ```{r}
-# Load the necessary library
-library(ResourceSelection)
-
-# Obtain predicted probabilities
-predicted_probs <- predict(final_model, type = "response")
-
-# Perform the Hosmer-Lemeshow goodness-of-fit test
-hoslem_test <- hoslem.test(data$v2, predicted_probs, g = 10) # 'g' specifies number of groups
 print(hoslem_test)
 ```
 
-### Interpretation of Hosmer-Lemeshow Test
+### Interpretation
 
-The Hosmer-Lemeshow test assesses whether the observed event rates match the expected event rates in subgroups of the model population. A non-significant p-value (p > 0.05) indicates a good fit. In this case, the p-value is [p-value], suggesting that the model fits the data well.
+The Hosmer-Lemeshow test assesses whether the observed event rates match the expected event rates in subgroups of the model population. A non-significant p-value (p > 0.05) indicates a good fit. In this case, the p-value is 0.5131, suggesting that the model fits the data well.
 
-## 5. Confusion Matrices and Metrics
+1. **p-value:** The p-value of 0.5131 is greater than the significance level of 0.05. This indicates that there is no statistically significant evidence to reject the null hypothesis of the test. The null hypothesis assumes that the model fits the data well. Hence, the test suggests that the logistic regression model provides a good fit to the observed data.
+
+2. **Test Statistic:** The X-squared value of 7.2202 is relatively small, indicating a minor deviation between the observed and expected frequencies across the groups.
+
+**Conclusion:** Since the p-value is not significant, the logistic regression model is well-calibrated and fits the data adequately. The predictions from the model align well with the actual observations. 
+
+## 3. Confusion Matrices and Metrics
+
+Why we need to measure these metrics? What does it answer?
+This section involves evaluating the performance of the chosen logistic regression model using a confusion matrix. The metrics used for evaluation are:
+
+1. Accuracy: Overall correctness of the model.
+
+   \[
+   \text{Accuracy} = \frac{\text{TP} + \text{TN}}{\text{Total}}
+   \]  
+   where:  
+   
+   - TP = True Positives  
+   - TN = True Negatives  
+   
+2. Sensitivity (True Positive Rate): Ability to identify "Not Survive" cases correctly.
+
+   \[
+   \text{Sensitivity} = \frac{\text{TP}}{\text{TP} + \text{FN}}
+   \]  
+   where:  
+   
+   - TP = True Positives  
+   - FN = False Negatives  
+
+3. Specificity (True Negative Rate): Ability to identify "Survive" cases correctly.
+   \[
+   \text{Specificity} = \frac{\text{TN}}{\text{TN} + \text{FP}}
+   \]  
+   where:  
+   
+   - TN = True Negatives
+   - FP = False Positives  
 
 We generate confusion matrices and calculate accuracy, sensitivity, and specificity for different cutoff values.
 
+TODO: How did we create the confusion matrix? 
+
+We first identify the relevant cutoff values. For each cutoff value, we compare the predicted probabilities against the cutoff and assign a binary outcome to determine the patient mortality. We then compare this predicted binary outcome against the actual outcome provided in the original dataset before pre-processing. Based on this comparison, we understand how well the model is able to predict the outcome and we create a table (Confusion matrix) consisting of True positives, True negatives, False positive, and False negatives. 
+
 ```{r}
-# Define cutoff values
-cutoffs <- c(0.5, 0.3, 0.7, 0.25, 0.4, 0.2)  # Cutoffs of 0.5, 0.3, and 0.7
-
-# Create an empty list to store confusion matrices and metrics
-results <- list()
-
-# Loop through each cutoff to calculate metrics
+  predicted_probs <- predict(final_model, type = "response")
 for (cutoff in cutoffs) {
-  # Convert probabilities to binary predictions based on the cutoff
-  predicted_class <- ifelse(predicted_probs > cutoff, 1, 0)
-  
-  # Generate the confusion matrix
-  confusion_matrix <- table(Actual = data$v2, Predicted = predicted_class)
-  
-  # Calculate metrics
-  accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
-  sensitivity <- confusion_matrix[2, 2] / sum(confusion_matrix[2, ])  # TP / (TP + FN)
-  specificity <- confusion_matrix[1, 1] / sum(confusion_matrix[1, ])  # TN / (TN + FP)
-  
-  # Store the results
-  results[[as.character(cutoff)]] <- list(
-    Confusion_Matrix = confusion_matrix,
-    Accuracy = accuracy,
-    Sensitivity = sensitivity,
-    Specificity = specificity
-  )
-}  
-# Print metrics for each cutoff
-for (cutoff in cutoffs) {
-  cat("\nCutoff:", cutoff, "\n")
-  print(results[[as.character(cutoff)]]$Confusion_Matrix)
-  cat("Accuracy:", results[[as.character(cutoff)]]$Accuracy, "\n")
-  cat("Sensitivity:", results[[as.character(cutoff)]]$Sensitivity, "\n")
-  cat("Specificity:", results[[as.character(cutoff)]]$Specificity, "\n")
-}
+    # Convert probabilities to binary predictions based on the cutoff
+    predicted_class <- ifelse(predicted_probs > cutoff, 1, 0)
+
+    # Generate the confusion matrix
+    confusion_matrix <- table(Actual = data$v2, Predicted = predicted_class)
+
+    # Calculate metrics
+    accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+    sensitivity <- confusion_matrix[2, 2] / sum(confusion_matrix[2, ]) # TP / (TP + FN)
+    specificity <- confusion_matrix[1, 1] / sum(confusion_matrix[1, ]) # TN / (TN + FP)
+
+    # Store the results
+    results[[as.character(cutoff)]] <- list(
+      Confusion_Matrix = confusion_matrix,
+      Accuracy = accuracy,
+      Sensitivity = sensitivity,
+      Specificity = specificity
+    )
+  }
+  # Print metrics for each cutoff
+  for (cutoff in cutoffs) {
+    cat("\nCutoff:", cutoff, "\n")
+    print(results[[as.character(cutoff)]]$Confusion_Matrix)
+    cat("Accuracy:", results[[as.character(cutoff)]]$Accuracy, "\n")
+    cat("Sensitivity:", results[[as.character(cutoff)]]$Sensitivity, "\n")
+    cat("Specificity:", results[[as.character(cutoff)]]$Specificity, "\n")
+  }
 ```
 
-## 6. ROC Curves and AUC
+We included the cutoff values of `0.5, 0.25, 0.75` initially to gauge how the predicted probabilities are varying with the actual outcome. We observed the following:
 
-We plot ROC curves and calculate AUC for different models.
+TODO: Mention the metrics explicitly while discussing it.
+1. Cutoff = 0.5
+At this threshold, the model achieves high accuracy and specificity, meaning it correctly identifies most of the "Survive" cases. However, sensitivity is low, indicating the model struggles to identify "Not Survive" cases.
+  
+2. Cutoff = 0.75
+Increasing the cutoff reduces sensitivity further (fewer "Not Survive" cases are identified) but increases specificity slightly. This cutoff might prioritize avoiding false positives ("Not Survive" predicted when "Survive") over identifying all "Not Survive" cases.
+
+3. Cutoff = 0.25
+Lowering the cutoff significantly improves sensitivity (better identification of "Not Survive" cases) but reduces specificity and overall accuracy. This cutoff is useful when identifying "Not Survive" cases is more critical.
+
+For predicting survival in ICU, sensitivity is more important as the cost of missing critical cases is much higher than the cost of over-monitoring patients. The model should ensure it captures the majority of high-risk patients, even if it results in some false positives. However, this is completely subjective. We could also balance sensitivity and specificity when
+ICU resources (e.g., staff, equipment) are limited, and one needs to minimize unnecessary interventions while still identifying most critical cases.
+
+## 4. ROC Curves and AUC
+
+From the previous section, we understand that we cannot choose an optimal cutoff to prioritize sensitivity or balance sensitivity and specificity. To identify the ideal cutoff, we make use of ROC curves and AUC. 
+
+**Receiver Operating Characteristic (ROC) Curve** plots the True Positive Rate (Sensitivity) against the False Positive Rate (1 - Specificity) at various threshold settings. ROC curves help evaluate the performance of a binary classifier across different classification thresholds.The ROC Curve shows the trade-off between sensitivity and specificity for each model.
+
+The **Area Under the Curve (AUC)** is a single metric summarizing the performance of a classifier.
+  - **AUC = 1.0**: Perfect model.
+  - **AUC = 0.5**: Model performs no better than random guessing.
+  - **Higher AUC** indicates better model performance.
+
+We plot ROC curves and calculate AUC for three models. The three models include: 
+
+- The full model that captures all the predictor variables available in the dataset, 
+- The model that is a result of the step function optimizing for AIC, and 
+- The model that is a result of the step function optimizing for BIC.
 
 ```{r}
-# Load the necessary library
-library(pROC)
+  # Plot the ROC curves
+  plot(roc_full, col = "blue", legacy.axes = TRUE, main = "ROC Curves for Logistic Models")
+  lines(roc_model_1, col = "red") # Add Model 1 ROC curve
+  lines(roc_model_2, col = "green") # Add Model 2 ROC curve
 
-# Fit the models
-full_model <- glm(v2 ~ ., family = binomial, data = data) # Full
-model_
+  # Add legend
+  legend("bottomright",
+    legend = c("Full Model", "Model 1 (AIC)", "Model 2 (BIC)"),
+    col = c("blue", "red", "green"), lwd = 2
+  )
+  cat("AUC for Full Model:", auc(roc_full), "\n")
+  cat("AUC for Model 1 (AIC):", auc(roc_model_1), "\n")
+  cat("AUC for Model 2 (BIC):", auc(roc_model_2), "\n")
+```
+
+The plot includes ROC curves for three logistic regression models:
+
+1. **Full Model (Blue)**: Includes all predictors.
+2. **Model 1 (Red)**: Includes predictors selected using AIC-based stepwise selection.
+3. **Model 2 (Green)**: Includes predictors selected using BIC-based stepwise selection.
+
+#### Key Insights
+
+On observing the plots:
+
+- The Full Model (Blue curve) shows the highest curve and AUC, indicating the best performance among the three models.
+- Model 1 (AIC) (Red curve) performs slightly worse than the full model but better than Model 2.
+- Model 2 (BIC) (Green curve) has the lowest curve and AUC, indicating comparatively weaker classification performance.
+
+The AUC values for the models are as follows:
+
+1. Full Model (Blue): `0.8847`  
+   - Indicates excellent performance, with high sensitivity and specificity across thresholds.
+2. Model 1 (AIC, Red): `0.8678`  
+   - Slightly lower than the Full Model, but still a strong classifier.
+3. Model 2 (BIC, Green): `0.8533`  
+   - Lower performance compared to the other models, though still reasonable.
+
+#### Conclusion
+
+- The **Full Model** is the best performer, as evidenced by the highest AUC (`0.8847`) and the highest ROC curve.
+- **Model 1 (AIC)** offers a good trade-off, with reduced complexity and slightly lower AUC (`0.8678`).
+- **Model 2 (BIC)** sacrifices performance for simplicity, resulting in the lowest AUC (`0.8533`).
+
+Based on the results above, it's a subjective decision between simpler interpretation and predictive performance. If the emphasis is on simpler interpretation with minimal loss in performance, **Model 1 (AIC)** will be considered. 
+
+## 5. LOOCV-adjusted ROC Curves and AUC
+
+
+
