@@ -532,4 +532,191 @@ The plot above shows the ROC curves for three logistic regression models:
 
 #### **Conclusion**
 
-LOOCV highlights the importance of model simplicity by penalizing overfitting, making it an essential step in robust model selection. **Model 2 (BIC)** maintains the highest LOOCV-adjusted AUC, making it the preferred model. 
+LOOCV highlights the importance of model simplicity by penalizing overfitting, making it an essential step in robust model selection. **Model 2 (BIC)** maintains the highest LOOCV-adjusted AUC, making it the preferred model.
+
+# Exercise 4:2
+
+## 1. Decision trees
+
+We will now study the usefulness of decision trees
+as an alternative to the logistic models.
+We start by generating decision trees using both splitting methods
+(Gini index and information gain)
+with the following values of the complexity parameter:
+\[\text{cp} \in \{0.1, 0.01, 0.001\}\]
+
+We plot each pair of trees and study the structure of each tree below.
+
+```{r}
+plot_decision_trees(data4, 0.1)
+```
+
+For a high value of the complexity parameter (\(\text{cp}=0.1\)),
+we see that the decision tree consists of only three nodes,
+with a single split separating the top node from the leaves.
+In this case, both splitting methods produced the same tree.
+
+```{r}
+plot_decision_trees(data4, 0.01)
+```
+
+For a medium value of the complexity parameter (\(\text{cp}=0.01\)),
+we see that the decision tree now consists of five nodes and two splits.
+Again, both splitting methods produced the same tree.
+Perhaps the choice of splitting method does not matter much when
+the requested trees are relatively simple.
+
+```{r}
+plot_decision_trees(data4, 0.001)
+```
+
+For a low value of the complexity parameter (\(\text{cp}=0.001\)),
+we see that
+the choice of splitting method affects the structure of the tree.
+The Gini index tree consists of 11 nodes and 5 splits,
+whereas the Information gain tree consists of 15 nodes and 7 splits.
+It appears that the lower the value of the complexity parameter,
+the more complex the tree.
+
+### Interpretation
+
+A good decision tree is one that strikes the right balance between
+interpretability and predictive power.
+A decision tree which has mediocre predictive power
+can still be useful if the tree simple enough so that non-experts can
+understand it.
+
+Nevertheless,
+let us examine the structure of the most complex decision
+tree we found.
+This is the tree that uses the information gain splitting method
+with a complexity parameter value of \(\text{cp}=0.001\).
+Although the tree is relatively complex, it may pay off in predictive power.
+
+```{r}
+rpart.plot(tm_good, main = paste(tm_good_split_name, "with cp =", tm_good_cp))
+```
+
+The tree consists of 15 nodes and 7 splits.
+The tree predicts the target variable \(V_2\) (survival),
+which has two possible outcomes, \(V_2=0\) (survived) and \(V_2=1\) (passed away).
+
+* Top node: Assuming we do not know anything about the patient,
+the probability of non-survival is 0.20.
+
+* `v21=0`: This is the first split.
+If the patient is conscious (\(V_{21}=0\)),
+we proceed to the left child node.
+If not, we proceed to the right child node,
+which states that the patient will pass away with a probability
+of 0.87. This is predicted to happen for 8 % of all patients.
+
+* `v11>=88`: This is the second split. If the blood pressure is high (\(V_{11}\geq 88\) mm Hg),
+we proceed to the left child node.
+If not, the patient passes away with a probability of 0.67.
+Only 4 \% of the patients suffer this fate.
+
+* `v14=0`: This is the third split.
+If the admission is of type "not acute" (\(V_{14}=0\)),
+the patient is predicted to pass away with a probability of only 0.02.
+If it is acute, we proceed to the right child node.
+
+* `v3<49`: This is the fourth split.
+If the patient is less than 49 years old (\(V_3\leq 49\)),
+the probability of passing away is only 0.04.
+If not, we proceed to the right child node.
+
+* `v11>=149`: This is the fifth split.
+If the blood pressure is very high (\(V_{11}\geq 149\) mm Hg),
+the patient is predicted to pass away with a probability of
+only 0.09. If not, we proceed to the right child node.
+
+* `v3<74`: This is the sixth split.
+If the patient is less than 74 years old (\(V_3<74\)),
+we proceed to the left child node.
+If not, the probability of passing away is 0.42.
+
+* `v11<137`: This is the seventh and final split.
+If the blood pressure is relatively low (\(V_{11}<137\) mm Hg),
+the patient is predicted to pass away with a probability of
+only 0.14. If not, the patient is predicted
+to pass away with a probability of 0.57.
+
+## 2. Predictive power
+
+Next, let us evaluate the predictive power of our decision tree.
+For comparison, we will plot the ROC curve for
+both the decision tree and the logistic regression model
+we chose in Exercise 4:1,
+then calculate the AUC.
+
+```{r}
+plot_tree_against_logistic(tree_roc, logistic_roc4)
+```
+
+AUC for the decision tree:
+```{r}
+tree_roc$auc
+```
+
+AUC for the logistic model:
+```{r}
+logistic_roc4$auc
+```
+
+As we can see, the ROC curves for the logistic model
+and the decision tree overlap for the most part,
+suggesting that the two models are approximately equal
+in predictive power.
+The decision tree is even shown to outperform
+the logistic model overall,
+as evidenced by the higher AUC value.
+In particular, if the specificity is approximately 0.8,
+we see that the decision tree yields better values of sensitivity.
+However, we should take these results with a grain of salt,
+as this is done without any correction for overfitting.
+
+## 3. LOOCV-correction
+
+To correct for overfitting, we will again perform
+leave-one-out-cross-validation and recompute
+the ROC and AUC.
+
+```{r}
+plot_tree_against_logistic(tree_roc_loocv, logistic_roc_loocv4)
+```
+
+AUC for the decision tree:
+```{r}
+tree_roc_loocv$auc
+```
+
+AUC for the logistic model:
+```{r}
+logistic_roc_loocv4$auc
+```
+
+After applying LOOCV, we see that
+the predictive power of both models dropped.
+The AUC for the decision tree is now considerably lower than that of
+the logistic model, implying that the decision tree is
+comparatively worse overall.
+At a specificity around 1.0, the two models
+are shown to be equally matched.
+Between specificity values of 0.6 and 1.0,
+we see that the ROC curve of the logistic
+model is above that of the decision tree,
+suggesting that the logistic model outperforms
+the decision tree within this range.
+If high specificity is desired, the
+decision tree will probably not be useful.
+
+On the other hand, the decision tree is shown
+to outperform the logistic model
+for low values of specificity (0.0 to around 0.6).
+So if we are willing to accept a high rate of
+false positives, the decision tree may be a better choice.
+Indeed, in the context of an ICU, it may
+be wiser to err on the side of caution and
+assume that the patient is dying in times of doubt,
+as the decision we make is a matter of life or death.
