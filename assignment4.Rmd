@@ -1,5 +1,5 @@
 ---
-title: "Computer Assignment 4"
+title: "Computer Assignment 3"
 author:
   - "Ville Sebastian Olsson (19911231-1999)"
   - "Arvind Guruprasad (19990212-6938)"
@@ -22,7 +22,7 @@ knitr::opts_chunk$set(echo = FALSE, comment = "")
 
 In this exercise, we will build a logistic regression model to predict the survival of a patient admitted to the ICU. In this process, we also want to identify the significant risk factors that affect the probability of the survival outcome. 
 
-The data is provided as a CSV file that consists of records on 200 patients admitted to an Intensive Care Unit (ICU) during a certain period. It contains 21 columns in total with 1 unique identifier, 3 continuous variables, and 17 categorical variables. 
+The data is provided as a CSV file that consists of records on 200 patients admitted to an Itensive Care Unit (ICU) during a certain period. It contains 21 columns in total with 1 unique identifier, 3 continuous variables, and 17 categorical variables. 
 To do this, we will pre-process the data and build logistic regression models. We will then assess the goodness-of-fit to compare different logistic regression models. 
 
 ## 1. Model selection
@@ -328,35 +328,35 @@ We generate confusion matrices and calculate accuracy, sensitivity, and specific
 We first identify the relevant cutoff values. For each cutoff value, we compare the predicted probabilities against the cutoff and assign a binary outcome to determine the patient mortality. We then compare this predicted binary outcome against the actual outcome provided in the original dataset. Based on this comparison, we create a table (Confusion matrix) consisting of the True positives, True negatives, False positive, and False negatives. This will allow us to numerically compute Accuracy, Sensitivity, and Specificity.
 
 ```{r}
-predicted_probs <- predict(final_model, type = "response")
+  predicted_probs <- predict(final_model, type = "response")
 for (cutoff in cutoffs) {
-  # Convert probabilities to binary predictions based on the cutoff
-  predicted_class <- ifelse(predicted_probs > cutoff, 1, 0)
+    # Convert probabilities to binary predictions based on the cutoff
+    predicted_class <- ifelse(predicted_probs > cutoff, 1, 0)
 
-  # Generate the confusion matrix
-  confusion_matrix <- table(Actual = data$v2, Predicted = predicted_class)
+    # Generate the confusion matrix
+    confusion_matrix <- table(Actual = data$v2, Predicted = predicted_class)
 
-  # Calculate metrics
-  accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
-  sensitivity <- confusion_matrix[2, 2] / sum(confusion_matrix[2, ]) # TP / (TP + FN)
-  specificity <- confusion_matrix[1, 1] / sum(confusion_matrix[1, ]) # TN / (TN + FP)
+    # Calculate metrics
+    accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+    sensitivity <- confusion_matrix[2, 2] / sum(confusion_matrix[2, ]) # TP / (TP + FN)
+    specificity <- confusion_matrix[1, 1] / sum(confusion_matrix[1, ]) # TN / (TN + FP)
 
-  # Store the results
-  results[[as.character(cutoff)]] <- list(
-    Confusion_Matrix = confusion_matrix,
-    Accuracy = accuracy,
-    Sensitivity = sensitivity,
-    Specificity = specificity
-  )
-}
-# Print metrics for each cutoff
-for (cutoff in cutoffs) {
-  cat("\nCutoff:", cutoff, "\n")
-  print(results[[as.character(cutoff)]]$Confusion_Matrix)
-  cat("Accuracy:", results[[as.character(cutoff)]]$Accuracy, "\n")
-  cat("Sensitivity:", results[[as.character(cutoff)]]$Sensitivity, "\n")
-  cat("Specificity:", results[[as.character(cutoff)]]$Specificity, "\n")
-}
+    # Store the results
+    results[[as.character(cutoff)]] <- list(
+      Confusion_Matrix = confusion_matrix,
+      Accuracy = accuracy,
+      Sensitivity = sensitivity,
+      Specificity = specificity
+    )
+  }
+  # Print metrics for each cutoff
+  for (cutoff in cutoffs) {
+    cat("\nCutoff:", cutoff, "\n")
+    print(results[[as.character(cutoff)]]$Confusion_Matrix)
+    cat("Accuracy:", results[[as.character(cutoff)]]$Accuracy, "\n")
+    cat("Sensitivity:", results[[as.character(cutoff)]]$Sensitivity, "\n")
+    cat("Specificity:", results[[as.character(cutoff)]]$Specificity, "\n")
+  }
 ```
 
 We included the cutoff values of `0.5, 0.25, 0.75` initially to gauge how the predicted probabilities are varying with the actual outcome. We observed the following:
@@ -392,19 +392,19 @@ We plot ROC curves and calculate AUC for three models. The three models include:
 - The model that is a result of the step function optimizing for BIC.
 
 ```{r}
-# Plot the ROC curves
-plot(roc_full, col = "blue", legacy.axes = TRUE, main = "ROC Curves for Logistic Models")
-lines(roc_model_1, col = "red") # Add Model 1 ROC curve
-lines(roc_model_2, col = "green") # Add Model 2 ROC curve
+  # Plot the ROC curves
+  plot(roc_full, col = "blue", legacy.axes = TRUE, main = "ROC Curves for Logistic Models")
+  lines(roc_model_1, col = "red") # Add Model 1 ROC curve
+  lines(roc_model_2, col = "green") # Add Model 2 ROC curve
 
-# Add legend
-legend("bottomright",
-  legend = c("Full Model", "Model 1 (AIC)", "Model 2 (BIC)"),
-  col = c("blue", "red", "green"), lwd = 2
-)
-cat("AUC for Full Model:", auc(roc_full), "\n")
-cat("AUC for Model 1 (AIC):", auc(roc_model_1), "\n")
-cat("AUC for Model 2 (BIC):", auc(roc_model_2), "\n")
+  # Add legend
+  legend("bottomright",
+    legend = c("Full Model", "Model 1 (AIC)", "Model 2 (BIC)"),
+    col = c("blue", "red", "green"), lwd = 2
+  )
+  cat("AUC for Full Model:", auc(roc_full), "\n")
+  cat("AUC for Model 1 (AIC):", auc(roc_model_1), "\n")
+  cat("AUC for Model 2 (BIC):", auc(roc_model_2), "\n")
 ```
 
 The plot includes ROC curves for three logistic regression models:
@@ -461,20 +461,20 @@ To implement LOOCV, we follow the below steps:
 The LOOCV-adjusted AUC and ROC curves are shown below:
 
 ```{r}
-cat("LOOCV AUC for Full Model:", loocv_full$AUC, "\n")
-cat("LOOCV AUC for Model 1:", loocv_model_1$AUC, "\n")
-cat("LOOCV AUC for Model 2:", loocv_model_2$AUC, "\n")
+  cat("LOOCV AUC for Full Model:", loocv_full$AUC, "\n")
+  cat("LOOCV AUC for Model 1 (AIC):", loocv_model_1$AUC, "\n")
+  cat("LOOCV AUC for Model 2 (BIC):", loocv_model_2$AUC, "\n")
 
-# Plot the ROC curves
-plot(loocv_full$ROC, col = "blue", legacy.axes = TRUE, main = "LOOCV ROC Curves")
-lines(loocv_model_1$ROC, col = "red")
-lines(loocv_model_2$ROC, col = "green")
+  # Plot the ROC curves
+  plot(loocv_full$ROC, col = "blue", legacy.axes = TRUE, main = "LOOCV ROC Curves")
+  lines(loocv_model_1$ROC, col = "red")
+  lines(loocv_model_2$ROC, col = "green")
 
-# Add a legend
-legend("bottomright",
-  legend = c("Full Model", "Model 1 (AIC)", "Model 2 (BIC)"),
-  col = c("blue", "red", "green"), lwd = 2
-)
+  # Add a legend
+  legend("bottomright",
+    legend = c("Full Model", "Model 1 (AIC)", "Model 2 (BIC)"),
+    col = c("blue", "red", "green"), lwd = 2
+  )
 ```
 
 The plot above shows the ROC curves for three logistic regression models:
@@ -532,191 +532,5 @@ The plot above shows the ROC curves for three logistic regression models:
 
 #### **Conclusion**
 
-LOOCV highlights the importance of model simplicity by penalizing overfitting, making it an essential step in robust model selection. **Model 2 (BIC)** maintains the highest LOOCV-adjusted AUC, making it the preferred model.
+LOOCV highlights the importance of model simplicity by penalizing overfitting, making it an essential step in robust model selection. **Model 2 (BIC)** maintains the highest LOOCV-adjusted AUC, making it the preferred model. 
 
-# Exercise 4:2
-
-## 1. Decision trees
-
-We will now study the usefulness of decision trees
-as an alternative to the logistic models.
-We start by generating decision trees using both splitting methods
-(Gini index and information gain)
-with the following values of the complexity parameter:
-\[\text{cp} \in \{0.1, 0.01, 0.001\}\]
-
-We plot each pair of trees and study the structure of each tree below.
-
-```{r}
-plot_decision_trees(data4, 0.1)
-```
-
-For a high value of the complexity parameter (\(\text{cp}=0.1\)),
-we see that the decision tree consists of only three nodes,
-with a single split separating the top node from the leaves.
-In this case, both splitting methods produced the same tree.
-
-```{r}
-plot_decision_trees(data4, 0.01)
-```
-
-For a medium value of the complexity parameter (\(\text{cp}=0.01\)),
-we see that the decision tree now consists of five nodes and two splits.
-Again, both splitting methods produced the same tree.
-Perhaps the choice of splitting method does not matter much when
-the requested trees are relatively simple.
-
-```{r}
-plot_decision_trees(data4, 0.001)
-```
-
-For a low value of the complexity parameter (\(\text{cp}=0.001\)),
-we see that
-the choice of splitting method affects the structure of the tree.
-The Gini index tree consists of 11 nodes and 5 splits,
-whereas the Information gain tree consists of 15 nodes and 7 splits.
-It appears that the lower the value of the complexity parameter,
-the more complex the tree.
-
-### Interpretation
-
-A good decision tree is one that strikes the right balance between
-interpretability and predictive power.
-A decision tree which has mediocre predictive power
-can still be useful if the tree simple enough so that non-experts can
-understand it.
-
-Nevertheless,
-let us examine the structure of the most complex decision
-tree we found.
-This is the tree that uses the information gain splitting method
-with a complexity parameter value of \(\text{cp}=0.001\).
-Although the tree is relatively complex, it may pay off in predictive power.
-
-```{r}
-rpart.plot(tm_good, main = paste(tm_good_split_name, "with cp =", tm_good_cp))
-```
-
-The tree consists of 15 nodes and 7 splits.
-The tree predicts the target variable \(V_2\) (survival),
-which has two possible outcomes, \(V_2=0\) (survived) and \(V_2=1\) (passed away).
-
-* Top node: Assuming we do not know anything about the patient,
-the probability of non-survival is 0.20.
-
-* `v21=0`: This is the first split.
-If the patient is conscious (\(V_{21}=0\)),
-we proceed to the left child node.
-If not, we proceed to the right child node,
-which states that the patient will pass away with a probability
-of 0.87. This is predicted to happen for 8 % of all patients.
-
-* `v11>=88`: This is the second split. If the blood pressure is high (\(V_{11}\geq 88\) mm Hg),
-we proceed to the left child node.
-If not, the patient passes away with a probability of 0.67.
-Only 4 \% of the patients suffer this fate.
-
-* `v14=0`: This is the third split.
-If the admission is of type "not acute" (\(V_{14}=0\)),
-the patient is predicted to pass away with a probability of only 0.02.
-If it is acute, we proceed to the right child node.
-
-* `v3<49`: This is the fourth split.
-If the patient is less than 49 years old (\(V_3\leq 49\)),
-the probability of passing away is only 0.04.
-If not, we proceed to the right child node.
-
-* `v11>=149`: This is the fifth split.
-If the blood pressure is very high (\(V_{11}\geq 149\) mm Hg),
-the patient is predicted to pass away with a probability of
-only 0.09. If not, we proceed to the right child node.
-
-* `v3<74`: This is the sixth split.
-If the patient is less than 74 years old (\(V_3<74\)),
-we proceed to the left child node.
-If not, the probability of passing away is 0.42.
-
-* `v11<137`: This is the seventh and final split.
-If the blood pressure is relatively low (\(V_{11}<137\) mm Hg),
-the patient is predicted to pass away with a probability of
-only 0.14. If not, the patient is predicted
-to pass away with a probability of 0.57.
-
-## 2. Predictive power
-
-Next, let us evaluate the predictive power of our decision tree.
-For comparison, we will plot the ROC curve for
-both the decision tree and the logistic regression model
-we chose in Exercise 4:1,
-then calculate the AUC.
-
-```{r}
-plot_tree_against_logistic(tree_roc, logistic_roc4)
-```
-
-AUC for the decision tree:
-```{r}
-tree_roc$auc
-```
-
-AUC for the logistic model:
-```{r}
-logistic_roc4$auc
-```
-
-As we can see, the ROC curves for the logistic model
-and the decision tree overlap for the most part,
-suggesting that the two models are approximately equal
-in predictive power.
-The decision tree is even shown to outperform
-the logistic model overall,
-as evidenced by the higher AUC value.
-In particular, if the specificity is approximately 0.8,
-we see that the decision tree yields better values of sensitivity.
-However, we should take these results with a grain of salt,
-as this is done without any correction for overfitting.
-
-## 3. LOOCV-correction
-
-To correct for overfitting, we will again perform
-leave-one-out-cross-validation and recompute
-the ROC and AUC.
-
-```{r}
-plot_tree_against_logistic(tree_roc_loocv, logistic_roc_loocv4)
-```
-
-AUC for the decision tree:
-```{r}
-tree_roc_loocv$auc
-```
-
-AUC for the logistic model:
-```{r}
-logistic_roc_loocv4$auc
-```
-
-After applying LOOCV, we see that
-the predictive power of both models dropped.
-The AUC for the decision tree is now considerably lower than that of
-the logistic model, implying that the decision tree is
-comparatively worse overall.
-At a specificity around 1.0, the two models
-are shown to be equally matched.
-Between specificity values of 0.6 and 1.0,
-we see that the ROC curve of the logistic
-model is above that of the decision tree,
-suggesting that the logistic model outperforms
-the decision tree within this range.
-If high specificity is desired, the
-decision tree will probably not be useful.
-
-On the other hand, the decision tree is shown
-to outperform the logistic model
-for low values of specificity (0.0 to around 0.6).
-So if we are willing to accept a high rate of
-false positives, the decision tree may be a better choice.
-Indeed, in the context of an ICU, it may
-be wiser to err on the side of caution and
-assume that the patient is dying in times of doubt,
-as the decision we make is a matter of life or death.
