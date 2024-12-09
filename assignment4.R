@@ -216,7 +216,8 @@ exercise42 <- function(data) {
   tree_roc <- roc(data4$v2, tree_probs, levels = c(0, 1), direction = "<")
 
   # ROC of Logistic Model
-  logistic_model <- glm(v2 ~ v21 + v14 + v3 + v7 + v11 + v18 + v17, family = binomial, data = data)
+  logistic_formula <- v2 ~ v21 + v14 + v3 + v7 # BIC model
+  logistic_model <- glm(logistic_formula, family = binomial, data = data)
   logistic_probs <- predict(logistic_model, type = "response")
   logistic_roc <- roc(data4$v2, logistic_probs, levels = c(0, 1), direction = "<")
 
@@ -251,7 +252,7 @@ exercise42 <- function(data) {
 
   logistic_roc_loocv <- loocv_auc(
     data4,
-    v2 ~ v21 + v14 + v3 + v7 + v11 + v18 + v17
+    logistic_formula
   )$ROC
   plot_tree_against_logistic(tree_roc_loocv, logistic_roc_loocv)
 
