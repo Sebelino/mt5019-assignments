@@ -67,7 +67,7 @@ where \(IJKL = 2\cdot2\cdot2\cdot2 = 16\) is the number of cells in the continge
 
 ### AIC
 
-Aikaike's information criterion (AIC) of a model \(M\) is a measure of the model's balance between goodness-of-fit
+Akaike's information criterion (AIC) of a model \(M\) is a measure of the model's balance between goodness-of-fit
 and model complexity, where a lower AIC value implies a better model. The AIC is given by:
 \[\text{AIC}(M) = -2\ell(M) + 2p\]
 where \(-2\ell(M)\) is the deviance and \(p\) is the number of parameters in \(M\),
@@ -161,7 +161,9 @@ corresponding to the models that were selected in each step:
 
 ## 2. Model selection
 
-We can sort the table of models by AIC in descending order:
+We described earlier the process of comparing the different models
+based on AIC, deviance, p-value, and degrees of freedom.
+Next, we sort the table of models by AIC in descending order:
 
 ```{r}
 model_table_short[order(model_table$AIC), ]
@@ -186,6 +188,8 @@ The model we selected looks like this:
 best_model
 ```
 
+with formula:
+\[N \sim X+Y+Z+V+X:Y+X:Z+X:V+Y:V+Z:V\]
 In addition to the main effects, this model includes the following two-way interactions:
 
 - \(X:Y\): Mother's age (\(X\)) and smoking habits (\(Y\)).
@@ -224,6 +228,10 @@ Non-significant associations (\(p\geq 0.05\)) are:
 - Mother's age (\(X\)),
 - The interaction between the mother's age and gestational age (\(X:Z\)),
 - The interaction between smoking habits and child survival (\(Y:V\)).
+
+While the non-significant associations do not contribute evidence
+of strong statistical associations, they may still be worth
+retaining in the model to control for confounding.
 
 ## 4. Logistic model
 
