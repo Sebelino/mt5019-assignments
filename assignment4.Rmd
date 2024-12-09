@@ -18,7 +18,7 @@ list2env(ass, envir = .GlobalEnv)
 knitr::opts_chunk$set(echo = FALSE, comment = "")
 ```
 
-# Exercise 4:1 - Multiple Logistic Regression 
+# Exercise 4:1 - Multiple Logistic Regression
 
 In this exercise, we will build a logistic regression model to predict the survival of a patient admitted to the ICU. In this process, we also want to identify the significant risk factors that affect the probability of the survival outcome.
 
@@ -29,9 +29,9 @@ To do this, we will pre-process the data and build logistic regression models. W
 
 ### Data Pre-processing
 
-#### Data cleaning 
+#### Collapsing categories
 
-The dataset includes categorical variables for Ethnicity (`v5`) and Consciousness level (`v21`).   
+The dataset includes categorical variables for Ethnicity (`v5`) and Consciousness level (`v21`).
 
 **Ethnicity**: We noticed that the category counts for 2 ('black') and 3 ('other') in Ethnicity (`v5`) are quite low relative to the category count for 1 ('white'). To balance the distribution, categories 2 and 3 are combined into a single category (0: other).
 
@@ -59,16 +59,23 @@ table(data$v21)
 
 #### Converting categorical variables to factors
 
-We convert the relevant columns to factors to ensure they are treated as categorical variables in the logistic regression models. All the columns that do not contain numerical values are converted to factors here. 
+We convert the relevant columns to factors to ensure they are treated as categorical variables in the logistic regression models. All the columns that do not contain numerical values are converted to factors here.
 
-#### Remove Patient ID
+#### Non-predictive variables
 
-We also removed the column Patient ID to ensure its not treated as a predictor as it does not provide any value in describing the patient but rather it acts as the unique identifier for each key. While training the models, it is recommended to remove the columns that would not add any contextual significance in describing patient mortality. 
+While training the models, it is recommended to remove the columns that would not add any contextual significance in describing patient mortality.
+In this case, all variables seem to be relevant in predicting patient mortality, with one exception: patient ID (`v1`).
+This column contains unique identifiers for the patients and should, in principle, not provide any predictive value.
+If there were to be an association between patient ID and survival outcomes, it would suggest that
+the patient IDs were assigned in a non-random manner.
+For example, perhaps patients who are treated at facility A are assigned a low patient ID, whereas
+patients treated at facility B are assigned a high patient ID. This would introduce bias into the model.
+For this reason, we remove this column before fitting the models.
 
 
 ### Model Selection
 
-We start with an empty model that includes only the intercept. We then fit a full model that includes all predictor variables. Using these two models as the lower and the upper bounds, we perform **stepwise model selection** using both AIC and BIC to compare the two best models possible. 
+We start with an empty model that includes only the intercept. We then fit a full model that includes all predictor variables. Using these two models as the lower and the upper bounds, we perform **stepwise model selection** using both AIC and BIC to compare the two best models possible.
 
 #### Akaike's Information Criteria (AIC)
 
@@ -125,7 +132,7 @@ Both models offer comparable AIC and BIC. The model `mstep1_AIC` offers the lowe
 
 #### Factors affecting patient survival
 
-Finally, based on the chosen model, the factors that affect the probability of the patient admitted to the ICU to not survive include 
+Finally, based on the chosen model, the factors that affect the probability of the patient admitted to the ICU to not survive include
 
 - **Consciousness Level (v21: Unconscious/Coma vs. Awake)**
 - **Type of Admission (v14: Acute vs. Non-Acute)**
@@ -188,7 +195,7 @@ Patients admitted for acute conditions have **20.65 times higher odds** of not s
 
 - OR: 1.0436
 - CI: (1.0179, 1.0746)
-For every additional year of age, the odds of not surviving increase by **4.36%**.  
+For every additional year of age, the odds of not surviving increase by **4.36%**.
 Age is a significant factor in survival, likely due to declining health and resilience in older patients.
 
 ---
@@ -197,7 +204,7 @@ Age is a significant factor in survival, likely due to declining health and resi
 
 - OR: 11.05
 - CI: (1.99, 73.21)
-Patients with cancer have **11.05 times higher odds** of not surviving compared to those without cancer.  
+Patients with cancer have **11.05 times higher odds** of not surviving compared to those without cancer.
 The presence of cancer reflects a chronic condition that exacerbates the risk of mortality.
 
 ---
@@ -206,7 +213,7 @@ The presence of cancer reflects a chronic condition that exacerbates the risk of
 
 - OR: 0.986
 - CI: (0.971, 0.999)
-For each 1 mm Hg increase in blood pressure, the odds of not surviving decrease by **1.44%**.  
+For each 1 mm Hg increase in blood pressure, the odds of not surviving decrease by **1.44%**.
 A higher blood pressure within a safe range might reflect better cardiovascular health, reducing mortality risk.
 
 ---
@@ -215,7 +222,7 @@ A higher blood pressure within a safe range might reflect better cardiovascular 
 
 - OR: 0.1051
 - CI: (0.012, 0.641)
-Patients with carbon dioxide levels above 45 have significantly **lower odds** of not surviving (89.49% decrease) compared to those with levels below 45.  
+Patients with carbon dioxide levels above 45 have significantly **lower odds** of not surviving (89.49% decrease) compared to those with levels below 45.
 Elevated carbon dioxide may reflect physiological compensation mechanisms for certain conditions.
 
 ---
@@ -224,7 +231,7 @@ Elevated carbon dioxide may reflect physiological compensation mechanisms for ce
 
 - OR: 6.39
 - CI: (1.14, 38.48)
-Patients with a blood pH below 7.25 have **6.39 times higher odds** of not surviving compared to those above 7.25.  
+Patients with a blood pH below 7.25 have **6.39 times higher odds** of not surviving compared to those above 7.25.
 
 ---
 
@@ -242,14 +249,14 @@ Below is the summary of the various factors used in the final model distinguishe
    - Blood Pressure (Higher)
    - Blood Carbon Dioxide (Above 45)
 
-Protective predictors refer to variables that are associated with a decreased risk of the outcome of interest (in this case, not surviving) when their values increase or change in a specific way. Essentially, these predictors reduce the likelihood of the patient not surviving. Whereas Significant risk factors are the opposite. They increase the likelihood of the patient not surviving with increase in their values. 
+Protective predictors refer to variables that are associated with a decreased risk of the outcome of interest (in this case, not surviving) when their values increase or change in a specific way. Essentially, these predictors reduce the likelihood of the patient not surviving. Whereas Significant risk factors are the opposite. They increase the likelihood of the patient not surviving with increase in their values.
 
 These results underscore the importance of critical physiological and clinical indicators in predicting survival outcomes in ICU patients.
 
 ## 2. Goodness of Fit
 
-Now that we have chosen the model, we need to understand how well the chosen model fit the data. We do this using the Hosmer-Lemeshow test. 
-The Hosmer-Lemeshow goodness-of-fit test is widely used to evaluate the calibration of logistic regression models, particularly when the data is at the **individual level**. Unlike deviance-based tests, which are suitable for grouped data, this test measures how well the predicted probabilities from the model align with the observed outcomes across subgroups of the data. 
+Now that we have chosen the model, we need to understand how well the chosen model fit the data. We do this using the Hosmer-Lemeshow test.
+The Hosmer-Lemeshow goodness-of-fit test is widely used to evaluate the calibration of logistic regression models, particularly when the data is at the **individual level**. Unlike deviance-based tests, which are suitable for grouped data, this test measures how well the predicted probabilities from the model align with the observed outcomes across subgroups of the data.
 
 Key reasons to use the Hosmer-Lemeshow test:
 
@@ -289,7 +296,7 @@ The Hosmer-Lemeshow test assesses whether the observed event rates match the exp
 
 2. **Test Statistic:** The X-squared value of 7.2202 is relatively small, indicating a minor deviation between the observed and expected frequencies across the groups.
 
-**Conclusion:** Since the p-value is not significant, the logistic regression model is well-calibrated and fits the data adequately. The predictions from the model align well with the actual observations. 
+**Conclusion:** Since the p-value is not significant, the logistic regression model is well-calibrated and fits the data adequately. The predictions from the model align well with the actual observations.
 
 ## 3. Confusion Matrices and Metrics
 
@@ -299,30 +306,30 @@ This section involves evaluating the performance of the chosen logistic regressi
 
    \[
    \text{Accuracy} = \frac{\text{TP} + \text{TN}}{\text{Total}}
-   \]  
-   where:  
-   
-   - TP = True Positives  
-   - TN = True Negatives  
-   
+   \]
+   where:
+
+   - TP = True Positives
+   - TN = True Negatives
+
 2. Sensitivity (True Positive Rate): Ability to identify "Not Survive" cases correctly.
 
    \[
    \text{Sensitivity} = \frac{\text{TP}}{\text{TP} + \text{FN}}
-   \]  
-   where:  
-   
-   - TP = True Positives  
-   - FN = False Negatives  
+   \]
+   where:
+
+   - TP = True Positives
+   - FN = False Negatives
 
 3. Specificity (True Negative Rate): Ability to identify "Survive" cases correctly.
    \[
    \text{Specificity} = \frac{\text{TN}}{\text{TN} + \text{FP}}
-   \]  
-   where:  
-   
+   \]
+   where:
+
    - TN = True Negatives
-   - FP = False Positives  
+   - FP = False Positives
 
 We generate confusion matrices and calculate accuracy, sensitivity, and specificity for different cutoff values.
 We first identify the relevant cutoff values. For each cutoff value, we compare the predicted probabilities against the cutoff and assign a binary outcome to determine the patient mortality. We then compare this predicted binary outcome against the actual outcome provided in the original dataset. Based on this comparison, we create a table (Confusion matrix) consisting of the True positives, True negatives, False positive, and False negatives. This will allow us to numerically compute Accuracy, Sensitivity, and Specificity.
@@ -363,7 +370,7 @@ We included the cutoff values of `0.5, 0.25, 0.75` initially to gauge how the pr
 
 1. Cutoff = 0.5
 At this threshold, the model achieves high accuracy (0.87) and specificity (0.981), meaning it correctly identifies most of the "Survive" cases. However, sensitivity (0.425) is low, indicating the model struggles to identify "Not Survive" cases.
-  
+
 2. Cutoff = 0.75
 Increasing the cutoff reduces sensitivity (0.325) further (fewer "Not Survive" cases are identified) but increases specificity (0.993) slightly. This cutoff might prioritize avoiding false positives ("Not Survive" predicted when "Survive") over identifying all "Not Survive" cases.
 
@@ -375,7 +382,7 @@ ICU resources (e.g., staff, equipment) are limited, and one needs to minimize un
 
 ## 4. ROC Curves and AUC
 
-From the previous section, we understand that we would to choose an optimal cutoff value to prioritize sensitivity or balance sensitivity and specificity. To identify the ideal cutoff, we make use of ROC curves and AUC. 
+From the previous section, we understand that we would to choose an optimal cutoff value to prioritize sensitivity or balance sensitivity and specificity. To identify the ideal cutoff, we make use of ROC curves and AUC.
 
 **Receiver Operating Characteristic (ROC) Curve** plots the True Positive Rate (Sensitivity) against the False Positive Rate (1 - Specificity) at various threshold settings. ROC curves help evaluate the performance of a binary classifier across different classification thresholds.The ROC Curve shows the trade-off between sensitivity and specificity for each model.
 
@@ -385,10 +392,10 @@ The **Area Under the Curve (AUC)** is a single metric summarizing the performanc
   - **AUC = 0.5**: Model performs no better than random guessing.
   - **Higher AUC** indicates better model performance.
 
-We plot ROC curves and calculate AUC for three models. The three models include: 
+We plot ROC curves and calculate AUC for three models. The three models include:
 
-- The full model that captures all the predictor variables available in the dataset, 
-- The model that is a result of the step function optimizing for AIC, and 
+- The full model that captures all the predictor variables available in the dataset,
+- The model that is a result of the step function optimizing for AIC, and
 - The model that is a result of the step function optimizing for BIC.
 
 ```{r}
@@ -442,7 +449,7 @@ Leave-One-Out Cross-Validation (LOOCV) is a validation technique used to estimat
 - **Avoids Overfitting**: By iteratively training the model on all data except one observation and then testing on the excluded observation, LOOCV ensures the model's performance is not overly optimistic.
 - **Reliable Estimate**: Each data point serves as the validation set once, leading to an almost unbiased estimate of prediction error.
 
-We will now implement LOOCV for the three models we selected earlier including the full model, Model 1 (AIC), and Model 2 (BIC). 
+We will now implement LOOCV for the three models we selected earlier including the full model, Model 1 (AIC), and Model 2 (BIC).
 
 To implement LOOCV, we follow the below steps:
 
@@ -532,7 +539,7 @@ The plot above shows the ROC curves for three logistic regression models:
 
 #### **Conclusion**
 
-LOOCV highlights the importance of model simplicity by penalizing overfitting, making it an essential step in robust model selection. **Model 2 (BIC)** maintains the highest LOOCV-adjusted AUC, making it the preferred model. 
+LOOCV highlights the importance of model simplicity by penalizing overfitting, making it an essential step in robust model selection. **Model 2 (BIC)** maintains the highest LOOCV-adjusted AUC, making it the preferred model.
 
 # Exercise 4:2
 
