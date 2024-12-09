@@ -599,8 +599,7 @@ tree we found.
 This is the tree that uses the information gain splitting method
 with a complexity parameter value of \(\text{cp}=0.001\).
 Although the tree is relatively complex, it may pay off in predictive power.
-
-TODO we will cover predictive power later on.
+We will determine whether this is the case in the next section.
 
 ```{r}
 rpart.plot(tm_good, main = paste(tm_good_split_name, "with cp =", tm_good_cp))
@@ -656,10 +655,9 @@ to pass away with a probability of 0.57.
 Next, let us evaluate the predictive power of our decision tree.
 For comparison, we will plot the ROC curve for
 both the decision tree and the logistic regression model
-we chose in Exercise 4:1,
-then calculate the AUC.
-
-TODO insert formula for 4:1 here
+we chose in Exercise 4:1.
+This refers to the model selected based on the BIC criterion, with formula:
+\[V_2 \sim V_{21} + V_{14} + V_3 + V_7\]
 
 ```{r}
 plot_tree_against_logistic(tree_roc, logistic_roc4)
