@@ -353,13 +353,14 @@ is mediated or overshadowed by other factors, such as gestational age (\(Z\)) wh
 
 ### Intercept
 
-The estimated odds ratio of \(6.13\) for the intercept means
-that the odds of child survival are \(6.13\) times higher
-than the odds of the child not surviving
+The estimated odds of \(6.13\) for the intercept means
+that the odds of child survival are \(6.13\) to \(1\)
 when all explanatory variables are at their baseline levels,
 i.e. when \(X=0\), \(Y=0\), and \(Z=0\).
-This means that a mother who is below 30 years old, smokes less than 5 cigarettes per day, and has a gestational age of less than 260 days has
-\(6.13\) better odds of her child surviving compared to it not surviving.
+This means that a mother who is below 30 years old, smokes less than 5 cigarettes per day,
+and has a gestational age of less than 260 days has
+an odds of \(6.13\) of her child surviving compared to it not surviving,
+at least with regards to the cohort that was studied.
 
 The associated p-value is much less than 0.05, meaning that we
 reject the null hypothesis that the odds is 1 with strong
@@ -367,17 +368,16 @@ statistical significance.
 We are 95 \% confident that the true odds ratio lies
 in the interval \([4.71, 7.99]\).
 
-It may be challenging to tell whether this
-estimated odds ratio makes sense intuitively.
+We may not be able to draw a useful conclusion from this odds.
 While a shorter gestational age (\(Z=0\))
 may be a risk factor, the lack of smoking (\(X=0\))
 and being below 30 years old (\(Y=0\)) might
 be protective factors that offset this risk.
-Most children in this study survived
-(`r sum(data[data$v==1,])` vs. `r sum(data[data$v==0,])`).
-Hence, it does not seem unreasonable
-that one child of this kind dies for each six children
-of the same kind who survive.
+Given that most children in this study survived
+(`r sum(data[data$v==1,])` vs. `r sum(data[data$v==0,])`),
+our finding that six children survive for each
+child in the baseline group
+aligns with the overall survival pattern in the cohort.
 
 ## 5. Logistic-loglinear model relationship
 
