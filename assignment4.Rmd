@@ -343,7 +343,9 @@ is poorly calibrated or that it fits the data poorly.
 
 ## 3. Confusion Matrices and Metrics
 
-This section involves evaluating the performance of the chosen logistic regression model using a confusion matrix. The metrics used for evaluation are:
+This section involves evaluating the predication performance of the chosen
+logistic regression model using a confusion matrix.
+The metrics used for evaluation are:
 
 1. Accuracy: Overall correctness of the model.
 
@@ -374,9 +376,25 @@ This section involves evaluating the performance of the chosen logistic regressi
    - TN = True Negatives
    - FP = False Positives
 
-We generate confusion matrices and calculate accuracy, sensitivity, and specificity for different cutoff values.
-We first identify the relevant cutoff values. For each cutoff value, we compare the predicted probabilities against the cutoff and assign a binary outcome to determine the patient mortality. We then compare this predicted binary outcome against the actual outcome provided in the original dataset. Based on this comparison, we create a table (Confusion matrix) consisting of the True positives, True negatives, False positive, and False negatives. This will allow us to numerically compute Accuracy, Sensitivity, and Specificity.
+We first define a set of suitable cutoff values.
+For each cutoff value,
+we compare the predicted probabilities against the cutoff value and assign a binary
+outcome to determine the patient mortality.
+For each cutoff value \(c\) and predicted probability \(p\),
+we assign the outcome as "Not Survive"
+(`1`) if \(p > c\) and "Survive" (`0`) otherwise.
+We then compare this predicted
+binary outcome against the actual outcome provided in the original dataset.
+Based on this comparison, we create a table (confusion matrix) consisting of
+the true positives, true negatives, false positives, and false negatives.
+This will allow us to numerically compute accuracy, sensitivity, and
+specificity.
 
+To gauge how the predicted probabilities are varying with the actual outcome,
+we evaluate the model performance for the following cutoff values:
+\[c \in \{0.5, 0.75, 0.25\}\]
+
+Result:
 ```{r}
 predicted_probs <- predict(final_model, type = "response")
 for (cutoff in cutoffs) {
@@ -409,19 +427,24 @@ for (cutoff in cutoffs) {
 }
 ```
 
-We included the cutoff values of `0.5, 0.25, 0.75` initially to gauge how the predicted probabilities are varying with the actual outcome. We observed the following:
+We can observe the following:
 
-1. Cutoff = 0.5
+1. Cutoff = 0.5:
 At this threshold, the model achieves high accuracy (0.87) and specificity (0.981), meaning it correctly identifies most of the "Survive" cases. However, sensitivity (0.425) is low, indicating the model struggles to identify "Not Survive" cases.
 
-2. Cutoff = 0.75
-Increasing the cutoff reduces sensitivity (0.325) further (fewer "Not Survive" cases are identified) but increases specificity (0.993) slightly. This cutoff might prioritize avoiding false positives ("Not Survive" predicted when "Survive") over identifying all "Not Survive" cases.
+2. Cutoff = 0.75:
+Increasing the cutoff reduces sensitivity (0.325) further (fewer "Not Survive" cases are identified) but increases specificity (0.993) slightly. This cutoff might prioritize avoiding false positives ("Not Survive" predicted when "Survive") over identifying all "Not Survive" cases. The accuracy (0.86) decreased slightly.
 
-3. Cutoff = 0.25
-Lowering the cutoff significantly improves sensitivity (0.7) (better identification of "Not Survive" cases) but reduces specificity (0.85) and overall accuracy (0.82). This cutoff is useful when identifying "Not Survive" cases is more critical.
+3. Cutoff = 0.25:
+Lowering the cutoff significantly improves sensitivity (0.7) (better identification of "Not Survive" cases) but reduces specificity (0.85) and overall accuracy (0.82). This cutoff is useful when it is more important to correctly identify "Not Survive" cases.
 
-For predicting survival in ICU, sensitivity is more important as the cost of missing critical cases is much higher than the cost of over-monitoring patients. The model should ensure it captures the majority of high-risk patients, even if it results in some false positives. However, this is completely subjective. We could also balance sensitivity and specificity when
-ICU resources (e.g., staff, equipment) are limited, and one needs to minimize unnecessary interventions while still identifying most critical cases.
+For predicting survival in ICU, sensitivity is especially important as the cost of missing
+critical cases is high compared to the cost of over-monitoring patients.
+The model should ensure it captures the majority of high-risk patients, even if
+it results in some false positives. However, this is completely subjective.
+We could also balance sensitivity and specificity when
+ICU resources (e.g., staff, equipment) are limited, and one needs to minimize
+unnecessary interventions while still identifying most critical cases.
 
 ## 4. ROC Curves and AUC
 
