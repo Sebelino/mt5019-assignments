@@ -448,21 +448,26 @@ unnecessary interventions while still identifying most critical cases.
 
 ## 4. ROC Curves and AUC
 
-From the previous section, we understand that we would to choose an optimal cutoff value to prioritize sensitivity or balance sensitivity and specificity. To identify the ideal cutoff, we make use of ROC curves and AUC.
+From the previous section, we learned that it is desirable to choose an
+optimal cutoff
+value to prioritize sensitivity or balance sensitivity and specificity.
+To more easily identify the ideal cutoff, we make use of ROC curves and AUC.
 
-**Receiver Operating Characteristic (ROC) Curve** plots the True Positive Rate (Sensitivity) against the False Positive Rate (1 - Specificity) at various threshold settings. ROC curves help evaluate the performance of a binary classifier across different classification thresholds.The ROC Curve shows the trade-off between sensitivity and specificity for each model.
+A ROC curve plots the true positive rate (sensitivity) against the false
+positive rate (1 - specificity) at various threshold settings. ROC curves help
+evaluate the performance of a binary classifier across different classification
+thresholds. The ROC curve shows the trade-off between sensitivity and
+specificity for a given model. The AUC is a single metric summarizing
+the performance of a classifier, where a higher AUC indicates
+better model performance.
 
-The **Area Under the Curve (AUC)** is a single metric summarizing the performance of a classifier.
+We will study three models:
 
-  - **AUC = 1.0**: Perfect model.
-  - **AUC = 0.5**: Model performs no better than random guessing.
-  - **Higher AUC** indicates better model performance.
+- The full model that captures all the main effects of the predictor variables available in the dataset,
+- The AIC-optimized model we found earlier, and
+- The BIC-optimized model we found earlier.
 
-We plot ROC curves and calculate AUC for three models. The three models include:
-
-- The full model that captures all the predictor variables available in the dataset,
-- The model that is a result of the step function optimizing for AIC, and
-- The model that is a result of the step function optimizing for BIC.
+For each model, we plot a ROC curve and calculate the AUC:
 
 ```{r}
 # Plot the ROC curves
@@ -472,38 +477,47 @@ lines(roc_model_2, col = "green") # Add Model 2 ROC curve
 
 # Add legend
 legend("bottomright",
-  legend = c("Full Model", "Model 1 (AIC)", "Model 2 (BIC)"),
+  legend = c("Full Model", "Model 1 (AIC-optimized)", "Model 2 (BIC-optimized)"),
   col = c("blue", "red", "green"), lwd = 2
 )
-cat("AUC for Full Model:", auc(roc_full), "\n")
-cat("AUC for Model 1 (AIC):", auc(roc_model_1), "\n")
-cat("AUC for Model 2 (BIC):", auc(roc_model_2), "\n")
 ```
 
-The plot includes ROC curves for three logistic regression models:
-
-1. **Full Model (Blue)**: Includes all predictors.
-2. **Model 1 (Red)**: Includes predictors selected using AIC-based stepwise selection.
-3. **Model 2 (Green)**: Includes predictors selected using BIC-based stepwise selection.
+AUC:
+```{r}
+cat("AUC for Full Model:", auc(roc_full), "\n")
+cat("AUC for Model 1 (AIC-optimized):", auc(roc_model_1), "\n")
+cat("AUC for Model 2 (BIC-optimized):", auc(roc_model_2), "\n")
+```
 
 #### Key Insights
 
-On observing the plots, We notice a lot of overlap between the three curves, indicating similar performance. Investigating further:
+Upon observing the plots, we notice a lot of overlap between the three curves,
+indicating similar performance. Investigating further:
 
-- The Full Model (Blue curve) shows the highest curve and AUC, indicating the best performance among the three models. The AUC of 0.8847 indicates excellent performance, with high sensitivity and specificity across thresholds.
+- The full model corresponds to the highest ROC curve and greatest AUC,
+indicating the best performance among the three models.
+The AUC (`0.8847`) indicates excellent performance, with high sensitivity
+and specificity across thresholds.
 
-- Model 1 (AIC) (Red curve) performs slightly worse than the full model but better than Model 2. The AUC (0.8678) here is slightly lower than the Full Model, but still a strong classifier.
+- Model 1 performs slightly worse than the full model but better than model 2.
+The AUC (`0.8678`) here is slightly lower than the full model,
+but still a strong classifier.
 
-- Model 2 (BIC) (Green curve) has the lowest curve, indicating comparatively weaker classification performance. Here, the AUC (0.8533) is the least performing compared to the other models, though still reasonable.
-
+- Model 2 has the lowest curve, indicating comparatively weaker classification
+performance. Here, the AUC (`0.8533`) is the least performing compared to the
+other models, though still not far behind the two others.
 
 #### Conclusion
 
-- The **Full Model** is the best performer, as evidenced by the highest AUC (`0.8847`) and the highest ROC curve.
-- **Model 1 (AIC)** offers a good trade-off, with reduced complexity and slightly lower AUC (`0.8678`).
-- **Model 2 (BIC)** sacrifices performance for simplicity, resulting in the lowest AUC (`0.8533`).
+- The full model is the best performer, as evidenced by the highest AUC (`0.8847`) and the highest ROC curve.
+- Model 1 offers a good trade-off, with reduced complexity and slightly lower AUC (`0.8678`).
+- Model 2 sacrifices performance for simplicity, resulting in the lowest AUC (`0.8533`).
 
-Based on the results above, it's a subjective decision between simpler interpretation and predictive performance. If the emphasis is on simpler interpretation with minimal loss in performance, **Model 1 (AIC)** will be considered. However, the model with the highest AUC is the **Full Model**.
+Based on the results above, a decision has to be made between
+simpler interpretation and predictive performance.
+If the emphasis is on simpler interpretation with minimal loss in performance,
+model 1 will be considered.
+However, the model with the highest AUC is the full model.
 
 ## 5. LOOCV-adjusted ROC Curves and AUC
 
