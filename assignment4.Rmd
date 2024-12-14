@@ -151,7 +151,15 @@ cat("AIC:", AIC(mstep1_BIC))
 cat("BIC:", BIC(mstep1_BIC))
 ```
 
-Both models offer comparable AIC and BIC. The model `mstep1_AIC` offers the lowest AIC, prioritizing prediction accuracy while `mstep1_BIC` provides the lowest BIC value, prioritizing model simplicity given the lack of predictor variables. Given the small sample size of the data, the trade-off between complexity and accuracy of the prediction is not significant. On prioritizing prediction accuracy over simplicity, we will be choosing the model with the lowest AIC `mstep1_AIC`. However, we will continue to compare the other model in the upcoming sections on ROC curves to ensure the other tests validate our choice.
+Both models offer comparable AIC and BIC.
+The AIC-optimized model offers the lowest AIC, prioritizing prediction accuracy,
+while the BIC-optimized model provides the lowest BIC value, prioritizing model
+simplicity given the shortage of predictor variables. Given the small sample
+size of the data, the trade-off between complexity and accuracy of the
+prediction is not significant. On prioritizing prediction accuracy over
+simplicity, we will be choosing the AIC-optimized model. However, we will
+continue to compare the BIC-optimized model in the upcoming sections on ROC
+curves to ensure the other tests validate our choice.
 
 #### Factors affecting patient survival
 
