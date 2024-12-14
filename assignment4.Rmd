@@ -90,7 +90,11 @@ For this reason, we discard this column before fitting the models.
 
 ### Model Selection
 
-We start with an empty model that includes only the intercept. We then fit a full model that includes all predictor variables. Using these two models as the lower and the upper bounds, we perform **stepwise model selection** using both AIC and BIC to compare the two best models possible.
+We start with an empty model that includes only the intercept. We then fit a full model that includes the main effects of all predictor variables. Using these two models as the lower and the upper bounds, we perform **stepwise model selection** using both AIC and BIC to compare the two models identified by the algorithm.
+
+Since there are many predictor variables, there are many ways to combine them
+into interactions. For the sake of minimizing model complexity, we will disregard
+models that contain interactions between the variables.
 
 #### Akaike's Information Criteria (AIC)
 
@@ -112,7 +116,11 @@ summary(mstep1_AIC)
 
 #### Bayesian Information Criterion (BIC)
 
-It is a model selection criterion used to evaluate the goodness of fit of a model while penalizing model complexity to avoid overfitting. It is similar in concept with that of AIC but the difference lies in its penality criteria. BIC penalizes complexity more heavily than AIC, especially for large sample sizes. The Bayesian Information Criterion (BIC) is given by:
+BIC is an alternative model selection criterion for evaluating the goodness
+of fit of a model while penalizing model complexity to avoid overfitting.
+It is similar in concept with that of AIC but the difference lies in its
+penalty criteria. BIC penalizes complexity more heavily than AIC, especially
+for large sample sizes. The Bayesian Information Criterion (BIC) is given by:
 
 \[
 BIC = -2 \cdot \ln(l) + k \cdot \ln(n)
@@ -131,16 +139,16 @@ summary(mstep1_BIC)
 
 #### Comparison of the Model
 
-AIC and BIC value of the model that is AIC optimized:
+AIC and BIC value of the AIC-optimized model:
 ```{r}
-AIC(mstep1_AIC)
-BIC(mstep1_AIC)
+cat("AIC:", AIC(mstep1_AIC))
+cat("BIC:", BIC(mstep1_AIC))
 ```
 
-AIC and BIC value of the model that is BIC optimized:
+AIC and BIC value of the BIC-optimized model:
 ```{r}
-AIC(mstep1_BIC)
-BIC(mstep1_BIC)
+cat("AIC:", AIC(mstep1_BIC))
+cat("BIC:", BIC(mstep1_BIC))
 ```
 
 Both models offer comparable AIC and BIC. The model `mstep1_AIC` offers the lowest AIC, prioritizing prediction accuracy while `mstep1_BIC` provides the lowest BIC value, prioritizing model simplicity given the lack of predictor variables. Given the small sample size of the data, the trade-off between complexity and accuracy of the prediction is not significant. On prioritizing prediction accuracy over simplicity, we will be choosing the model with the lowest AIC `mstep1_AIC`. However, we will continue to compare the other model in the upcoming sections on ROC curves to ensure the other tests validate our choice.
