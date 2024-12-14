@@ -22,37 +22,47 @@ knitr::opts_chunk$set(echo = FALSE, comment = "")
 
 In this exercise, we will build a logistic regression model to predict the survival of a patient admitted to the ICU. In this process, we also want to identify the significant risk factors that affect the probability of the survival outcome.
 
-The data is provided as a CSV file that consists of records on 200 patients admitted to an Intensive Care Unit (ICU) during a certain period. It contains 21 columns in total with 1 unique identifier, 3 continuous variables, and 17 categorical variables.
+The data is provided as a CSV file that consists of records on 200 patients admitted to an Intensive Care Unit (ICU) during a certain period. It contains 21 columns in total with 1 unique identifier, 3 continuous variables, 15 binary variables,
+and 2 nominal variables.
 To do this, we will pre-process the data and build logistic regression models. We will then assess the goodness-of-fit to compare different logistic regression models.
 
 ## 1. Model selection
 
+Our first objective is to select a model that strikes the right balance
+between goodness-of-fit and model complexity.
+
 ### Data Pre-processing
+
+Before feeding the data into a model, we investigate if
+it is appropriate to first transform the data in some manner.
 
 #### Collapsing categories
 
-The dataset includes categorical variables for Ethnicity (`v5`) and Consciousness level (`v21`).
+The dataset includes nominal variables for Ethnicity (`v5`) and Consciousness level (`v21`).
 
-**Ethnicity**: We noticed that the category counts for 2 ('black') and 3 ('other') in Ethnicity (`v5`) are quite low relative to the category count for 1 ('white'). To balance the distribution, categories 2 and 3 are combined into a single category (0: other).
-
-Original counts are shown below:
+**Ethnicity**: We noticed that the level counts for `2` ('black') and `3` ('other') in Ethnicity (`v5`) were quite low relative to the level count for `1` ('white').
+The counts for each level of \(V_5 \in \{1,2,3\}\) were:
 ```{r}
 table(data_original$v5)
 ```
+The count for the lowest level accounts for only \(10/(175+15+10)=5\%\)
+of the total count, which is a small fraction.
+Logistic regression requires sufficient data for each level of a categorical
+variable to estimate the corresponding coefficients reliably.
+With very small counts for levels `2` and `3`, the model may not be able to
+accurately estimate the effect of these levels on the outcome.
 
-Counts after combining categories:
+To balance the distribution, levels `2` and `3` are combined into a single level (`0`: 'other'), with \(15+10 = 25\) subjects:
 ```{r}
 table(data$v5)
 ```
 
-**Consciousness level**: Similarly, the category count for 1 ('unconscious') and 2 ('coma') in Consciousness level (`v21`) are low compared to 0 ('awake'). We have combined categories 1 and 2 into a single category (1: unconscious and coma).
-
-Original counts are shown below:
+**Consciousness level**: Similarly, the level count for `1` ('unconscious') and `2` ('coma') in Consciousness level (`v21`) are low compared to `0` ('awake').
 ```{r}
 table(data_original$v21)
 ```
 
-Counts after combining categories:
+Hence, we combine levels `1` and `2` into a single level (`1`: unconscious and coma):
 ```{r}
 table(data$v21)
 ```
@@ -541,7 +551,7 @@ The plot above shows the ROC curves for three logistic regression models:
 
 LOOCV highlights the importance of model simplicity by penalizing overfitting, making it an essential step in robust model selection. **Model 2 (BIC)** maintains the highest LOOCV-adjusted AUC, making it the preferred model.
 
-# Exercise 4:2
+# Exercise 4:2 - Decision Tree
 
 ## 1. Decision trees
 
