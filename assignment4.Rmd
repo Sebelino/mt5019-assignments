@@ -163,7 +163,7 @@ curves to ensure the other tests validate our choice.
 
 #### Factors affecting patient survival
 
-Finally, based on the chosen model, the factors that affect the probability of the patient admitted to the ICU to not survive include
+Finally, based on the chosen model, the factors that affect the probability of the patient admitted to the ICU to not survive include:
 
 - **Consciousness Level (v21: Unconscious/Coma vs. Awake)**
 - **Type of Admission (v14: Acute vs. Non-Acute)**
@@ -184,7 +184,7 @@ final_model <- glm(v2 ~ v21 + v14 + v3 + v7 + v11 + v18 + v17, family = binomial
 
 # Compute Odds and CI for final model's coefficients
 exp_coef <- exp(coef(final_model))
-conf_intervals <- exp(confint(final_model))
+conf_intervals <- exp(suppressMessages(confint(final_model)))
 odds_ratios <- data.frame(
   Variable = names(exp_coef),
   Odds_Ratio = exp_coef,
@@ -686,7 +686,7 @@ to pass away with a probability of 0.57.
 Next, let us evaluate the predictive power of our decision tree.
 For comparison, we will plot the ROC curve for
 both the decision tree and the logistic regression model
-we chose in Exercise 4:1.
+we chose at the end of Exercise 4:1.
 This refers to the model selected based on the BIC criterion, with formula:
 \[V_2 \sim V_{21} + V_{14} + V_3 + V_7\]
 
