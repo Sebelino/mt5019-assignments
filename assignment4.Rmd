@@ -24,21 +24,22 @@ In this exercise, we will build a logistic regression model to predict the survi
 
 The data is provided as a CSV file that consists of records on 200 patients admitted to an Intensive Care Unit (ICU) during a certain period. It contains 21 columns in total with 1 unique identifier, 3 continuous variables, 15 binary variables,
 and 2 nominal variables.
-To do this, we will pre-process the data and build logistic regression models. We will then assess the goodness-of-fit to compare different logistic regression models.
+To do this, we first pre-process the data and build logistic regression models. We will then assess the goodness-of-fit to compare different logistic regression models.
 
 ## 1. Model selection
 
 Our first objective is to select a model that strikes the right balance
 between goodness-of-fit and model complexity.
 
-### Data Pre-processing
+### Collapsing categories
 
 Before feeding the data into a model, we investigate if
 it is appropriate to first transform the data in some manner.
+In particular, some categorical variables may need to be collapsed
+because of low counts in certain categories.
 
-#### Collapsing categories
-
-The dataset includes nominal variables for Ethnicity (`v5`) and Consciousness level (`v21`).
+The dataset includes nominal variables for Ethnicity (`v5`) and Consciousness level (`v21`),
+which we will study below.
 
 **Ethnicity**: We noticed that the level counts for `2` ('black') and `3` ('other') in Ethnicity (`v5`) were quite low relative to the level count for `1` ('white').
 The counts for each level of \(V_5 \in \{1,2,3\}\) were:
@@ -67,11 +68,11 @@ Hence, we combine levels `1` and `2` into a single level (`1`: unconscious and c
 table(data$v21)
 ```
 
-#### Converting categorical variables to factors
+### Converting categorical variables to factors
 
-We convert the relevant columns to factors to ensure they are treated as categorical variables in the logistic regression models. All the columns that do not contain numerical values are converted to factors here.
+We also convert the relevant columns to factors to ensure they are treated as categorical variables in the logistic regression models. All the columns that do not contain numerical values are converted to factors here.
 
-#### Non-predictive variables
+### Non-predictive variables
 
 Before training the models, it is recommended to discard the columns
 in the data
@@ -87,16 +88,16 @@ predictive power to the
 patient ID, even though it is not inherently related to mortality.
 For this reason, we discard this column before fitting the models.
 
-
 ### Model Selection
 
-We start with an empty model that includes only the intercept. We then fit a full model that includes the main effects of all predictor variables. Using these two models as the lower and the upper bounds, we perform **stepwise model selection** using both AIC and BIC to compare the two models identified by the algorithm.
+To select a suitable model,
+we start by considering an empty model that includes only the intercept. We then fit a full model that includes the main effects of all predictor variables. Using these two models as the lower and the upper bounds, we perform **stepwise model selection** using both AIC and BIC to compare the two models identified by the algorithm.
 
 Since there are many predictor variables, there are many ways to combine them
 into interactions. For the sake of minimizing model complexity, we will disregard
 models that contain interactions between the variables.
 
-#### Akaike's Information Criteria (AIC)
+### Akaike's Information Criteria (AIC)
 
 The Akaike Information Criterion (AIC) is a statistical measure used for model selection. It evaluates the quality of a statistical model by balancing the trade-off between goodness of fit (how well the model fits the data) and model complexity (the number of parameters in the model). AIC helps in identifying the model that explains the data with the minimum necessary complexity. The Akaike Information Criterion (AIC) is given by:
 
@@ -114,7 +115,7 @@ The summary of the final model as a result of the step function using AIC:
 summary(mstep1_AIC)
 ```
 
-#### Bayesian Information Criterion (BIC)
+### Bayesian Information Criterion (BIC)
 
 BIC is an alternative model selection criterion for evaluating the goodness
 of fit of a model while penalizing model complexity to avoid overfitting.
@@ -137,7 +138,7 @@ The summary of the final model as a result of the step function using BIC:
 summary(mstep1_BIC)
 ```
 
-#### Comparison of the Model
+### Model comparison
 
 AIC and BIC value of the AIC-optimized model:
 ```{r}
@@ -161,17 +162,15 @@ simplicity, we will be choosing the AIC-optimized model. However, we will
 continue to compare the BIC-optimized model in the upcoming sections on ROC
 curves to ensure the other tests validate our choice.
 
-#### Factors affecting patient survival
+Based on the chosen model, the factors that affect the probability of the patient admitted to the ICU to not survive include:
 
-Finally, based on the chosen model, the factors that affect the probability of the patient admitted to the ICU to not survive include:
-
-- **Consciousness Level (v21: Unconscious/Coma vs. Awake)**
-- **Type of Admission (v14: Acute vs. Non-Acute)**
-- **Age (v3)**
-- **Cancer (v7: Yes vs. No)**
-- **Blood Pressure (v11: Per mm Hg)**
-- **Blood Carbon Dioxide (v18: Above 45 vs. Below 45)**
-- **Blood pH (v17: Below 7.25 vs. Above 7.25)**
+- Consciousness Level (`v21`: Unconscious/Coma vs. Awake)
+- Type of Admission (`v14`: Acute vs. Non-Acute)
+- Age (`v3`)
+- Cancer (`v7`: Yes vs. No)
+- Blood Pressure (`v11`: Per mm Hg)
+- Blood Carbon Dioxide (`v18`: Above 45 vs. Below 45)
+- Blood pH (`v17`: Below 7.25 vs. Above 7.25)
 
 
 ### Odds Ratios and Confidence Intervals
@@ -194,8 +193,7 @@ odds_ratios <- data.frame(
 print(odds_ratios)
 ```
 
-
-#### Interpreting Coefficients
+Below follows an interpretation of the results for each coefficient.
 
 **Consciousness Level (v211: Unconscious/Coma vs. Awake)**
 
@@ -277,7 +275,8 @@ Under baseline conditions, the odds of not surviving are extremely small compare
 
 ---
 
-Below is the summary of the various factors used in the final model distinguished based on its significance:
+We can summarize the various factors used in the final model based on their
+odds ratio (greater than 1 vs. less than 1):
 
 1. **Significant Risk Factors for Not Surviving:**
 
@@ -291,7 +290,8 @@ Below is the summary of the various factors used in the final model distinguishe
    - Blood Pressure (Higher)
    - Blood Carbon Dioxide (Above 45)
 
-Protective predictors refer to variables that are associated with a decreased risk of the outcome of interest (in this case, not surviving) when their values increase or change in a specific way. Essentially, these predictors reduce the likelihood of the patient not surviving. Whereas Significant risk factors are the opposite. They increase the likelihood of the patient not surviving with increase in their values.
+Protective predictors refer to variables that are associated with a decreased risk of the outcome of interest (in this case, not surviving) when their values increase or change in a specific way. Essentially, these predictors reduce the likelihood of the patient not surviving.
+By contrast, significant risk factors increase the likelihood of the patient not surviving with an increase in their values.
 
 These results underscore the importance of critical physiological and clinical indicators in predicting survival outcomes in ICU patients.
 
