@@ -297,17 +297,12 @@ These results underscore the importance of critical physiological and clinical i
 
 ## 2. Goodness of Fit
 
-Now that we have chosen the model, we need to understand how well the chosen model fit the data. We do this using the Hosmer-Lemeshow test.
-The Hosmer-Lemeshow goodness-of-fit test is widely used to evaluate the calibration of logistic regression models, particularly when the data is at the **individual level**. Unlike deviance-based tests, which are suitable for grouped data, this test measures how well the predicted probabilities from the model align with the observed outcomes across subgroups of the data.
+Now that we have chosen the model, we need to understand how well the chosen
+model fits the data. We do this using the Hosmer-Lemeshow goodness-of-fit test.
+This test is widely used to evaluate the
+calibration of logistic regression models, particularly when the data is at the individual level.
+Unlike deviance-based tests, which are suitable for grouped data, this test measures how well the predicted probabilities from the model align with the observed outcomes across subgroups of the data.
 
-Key reasons to use the Hosmer-Lemeshow test:
-
-- **Assess Calibration**: It determines whether the model adequately predicts probabilities for each risk group.
-- **Group Data into Deciles**: It partitions the data into a specified number of groups (typically 10) based on predicted probabilities and compares the observed and expected counts in each group.
-- **Test Null Hypothesis**: The null hypothesis states that the model fits the data well.
-
-
-*Check if this is overkill*
 The test statistic for the Hosmer-Lemeshow test is given by:
 
 \[
@@ -324,21 +319,27 @@ Where:
 
 The test statistic follows a chi-squared distribution with \( G - 2 \) degrees of freedom.
 
-On running this test, we obtain:
+We follow the common convention of running the test with \(G=10\) groups.
+Upon running this test, we obtain:
 
 ```{r}
 print(hoslem_test)
 ```
 
-### Interpretation
+The p-value of \(0.5131\) is greater than the significance level of 0.05.
+This indicates that there is no statistically significant evidence to reject
+the null hypothesis of the test. The null hypothesis assumes that the model fits
+the data well. Hence, the test suggests that the logistic regression model
+provides a good fit to the observed data.
 
-The Hosmer-Lemeshow test assesses whether the observed event rates match the expected event rates in subgroups of the model population. A non-significant p-value (p > 0.05) indicates a good fit. In this case, the p-value is 0.5131, suggesting that the model fits the data well.
+The \(\chi^2\) value of \(7.2202\) is relatively small considered that there
+are 8 degrees of freedom, indicating a minor deviation between the observed
+and expected frequencies across the groups.
 
-1. **p-value:** The p-value of 0.5131 is greater than the significance level of 0.05. This indicates that there is no statistically significant evidence to reject the null hypothesis of the test. The null hypothesis assumes that the model fits the data well. Hence, the test suggests that the logistic regression model provides a good fit to the observed data.
-
-2. **Test Statistic:** The X-squared value of 7.2202 is relatively small, indicating a minor deviation between the observed and expected frequencies across the groups.
-
-**Conclusion:** Since the p-value is not significant, the logistic regression model is well-calibrated and fits the data adequately. The predictions from the model align well with the actual observations.
+Since the result of the test is not statistically significant,
+we have found no evidence that
+the logistic regression model
+is poorly calibrated or that it fits the data poorly.
 
 ## 3. Confusion Matrices and Metrics
 
