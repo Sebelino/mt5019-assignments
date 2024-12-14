@@ -197,19 +197,11 @@ print(odds_ratios)
 
 #### Interpreting Coefficients
 
-**Intercept**
-
-- Odds Ratio (OR): 0.0049
-- Confidence Interval (CI): (0.00016, 0.0961)
-
-The baseline odds of not surviving when all predictors are at their reference levels are extremely low.
-
----
-
 **Consciousness Level (v211: Unconscious/Coma vs. Awake)**
 
 - OR: 89.68
 - CI: (15.42, 894.72)
+
 Patients who are unconscious or in a coma have **89.68 times higher odds** of not surviving compared to those who are awake. The large odds ratio reflects the severe impact of a lack of consciousness on survival outcomes.
 
 ---
@@ -218,6 +210,7 @@ Patients who are unconscious or in a coma have **89.68 times higher odds** of no
 
 - OR: 20.65
 - CI: (4.03, 186.17)
+
 Patients admitted for acute conditions have **20.65 times higher odds** of not surviving compared to non-acute admissions. Acute admissions likely indicate critical conditions requiring immediate attention, which correlates with poorer outcomes.
 
 ---
@@ -226,6 +219,7 @@ Patients admitted for acute conditions have **20.65 times higher odds** of not s
 
 - OR: 1.0436
 - CI: (1.0179, 1.0746)
+
 For every additional year of age, the odds of not surviving increase by **4.36%**.
 Age is a significant factor in survival, likely due to declining health and resilience in older patients.
 
@@ -235,6 +229,7 @@ Age is a significant factor in survival, likely due to declining health and resi
 
 - OR: 11.05
 - CI: (1.99, 73.21)
+
 Patients with cancer have **11.05 times higher odds** of not surviving compared to those without cancer.
 The presence of cancer reflects a chronic condition that exacerbates the risk of mortality.
 
@@ -244,8 +239,11 @@ The presence of cancer reflects a chronic condition that exacerbates the risk of
 
 - OR: 0.986
 - CI: (0.971, 0.999)
+
 For each 1 mm Hg increase in blood pressure, the odds of not surviving decrease by **1.44%**.
-A higher blood pressure within a safe range might reflect better cardiovascular health, reducing mortality risk.
+A higher blood pressure within a safe range might reflect better cardiovascular health, reducing mortality risk. However, the difference is small.
+It should also be noted that the result is barely significant, as the confidence
+interval almost includes 1.
 
 ---
 
@@ -253,6 +251,7 @@ A higher blood pressure within a safe range might reflect better cardiovascular 
 
 - OR: 0.1051
 - CI: (0.012, 0.641)
+
 Patients with carbon dioxide levels above 45 have significantly **lower odds** of not surviving (89.49% decrease) compared to those with levels below 45.
 Elevated carbon dioxide may reflect physiological compensation mechanisms for certain conditions.
 
@@ -262,7 +261,19 @@ Elevated carbon dioxide may reflect physiological compensation mechanisms for ce
 
 - OR: 6.39
 - CI: (1.14, 38.48)
+
 Patients with a blood pH below 7.25 have **6.39 times higher odds** of not surviving compared to those above 7.25.
+The magnitude of the odds ratio is quite large, implying that low blood pH is a clinically important factor associated with survival.
+
+---
+
+**Intercept**
+
+- Odds Ratio (OR): 0.0049
+- Confidence Interval (CI): (0.00016, 0.0961)
+
+The baseline odds of not surviving when all predictors are at their reference levels are extremely low.
+Under baseline conditions, the odds of not surviving are extremely small compared to the odds of surviving, at least within this study population.
 
 ---
 
