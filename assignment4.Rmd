@@ -513,7 +513,7 @@ other models, though still not far behind the two others.
 - Model 1 offers a good trade-off, with reduced complexity and slightly lower AUC (`0.8678`).
 - Model 2 sacrifices performance for simplicity, resulting in the lowest AUC (`0.8533`).
 
-Based on the results above, a decision has to be made between
+Hence, a decision has to be made between
 simpler interpretation and predictive performance.
 If the emphasis is on simpler interpretation with minimal loss in performance,
 model 1 will be considered.
