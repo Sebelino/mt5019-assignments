@@ -73,14 +73,19 @@ We convert the relevant columns to factors to ensure they are treated as categor
 
 #### Non-predictive variables
 
-While training the models, it is recommended to remove the columns that would not add any contextual significance in describing patient mortality.
+Before training the models, it is recommended to discard the columns
+in the data
+that would not add any contextual significance in describing patient mortality.
 In this case, all variables seem to be relevant in predicting patient mortality, with one exception: patient ID (`v1`).
 This column contains unique identifiers for the patients and should, in principle, not provide any predictive value.
 If there were to be an association between patient ID and survival outcomes, it would suggest that
 the patient IDs were assigned in a non-random manner.
 For example, perhaps patients who are treated at facility A are assigned a low patient ID, whereas
-patients treated at facility B are assigned a high patient ID. This would introduce bias into the model.
-For this reason, we remove this column before fitting the models.
+patients treated at facility B are assigned a high patient ID.
+Including the patient ID would then mean that the model is trained to attribute
+predictive power to the
+patient ID, even though it is not inherently related to mortality.
+For this reason, we discard this column before fitting the models.
 
 
 ### Model Selection
