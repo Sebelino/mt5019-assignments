@@ -84,6 +84,10 @@ main <- function() {
 
   # Extract coefficients and standard errors
   coefficients <- summary(best_model)$coefficients
+
+  # Remove main effects
+  coefficients <- coefficients[grepl(":", rownames(coefficients)), ]
+
   best_model_estimates <- coefficients[, "Estimate"]
   best_model_se <- coefficients[, "Std. Error"]
 

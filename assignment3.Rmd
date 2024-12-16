@@ -178,7 +178,7 @@ we should select the model that satisfies two criteria:
 Based on the table above, we want to select model 13, i.e.
 \((XY,XZ,XV,YV,ZV)\),
 which has the lowest AIC value (113.7953) and a p-value
-of 0.935.
+of 0.935, which means a very good fit.
 
 ## 3. Model interpretation
 
@@ -204,8 +204,8 @@ three-way interaction models while retaining
 its ability to fit the data reasonably well.
 
 To quantify the associations, we calculate the odds ratio:
-\[OR = e^{\lambda_t}\]
-for each parameter \(\lambda_t\) in the model,
+\[\text{OR} = e^{\lambda_t}\]
+for each coefficient \(\lambda_t\) in the model,
 along with a 95 \% confidence interval and p-value.
 Result:
 
@@ -213,21 +213,134 @@ Result:
 associations
 ```
 
+These are conditional odds ratios. To demonstrate this, we can consider the odds
+ratio for the \(X:Y\) interaction. The conditional odds ratio of \(X\) and
+\(Y\) given \(Z=k\) and \(V=l\), denoted \(\theta_{XY(kl)}\), is given by:
+
+\begin{align*}
+    & \ln \theta_{XY(kl)} \\
+    =& \ln \frac{\pi_{11|kl}\pi_{00|kl}}{\pi_{10|kl}\pi_{01|kl}} \\
+    =& \ln \frac{P(X=1,Y=1|Z=k,V=l)P(X=0,Y=0|Z=k,V=l)}{P(X=1,Y=0|Z=k,V=l)P(X=0,Y=1|Z=k,V=l)} \\
+    =& \ln \frac{\frac{P(X=1,Y=1,Z=k,V=l)}{P(Z=k,V=l)}\cdot\frac{P(X=0,Y=0,Z=k,V=l)}{P(Z=k,V=l)}}{\frac{P(X=1,Y=0,Z=k,V=l)}{P(Z=k,V=l)}\cdot \frac{P(X=0,Y=1,Z=k,V=l)}{P(Z=k,V=l)}} \\
+    =& \ln \frac{P(X=1,Y=1,Z=k,V=l)P(X=0,Y=0,Z=k,V=l)}{P(X=1,Y=0,Z=k,V=l)P(X=0,Y=1,Z=k,V=l)} \\
+    =& \ln \frac{\pi_{11kl}\pi_{00kl}}{\pi_{10kl}\pi_{01kl}} \\
+    =& \ln \frac{\mu_{11kl}\mu_{00kl}}{\mu_{10kl}\mu_{01kl}} \\
+    =& (\lambda+\lambda_1^X+\lambda_1^Y+\lambda_k^Z+\lambda_l^V+\lambda_{11}^{XY}+\lambda_{1k}^{XZ}+\lambda_{1l}^{XV}+\lambda_{1k}^{YZ}+\lambda_{1l}^{YV}+\lambda_{kl}^{ZV}+\lambda_{\geq3}(1,1,k,l))\\
+    +& (\lambda+\lambda_0^X+\lambda_0^Y+\lambda_k^Z+\lambda_l^V+\lambda_{00}^{XY}+\lambda_{0k}^{XZ}+\lambda_{0l}^{XV}+\lambda_{0k}^{YZ}+\lambda_{0l}^{YV}+\lambda_{kl}^{ZV}+\lambda_{\geq3}(0,0,k,l))\\
+    -& (\lambda+\lambda_0^X+\lambda_1^Y+\lambda_k^Z+\lambda_l^V+\lambda_{01}^{XY}+\lambda_{0k}^{XZ}+\lambda_{0l}^{XV}+\lambda_{1k}^{YZ}+\lambda_{1l}^{YV}+\lambda_{kl}^{ZV}+\lambda_{\geq3}(0,1,k,l))\\
+    -& (\lambda+\lambda_1^X+\lambda_0^Y+\lambda_k^Z+\lambda_l^V+\lambda_{10}^{XY}+\lambda_{1k}^{XZ}+\lambda_{1l}^{XV}+\lambda_{0k}^{YZ}+\lambda_{0l}^{YV}+\lambda_{kl}^{ZV}+\lambda_{\geq3}(1,0,k,l))\\
+    =& \lambda_{11}^{XY}+\lambda_{00}^{XY}-\lambda_{10}^{XY}-\lambda_{01}^{XY}+\lambda_{\geq3}(1,1,k,l)+\lambda_{\geq3}(0,0,k,l)+\lambda_{\geq3}(0,1,k,l)+\lambda_{\geq3}(1,0,k,l) \\
+    =& \lambda_{11}^{XY}+\lambda_{00}^{XY}-\lambda_{10}^{XY}-\lambda_{01}^{XY} & (\text{No 3rd-order interactions}) \\
+    =& \lambda_{11}^{XY} & (\text{With baseline level zero}) \\
+\end{align*}
+
+where the \(\lambda_{\geq 3}\) terms denote the sum of third-order and higher-order interactions.
+Since our model does not contain such interactions, these terms are all zero.
+The terms that involve \(Z=k\) and \(V=l\) cancel out, and
+any term involving the baseline level 0 is zero, so we are left only with the
+interaction term \(\lambda_{11}^{XY}\).
+Hence,
+\[\theta_{XY(kl)}= e^{\lambda_{11}^{XY}} \approx 0.66\]
+
+This conditional odds ratio can also be expressed as the ratio of the odds of
+being old (\(X=1\)) given that the mother is a smoker (\(Y=1\)), relative to the
+odds of being old
+given that the mother is a non-smoker (\(Y=0\)), given fixed values of
+gestational age
+(\(Z=k\)) and child survival status (\(V=l\)).
+We can prove this by rewriting the odds ratio into \(\theta_{XY(kl)}\):
+
+\begin{align*}
+    & \frac{\text{odds}(\text{old}|\text{smoker},Z=k,V=l)}{\text{odds}(\text{old}|\text{non-smoker},Z=k,V=l)} \\
+    =& \frac{\text{odds}(X=1|Y=1,Z=k,V=l)}{\text{odds}(X=1|Y=0,Z=k,V=l)} \\
+    =& \frac{\frac{P(X=1|Y=1,Z=k,V=l)}{1-P(X=1|Y=1,Z=k,V=l)}}{\frac{P(X=1|Y=0,Z=k,V=l)}{1-P(X=1|Y=0,Z=k,V=l)}} \\
+    =& \frac{P(X=1|Y=1,Z=k,V=l)/P(X=0|Y=1,Z=k,V=l)}{P(X=1|Y=0,Z=k,V=l)/P(X=0|Y=0,Z=k,V=l)} \\
+    =& \frac{P(X=1|Y=1,Z=k,V=l)P(X=0|Y=0,Z=k,V=l)}{P(X=1|Y=0,Z=k,V=l)P(X=0|Y=1,Z=k,V=l)} \\
+    =& \frac{\frac{P(X=1,Y=1,Z=k,V=l)}{P(Y=1,Z=k,V=l)}\cdot \frac{P(X=0,Y=0,Z=k,V=l)}{P(Y=0,Z=k,V=l)}}{\frac{P(X=1,Y=0,Z=k,V=l)}{P(Y=0,Z=k,V=l)}\cdot\frac{P(X=0,Y=1,Z=k,V=l)}{P(Y=1,Z=k,V=l)}} \\
+    =& \frac{\frac{\pi_{11kl}}{\pi_{+1kl}}\cdot \frac{\pi_{00kl}}{\pi_{+0kl}}}{\frac{\pi_{10kl}}{\pi_{+0kl}}\cdot\frac{\pi_{01kl}}{\pi_{+1kl}}} \\
+    =& \frac{\pi_{11kl}\cdot\pi_{00kl}}{\pi_{10kl}\cdot\pi_{01kl}} \\
+    =& \theta_{XY(kl)}
+\end{align*}
+
+Conversely, the conditional odds ratio can be expressed as the ratio of the
+odds of
+being a smoker (\(Y=1\)) given that the mother is old (\(X=1\)), relative to the
+odds of being a smoker
+given that the mother is young (\(X=0\)), given fixed values of
+gestational age
+(\(Z=k\)) and child survival status (\(V=l\)):
+
+\begin{align*}
+    & \frac{\text{odds}(\text{smoker}|\text{old},Z=k,V=l)}{\text{odds}(\text{smoker}|\text{young},Z=k,V=l)} \\
+    =& \frac{\text{odds}(Y=1|X=1,Z=k,V=l)}{\text{odds}(Y=1|X=0,Z=k,V=l)} \\
+    =& \frac{\frac{P(Y=1|X=1,Z=k,V=l)}{1-P(Y=1|X=1,Z=k,V=l)}}{\frac{P(Y=1|X=0,Z=k,V=l)}{1-P(Y=1|X=0,Z=k,V=l)}} \\
+    =& \frac{P(Y=1|X=1,Z=k,V=l)/P(Y=0|X=1,Z=k,V=l)}{P(Y=1|X=0,Z=k,V=l)/P(Y=0|X=0,Z=k,V=l)} \\
+    =& \frac{P(Y=1|X=1,Z=k,V=l)P(Y=0|X=0,Z=k,V=l)}{P(Y=1|X=0,Z=k,V=l)P(Y=0|X=1,Z=k,V=l)} \\
+    =& \frac{\frac{P(X=1,Y=1,Z=k,V=l)}{P(X=1,Z=k,V=l)}\cdot \frac{P(X=0,Y=0,Z=k,V=l)}{P(X=0,Z=k,V=l)}}{\frac{P(X=0,Y=1,Z=k,V=l)}{P(X=0,Z=k,V=l)}\cdot \frac{P(X=1,Y=0,Z=k,V=l)}{P(X=1,Z=k,V=l)}} \\
+    =& \frac{\frac{\pi_{11kl}}{\pi_{1+kl}}\cdot \frac{\pi_{00kl}}{\pi_{0+kl}}}{\frac{\pi_{01kl}}{\pi_{0+kl}}\cdot \frac{\pi_{10kl}}{\pi_{1+kl}}} \\
+    =& \frac{\pi_{11kl}\cdot \pi_{00kl}}{\pi_{01kl}\cdot \pi_{10kl}} \\
+    =& \frac{\pi_{11kl}\cdot \pi_{00kl}}{\pi_{10kl}\cdot \pi_{01kl}} \\
+    =& \theta_{XY(kl)}
+\end{align*}
+
+Due to this, we can now formulate two natural interpretations for each
+two-way odds ratio in the table.
+
 The significant associations (\(p<0.05\)) are:
 
-- The intercept,
-- Smoking habits (\(Y\)),
-- Gestational age (\(Z\)),
-- Child survival (\(V\)),
-- The interaction between the mother's age and smoking habits (\(X:Y\)),
-- The interaction between the mother's age and child survival (\(X:V\)),
+- The interaction between the mother's age and smoking habits (\(X:Y\)).
+Based on our reasoning above, the conditional odds ratio of 0.66 indicates
+that at fixed levels of
+gestational age (\(Z=k\)) and child survival status (\(V=l\)),
+the odds of a smoking mother (\(Y=1\)) being
+old (\(X=1\)) are 0.66 times the odds of a non-smoking mother (\(Y=0\))
+being old.
+Alternatively, at fixed levels of \(Z\) and \(V\),
+the odds of an old mother
+being a smoker are 0.66 times the odds of a young mother being a smoker.
+
+- The interaction between the mother's age and child survival (\(X:V\)).
+The conditional odds ratio of 0.63 indicates that at fixed levels of
+gestational age (\(Z=k\)) and smoking habits (\(Y=j\)),
+the odds of a child surviving (\(V=1\)) given that the mother is old (\(X=1\))
+are 0.63 times the odds of a child surviving given that the mother is young
+(\(X=0\)).
+Alternatively, at fixed levels of \(Z\) and \(Y\),
+the odds of a mother being old given that the child survives are 0.63 times
+the odds of a mother being old given that the child dies.
+
 - The interaction between gestational age and child survival (\(Z:V\)).
+The conditional odds ratio of 27 indicates that at fixed levels of
+age (\(X=i\)) and smoking habits \(Y=j\),
+the odds of a child surviving (\(V=1\)) given a high gestational age (\(Z=1\))
+are 27 times the odds of a child surviving given a low gestational age
+(\(Z=0\)).
+Alternatively, at fixed levels of \(X\) and \(Y\),
+the odds of gestational age being high given that the child survives
+are 27 times the odds of gestational age being high given that the child dies.
 
 Non-significant associations (\(p\geq 0.05\)) are:
 
-- Mother's age (\(X\)),
-- The interaction between the mother's age and gestational age (\(X:Z\)),
+- The interaction between the mother's age and gestational age (\(X:Z\)).
+The conditional odds ratio of 0.85 indicates that at fixed levels of
+smoking habits (\(Y=j\)) and child survival (\(V=l\)),
+the odds of a mother being old (\(X=1\)) given a high gestational age (\(Z=1\))
+are 0.85 times the odds of a mother being young (\(X=0\)) given a high
+gestational age.
+Alternatively, at fixed levels of \(Y\) and \(V\),
+the odds of gestational age being high given that the mother is old
+are 0.85 times the odds of gestational age being high given that the mother
+is young.
+
 - The interaction between smoking habits and child survival (\(Y:V\)).
+The conditional odds ratio of 0.64 indicates that at fixed levels of
+age (\(X=i\)) and gestational age (\(Z=k\)),
+the odds of a child surviving (\(V=1\)) given that the mother smokes heavily
+(\(Y=1\)) are 0.64 times the odds of a child surviving given that the mother
+does not smoke heavily (\(Y=0\)).
+Alternatively, at fixed levels of \(X\) and \(Z\),
+the odds of a mother smoking heavily given that the child survives
+are 0.64 times the odds of a mother smoking heavily given that the child dies.
 
 While the non-significant associations do not contribute evidence
 of strong statistical associations, they may still be worth
@@ -319,7 +432,7 @@ make a more nuanced conclusion.
 
 The estimated odds ratio of \(27.4\) for \(Z\) is greater than 1,
 suggesting that children born after 260 days of gestation have higher odds of survival compared to those born before 260 days.
-The odds are \(27.4\) times higher for children born after 260 days compared to those born before 260 days.
+The odds are \(27.4\) times as high for children born after 260 days compared to those born before 260 days.
 
 The p-value is much less than 0.05, meaning that we
 reject the null hypothesis that the odds is 1 with strong
@@ -362,10 +475,14 @@ and has a gestational age of less than 260 days has
 an odds of \(6.13\) of her child surviving compared to it not surviving,
 at least with regards to the cohort that was studied.
 
-The associated p-value is much less than 0.05, meaning that we
-reject the null hypothesis that the odds is 1 with strong
-statistical significance.
-We are 95 \% confident that the true odds ratio lies
+The associated p-value is much less than 0.05.
+This means that if we were to formulate the
+null hypothesis that the odds of child survival for this
+particular kind of mother is 1, we would reject
+it with strong statistical significance.
+However, we see no reason to test this hypothesis.
+The confidence interval shows that
+we are 95 \% confident that the true odds ratio lies
 in the interval \([4.71, 7.99]\).
 
 We may not be able to draw a useful conclusion from this odds.
