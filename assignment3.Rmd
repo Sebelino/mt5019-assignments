@@ -213,7 +213,7 @@ Result:
 associations
 ```
 
-These are conditional odds ratios. To demonstrate this, we can consider the odds
+These are estimated conditional odds ratios. To demonstrate this, we can consider the odds
 ratio for the \(X:Y\) interaction. The conditional odds ratio of \(X\) and
 \(Y\) given \(Z=k\) and \(V=l\), denoted \(\theta_{XY(kl)}\), is given by:
 
